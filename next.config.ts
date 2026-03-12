@@ -7,8 +7,7 @@ const nextConfig: NextConfig = {
     removeConsole: process.env.NODE_ENV === "production",
   },
   experimental: {
-    optimizePackageImports: ["lucide-react"],
-    inlineCss: true,
+    optimizePackageImports: ["lucide-react", "zod"],
   },
   async rewrites() {
     const backendUrl = process.env.NEXT_PUBLIC_API_URL || "https://loan-app-ka1t.vercel.app";

@@ -5,7 +5,7 @@ import { calculateLoan, formatCurrency } from "@/lib/utils";
 import { LOAN_LIMITS } from "@/lib/constants";
 
 export default function LoanCalculator() {
-  const [amount, setAmount] = useState(10000);
+  const [amount, setAmount] = useState(5000);
   const [term, setTerm] = useState(36);
   const [apr, setApr] = useState(12.99);
 

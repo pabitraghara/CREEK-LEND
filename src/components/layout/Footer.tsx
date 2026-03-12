@@ -47,6 +47,7 @@ export default function Footer() {
               <li>
                 <Link
                   href="/apply"
+                  prefetch={false}
                   className="text-secondary hover:text-secondary-light transition-colors text-sm font-medium"
                 >
                   Apply Now
@@ -127,7 +128,7 @@ export default function Footer() {
                     d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
                   />
                 </svg>
-                <span>Mon-Fri: 8AM - 8PM EST</span>
+                <span>Mon-Fri: 6AM - 5PM PST</span>
               </li>
             </ul>
           </div>
@@ -142,20 +143,17 @@ export default function Footer() {
             credit history. Not all applicants will qualify for the lowest rate.
             Loan amounts range from ${LOAN_LIMITS.minAmount.toLocaleString()} to
             ${LOAN_LIMITS.maxAmount.toLocaleString()} with terms from{" "}
-            {LOAN_LIMITS.minTerm} to {LOAN_LIMITS.maxTerm} months. Creek Lend
-            is a direct lender. This is not a loan broker or marketplace service.
+            {LOAN_LIMITS.minTerm} to {LOAN_LIMITS.maxTerm} months. Creek Lend is
+            a direct lender. This is not a loan broker or marketplace service.
           </p>
         </div>
 
         {/* Copyright */}
         <div className="mt-6 pt-6 border-t border-white/10 flex flex-col sm:flex-row justify-between items-center gap-4">
           <p className="text-xs text-white/50">
-            &copy; {currentYear} {SITE_NAME}. All rights reserved. NMLS#
-            XXXXXXX
+            &copy; {currentYear} {SITE_NAME}. All rights reserved. NMLS# XXXXXXX
           </p>
-          <p className="text-xs text-white/50">
-            Equal Housing Lender | Direct Lender
-          </p>
+          <p className="text-xs text-white/50">Creek Lend | Direct Lender</p>
         </div>
       </div>
     </footer>

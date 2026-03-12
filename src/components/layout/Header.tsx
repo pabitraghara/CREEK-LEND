@@ -32,6 +32,7 @@ export default function Header() {
             ))}
             <Link
               href="/apply"
+              prefetch={false}
               className="bg-primary hover:bg-primary-dark text-white px-6 py-2.5 rounded-lg font-semibold transition-colors duration-200 shadow-md hover:shadow-lg"
             >
               Apply Now
@@ -87,6 +88,7 @@ export default function Header() {
               ))}
               <Link
                 href="/apply"
+                prefetch={false}
                 className="bg-primary hover:bg-primary-dark text-white px-4 py-3 rounded-lg font-semibold text-center transition-colors mt-2"
                 onClick={() => setMobileMenuOpen(false)}
               >

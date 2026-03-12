@@ -1,15 +1,17 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import dynamic from "next/dynamic";
 import { getUTMParams } from "@/lib/utils";
 import { apiUrl } from "@/lib/api";
-import StepPersonalInfo from "./steps/StepPersonalInfo";
-import StepIdentification from "./steps/StepIdentification";
-import StepAddress from "./steps/StepAddress";
-import StepEmployment from "./steps/StepEmployment";
-import StepLoanDetails from "./steps/StepLoanDetails";
-import StepBanking from "./steps/StepBanking";
-import StepConsent from "./steps/StepConsent";
+
+const StepPersonalInfo = dynamic(() => import("./steps/StepPersonalInfo"));
+const StepIdentification = dynamic(() => import("./steps/StepIdentification"));
+const StepAddress = dynamic(() => import("./steps/StepAddress"));
+const StepEmployment = dynamic(() => import("./steps/StepEmployment"));
+const StepLoanDetails = dynamic(() => import("./steps/StepLoanDetails"));
+const StepBanking = dynamic(() => import("./steps/StepBanking"));
+const StepConsent = dynamic(() => import("./steps/StepConsent"));
 
 export interface ApplicationData {
   // Personal Info
@@ -83,7 +85,7 @@ const initialData: ApplicationData = {
   jobTitle: "",
   monthlyIncome: 0,
   yearsEmployed: 0,
-  loanAmount: 10000,
+  loanAmount: 5000,
   loanPurpose: "",
   loanTerm: 36,
   routingNumber: "",
