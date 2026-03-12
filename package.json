@@ -27,9 +27,9 @@
     "eslint-config-next": "^16.1.6"
   },
   "browserslist": [
-    "chrome >= 109",
-    "safari >= 16.4",
-    "firefox >= 115",
-    "edge >= 109"
+    "chrome >= 114",
+    "safari >= 17",
+    "firefox >= 121",
+    "edge >= 114"
   ]
 }
