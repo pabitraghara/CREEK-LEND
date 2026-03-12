@@ -3,7 +3,7 @@ import dynamic from "next/dynamic";
 import { SITE_NAME, LOAN_LIMITS } from "@/lib/constants";
 
 const LoanCalculator = dynamic(() => import("@/components/ui/LoanCalculator"), {
-  ssr: true,
+  ssr: false,
   loading: () => (
     <div className="bg-white rounded-2xl shadow-xl p-8 border border-surface-dark animate-pulse min-h-[400px]">
       <div className="h-8 bg-surface rounded w-1/3 mb-6"></div>

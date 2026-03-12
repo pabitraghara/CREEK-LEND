@@ -68,13 +68,13 @@ export default function RootLayout({
   return (
     <html lang="en" className={inter.variable}>
       <head>
-        <GoogleTagManager />
         <FinancialServiceSchema />
         <link rel="icon" href="/favicon.ico" />
         <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
       </head>
       <body className="min-h-screen flex flex-col">
         <GTMNoScript />
+        <GoogleTagManager />
         <GoogleAnalytics />
         <MetaPixel />
         <ConditionalLayout>{children}</ConditionalLayout>

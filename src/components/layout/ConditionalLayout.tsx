@@ -1,8 +1,10 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import { usePathname } from "next/navigation";
 import Header from "./Header";
-import Footer from "./Footer";
+
+const Footer = dynamic(() => import("./Footer"), { ssr: true });
 
 export default function ConditionalLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
