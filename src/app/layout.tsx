@@ -68,7 +68,7 @@ export default function RootLayout({
   return (
     <html lang="en" className={inter.variable}>
       <head>
-        <link rel="preconnect" href="https://loan-app-ka1t.vercel.app" />
+        <link rel="preconnect" href="https://loan-app-ka1t.vercel.app" crossOrigin="anonymous" />
         <link rel="dns-prefetch" href="https://www.googletagmanager.com" />
         <link rel="dns-prefetch" href="https://www.google-analytics.com" />
         <link rel="dns-prefetch" href="https://connect.facebook.net" />
