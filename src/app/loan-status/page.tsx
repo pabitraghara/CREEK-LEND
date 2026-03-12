@@ -1,4 +1,8 @@
-import LoanStatusForm from "./LoanStatusForm";
+import dynamic from "next/dynamic";
+
+const LoanStatusForm = dynamic(() => import("./LoanStatusForm"), {
+  loading: () => <p>Loading...</p>,
+});
 
 export const metadata = {
   title: "Check Loan Status",
