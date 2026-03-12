@@ -1,13 +1,24 @@
 import Link from "next/link";
-import LoanCalculator from "@/components/ui/LoanCalculator";
-import { FinancialServiceSchema } from "@/components/ui/JsonLd";
+import dynamic from "next/dynamic";
 import { SITE_NAME, LOAN_LIMITS } from "@/lib/constants";
+
+const LoanCalculator = dynamic(() => import("@/components/ui/LoanCalculator"), {
+  ssr: true,
+  loading: () => (
+    <div className="bg-white rounded-2xl shadow-xl p-8 border border-surface-dark animate-pulse min-h-[400px]">
+      <div className="h-8 bg-surface rounded w-1/3 mb-6"></div>
+      <div className="space-y-4">
+        <div className="h-12 bg-surface rounded"></div>
+        <div className="h-12 bg-surface rounded"></div>
+        <div className="h-32 bg-surface rounded"></div>
+      </div>
+    </div>
+  ),
+});
 
 export default function HomePage() {
   return (
     <>
-      <FinancialServiceSchema />
-
       {/* Hero Section */}
       <section className="bg-gradient-to-br from-primary via-primary-dark to-primary-light text-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-24">
@@ -189,9 +200,9 @@ export default function HomePage() {
                 <div className="w-14 h-14 bg-primary/10 rounded-xl flex items-center justify-center text-primary mb-5">
                   {feature.icon}
                 </div>
-                <h3 className="text-xl font-bold text-text-primary mb-3">
+                <h2 className="text-xl font-bold text-text-primary mb-3">
                   {feature.title}
-                </h3>
+                </h2>
                 <p className="text-text-secondary leading-relaxed">
                   {feature.description}
                 </p>

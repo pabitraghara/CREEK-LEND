@@ -3,6 +3,7 @@ import { Inter } from "next/font/google";
 import ConditionalLayout from "@/components/layout/ConditionalLayout";
 import { GoogleAnalytics, GoogleTagManager, GTMNoScript } from "@/components/analytics/GoogleAnalytics";
 import { MetaPixel } from "@/components/analytics/MetaPixel";
+import { FinancialServiceSchema } from "@/components/ui/JsonLd";
 import { SITE_NAME, SITE_URL, SITE_DESCRIPTION } from "@/lib/constants";
 import "./globals.css";
 
@@ -68,6 +69,7 @@ export default function RootLayout({
     <html lang="en" className={inter.variable}>
       <head>
         <GoogleTagManager />
+        <FinancialServiceSchema />
         <link rel="icon" href="/favicon.ico" />
         <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
       </head>

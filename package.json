@@ -24,5 +24,10 @@
   "devDependencies": {
     "eslint": "^9.39.4",
     "eslint-config-next": "^16.1.6"
-  }
+  },
+  "browserslist": [
+    "last 2 versions",
+    "not dead",
+    "not ie 11"
+  ]
 }

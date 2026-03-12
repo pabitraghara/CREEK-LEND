@@ -13,7 +13,7 @@ export default function LoanCalculator() {
 
   return (
     <div className="bg-white rounded-2xl shadow-xl p-6 sm:p-8 border border-surface-dark">
-      <h3 className="text-2xl font-bold text-primary mb-6">Loan Calculator</h3>
+      <h2 className="text-2xl font-bold text-primary mb-6">Loan Calculator</h2>
 
       {/* Loan Amount */}
       <div className="mb-6">
