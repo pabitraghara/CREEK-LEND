@@ -130,18 +130,22 @@ export default function ApplicationWizard() {
     checkGeo();
   }, []);
 
+  useEffect(() => {
+    if (currentStep > 1) {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+  }, [currentStep]);
+
   const updateFormData = useCallback((updates: Partial<ApplicationData>) => {
     setFormData((prev) => ({ ...prev, ...updates }));
   }, []);
 
   const nextStep = useCallback(() => {
     setCurrentStep((prev) => Math.min(prev + 1, STEPS.length));
-    window.scrollTo({ top: 0, behavior: "smooth" });
   }, []);
 
   const prevStep = useCallback(() => {
     setCurrentStep((prev) => Math.max(prev - 1, 1));
-    window.scrollTo({ top: 0, behavior: "smooth" });
   }, []);
 
   const handleSubmit = async () => {

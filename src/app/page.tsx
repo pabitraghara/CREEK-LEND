@@ -90,28 +90,29 @@ export default function HomePage() {
       {/* Trust Indicators */}
       <section className="bg-surface py-8 border-b border-surface-dark">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <h2 className="sr-only">Key Statistics</h2>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
             <div>
               <p className="text-3xl font-bold text-primary">$10K</p>
-              <p className="text-sm text-text-secondary mt-1">
+              <h3 className="text-sm text-text-secondary mt-1">
                 Max Loan Amount
-              </p>
+              </h3>
             </div>
             <div>
               <p className="text-3xl font-bold text-primary">
                 {LOAN_LIMITS.minAPR}%
               </p>
-              <p className="text-sm text-text-secondary mt-1">Starting APR</p>
+              <h3 className="text-sm text-text-secondary mt-1">Starting APR</h3>
             </div>
             <div>
               <p className="text-3xl font-bold text-primary">5 min</p>
-              <p className="text-sm text-text-secondary mt-1">
+              <h3 className="text-sm text-text-secondary mt-1">
                 Application Time
-              </p>
+              </h3>
             </div>
             <div>
               <p className="text-3xl font-bold text-primary">24 hrs</p>
-              <p className="text-sm text-text-secondary mt-1">Funding Speed</p>
+              <h3 className="text-sm text-text-secondary mt-1">Funding Speed</h3>
             </div>
           </div>
         </div>
