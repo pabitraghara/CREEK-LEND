@@ -1,8 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import dynamic from "next/dynamic";
-
-const BreadcrumbSchema = dynamic(() => import("@/components/ui/JsonLd").then(mod => mod.BreadcrumbSchema), { ssr: false });
+import { BreadcrumbSchema } from "@/components/ui/JsonLd";
 
 export const metadata: Metadata = {
   title: "How It Works — Simple 3-Step Loan Process",

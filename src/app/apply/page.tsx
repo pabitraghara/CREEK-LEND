@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import dynamic from "next/dynamic";
+import { BreadcrumbSchema } from "@/components/ui/JsonLd";
 
 const ApplicationWizard = dynamic(() => import("@/components/forms/ApplicationWizard"), {
   ssr: true,
@@ -17,8 +18,6 @@ const ApplicationWizard = dynamic(() => import("@/components/forms/ApplicationWi
     </div>
   ),
 });
-
-const BreadcrumbSchema = dynamic(() => import("@/components/ui/JsonLd").then(mod => mod.BreadcrumbSchema), { ssr: false });
 
 export const metadata: Metadata = {
   title: "Apply for a Personal Loan",

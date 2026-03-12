@@ -1,7 +1,5 @@
 import type { Metadata } from "next";
-import dynamic from "next/dynamic";
-
-const BreadcrumbSchema = dynamic(() => import("@/components/ui/JsonLd").then(mod => mod.BreadcrumbSchema), { ssr: false });
+import { BreadcrumbSchema } from "@/components/ui/JsonLd";
 import { SITE_NAME, BUSINESS_EMAIL, SITE_URL } from "@/lib/constants";
 
 export const metadata: Metadata = {
