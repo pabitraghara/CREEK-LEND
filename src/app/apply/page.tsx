@@ -1,6 +1,24 @@
 import type { Metadata } from "next";
-import ApplicationWizard from "@/components/forms/ApplicationWizard";
-import { BreadcrumbSchema } from "@/components/ui/JsonLd";
+import dynamic from "next/dynamic";
+
+const ApplicationWizard = dynamic(() => import("@/components/forms/ApplicationWizard"), {
+  ssr: true,
+  loading: () => (
+    <div className="bg-white rounded-2xl shadow-xl p-8 border border-surface-dark animate-pulse min-h-[600px]">
+      <div className="h-8 bg-surface rounded w-1/3 mb-10 mx-auto"></div>
+      <div className="space-y-8">
+        <div className="grid grid-cols-2 gap-6">
+          <div className="h-12 bg-surface rounded"></div>
+          <div className="h-12 bg-surface rounded"></div>
+        </div>
+        <div className="h-40 bg-surface rounded"></div>
+        <div className="h-12 bg-surface rounded w-1/2 mx-auto"></div>
+      </div>
+    </div>
+  ),
+});
+
+const BreadcrumbSchema = dynamic(() => import("@/components/ui/JsonLd").then(mod => mod.BreadcrumbSchema), { ssr: false });
 
 export const metadata: Metadata = {
   title: "Apply for a Personal Loan",

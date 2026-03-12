@@ -2,7 +2,9 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { FAQSchema } from "@/components/ui/JsonLd";
+import dynamic from "next/dynamic";
+
+const FAQSchema = dynamic(() => import("@/components/ui/JsonLd").then(mod => mod.FAQSchema), { ssr: false });
 import { SITE_NAME, LOAN_LIMITS } from "@/lib/constants";
 
 const faqs = [

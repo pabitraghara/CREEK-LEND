@@ -2,8 +2,7 @@
 
 import dynamic from "next/dynamic";
 import { usePathname } from "next/navigation";
-import Header from "./Header";
-
+const Header = dynamic(() => import("./Header"), { ssr: true });
 const Footer = dynamic(() => import("./Footer"), { ssr: true });
 
 export default function ConditionalLayout({ children }: { children: React.ReactNode }) {
