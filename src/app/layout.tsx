@@ -1,13 +1,9 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
-import dynamic from "next/dynamic";
 import ConditionalLayout from "@/components/layout/ConditionalLayout";
-
-const GoogleAnalytics = dynamic(() => import("@/components/analytics/GoogleAnalytics").then(mod => mod.GoogleAnalytics), { ssr: false });
-const GoogleTagManager = dynamic(() => import("@/components/analytics/GoogleAnalytics").then(mod => mod.GoogleTagManager), { ssr: false });
-const GTMNoScript = dynamic(() => import("@/components/analytics/GoogleAnalytics").then(mod => mod.GTMNoScript), { ssr: false });
-const MetaPixel = dynamic(() => import("@/components/analytics/MetaPixel").then(mod => mod.MetaPixel), { ssr: false });
-const FinancialServiceSchema = dynamic(() => import("@/components/ui/JsonLd").then(mod => mod.FinancialServiceSchema), { ssr: false });
+import { GoogleAnalytics, GoogleTagManager, GTMNoScript } from "@/components/analytics/GoogleAnalytics";
+import { MetaPixel } from "@/components/analytics/MetaPixel";
+import { FinancialServiceSchema } from "@/components/ui/JsonLd";
 import { SITE_NAME, SITE_URL, SITE_DESCRIPTION } from "@/lib/constants";
 import "./globals.css";
 
