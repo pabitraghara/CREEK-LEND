@@ -8,6 +8,7 @@ const nextConfig: NextConfig = {
   },
   experimental: {
     optimizePackageImports: ["lucide-react"],
+    inlineCss: true,
   },
   async rewrites() {
     const backendUrl = process.env.NEXT_PUBLIC_API_URL || "https://loan-app-ka1t.vercel.app";
