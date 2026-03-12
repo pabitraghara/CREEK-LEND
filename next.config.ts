@@ -3,18 +3,15 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   poweredByHeader: false,
   compress: true,
-  swcMinify: true,
   compiler: {
     removeConsole: process.env.NODE_ENV === "production",
   },
   experimental: {
     optimizePackageImports: ["lucide-react", "zod"],
-    optimizeCss: true,
-    deploymentBrowserslist: ["chrome 100", "safari 15", "firefox 100"],
   },
-  optimizeFonts: true,
   async rewrites() {
-    const backendUrl = process.env.NEXT_PUBLIC_API_URL || "https://loan-app-ka1t.vercel.app";
+    const backendUrl =
+      process.env.NEXT_PUBLIC_API_URL || "https://loan-app-ka1t.vercel.app";
     return [
       {
         source: "/api/:path*",
