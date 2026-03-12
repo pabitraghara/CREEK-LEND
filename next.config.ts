@@ -4,7 +4,7 @@ const nextConfig: NextConfig = {
   poweredByHeader: false,
   compress: true,
   async rewrites() {
-    const backendUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001";
+    const backendUrl = process.env.NEXT_PUBLIC_API_URL || "https://loan-app-ka1t.vercel.app";
     return [
       {
         source: "/api/:path*",
