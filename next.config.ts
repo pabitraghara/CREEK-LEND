@@ -9,6 +9,7 @@ const nextConfig: NextConfig = {
   experimental: {
     optimizePackageImports: ["lucide-react", "zod"],
     optimizeCss: true,
+    inlineCss: true,
   },
   async rewrites() {
     const backendUrl =
