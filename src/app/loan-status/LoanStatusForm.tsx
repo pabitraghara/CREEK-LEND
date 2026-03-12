@@ -197,9 +197,9 @@ export default function LoanStatusForm() {
           <div
             className={`rounded-2xl border-2 p-6 ${statusInfo.bg} text-center`}
           >
-            <p className={`text-2xl font-bold ${statusInfo.color} mb-2`}>
+            <h2 className={`text-2xl font-bold ${statusInfo.color} mb-2`}>
               {statusInfo.label}
-            </p>
+            </h2>
             <p className="text-sm text-text-secondary">
               {statusInfo.description}
             </p>
@@ -207,9 +207,9 @@ export default function LoanStatusForm() {
 
           {/* Loan Details Card */}
           <div className="bg-white rounded-2xl shadow-lg p-8 border border-surface-dark">
-            <h2 className="text-xl font-bold text-text-primary mb-6">
+            <h3 className="text-xl font-bold text-text-primary mb-6">
               Loan Details
-            </h2>
+            </h3>
 
             <div className="space-y-4">
               <div className="flex justify-between items-center py-3 border-b border-surface-dark">

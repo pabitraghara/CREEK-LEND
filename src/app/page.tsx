@@ -201,9 +201,9 @@ export default function HomePage() {
                 <div className="w-14 h-14 bg-primary/10 rounded-xl flex items-center justify-center text-primary mb-5">
                   {feature.icon}
                 </div>
-                <h2 className="text-xl font-bold text-text-primary mb-3">
+                <h3 className="text-xl font-bold text-text-primary mb-3">
                   {feature.title}
-                </h2>
+                </h3>
                 <p className="text-text-secondary leading-relaxed">
                   {feature.description}
                 </p>

@@ -27,8 +27,9 @@
     "eslint-config-next": "^16.1.6"
   },
   "browserslist": [
-    "last 2 major versions",
-    "not dead",
-    "not ie 11"
+    "chrome >= 100",
+    "safari >= 15",
+    "firefox >= 100",
+    "edge >= 100"
   ]
 }
