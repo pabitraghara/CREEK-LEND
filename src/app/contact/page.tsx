@@ -1,22 +1,6 @@
 import type { Metadata } from "next";
-import dynamic from "next/dynamic";
 import { BreadcrumbSchema } from "@/components/ui/JsonLd";
-const ContactForm = dynamic(() => import("@/components/forms/ContactForm"), {
-  ssr: true,
-  loading: () => (
-    <div className="bg-white rounded-2xl shadow-xl p-8 border border-surface-dark animate-pulse min-h-[400px]">
-      <div className="space-y-6">
-        <div className="grid grid-cols-2 gap-6">
-          <div className="h-12 bg-surface rounded"></div>
-          <div className="h-12 bg-surface rounded"></div>
-        </div>
-        <div className="h-12 bg-surface rounded"></div>
-        <div className="h-32 bg-surface rounded"></div>
-        <div className="h-12 bg-surface rounded w-1/3 mx-auto"></div>
-      </div>
-    </div>
-  ),
-});
+import ContactForm from "@/components/forms/ContactForm";
 import {
   SITE_NAME,
   BUSINESS_EMAIL,

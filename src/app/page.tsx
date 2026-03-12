@@ -1,20 +1,6 @@
 import Link from "next/link";
-import dynamic from "next/dynamic";
+import LoanCalculator from "@/components/ui/LoanCalculator";
 import { SITE_NAME, LOAN_LIMITS } from "@/lib/constants";
-
-const LoanCalculator = dynamic(() => import("@/components/ui/LoanCalculator"), {
-  ssr: true,
-  loading: () => (
-    <div className="bg-white rounded-2xl shadow-xl p-8 border border-surface-dark animate-pulse min-h-[400px]">
-      <div className="h-8 bg-surface rounded w-1/3 mb-6"></div>
-      <div className="space-y-4">
-        <div className="h-12 bg-surface rounded"></div>
-        <div className="h-12 bg-surface rounded"></div>
-        <div className="h-32 bg-surface rounded"></div>
-      </div>
-    </div>
-  ),
-});
 
 export default function HomePage() {
   return (

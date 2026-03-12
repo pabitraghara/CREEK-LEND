@@ -1,16 +1,4 @@
-import dynamic from "next/dynamic";
-
-const LoanStatusForm = dynamic(() => import("./LoanStatusForm"), {
-  loading: () => (
-    <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div className="bg-white rounded-2xl shadow-lg p-8 border border-surface-dark animate-pulse min-h-[300px]">
-        <div className="h-10 bg-surface rounded mb-6"></div>
-        <div className="h-10 bg-surface rounded mb-6"></div>
-        <div className="h-12 bg-primary/20 rounded"></div>
-      </div>
-    </div>
-  ),
-});
+import LoanStatusForm from "./LoanStatusForm";
 
 export const metadata = {
   title: "Check Loan Status",
