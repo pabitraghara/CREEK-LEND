@@ -1,27 +1,14 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { BreadcrumbSchema } from "@/components/ui/JsonLd";
-import { LOAN_LIMITS, SITE_NAME } from "@/lib/constants";
+import { SITE_NAME } from "@/lib/constants";
 
 export const metadata: Metadata = {
   title: "Rates & Fees — Transparent Personal Loan Pricing",
   description:
-    "View Creek Lend's transparent personal loan rates and fees. APRs from 5.99% to 35.99% with no hidden charges. See state-specific rate information.",
+    "View Creek Lend's transparent personal loan rates and fees. One-time 10% flat fee with no hidden charges. $0 upfront fees on all loans.",
   alternates: { canonical: "/rates-and-fees" },
 };
-
-const sampleRates = [
-  { state: "California", minAPR: 5.99, maxAPR: 35.99, minLoan: 1000, maxLoan: 50000 },
-  { state: "New York", minAPR: 5.99, maxAPR: 25.00, minLoan: 1000, maxLoan: 50000 },
-  { state: "Texas", minAPR: 5.99, maxAPR: 35.99, minLoan: 1000, maxLoan: 50000 },
-  { state: "Florida", minAPR: 5.99, maxAPR: 30.00, minLoan: 1000, maxLoan: 50000 },
-  { state: "Illinois", minAPR: 5.99, maxAPR: 35.99, minLoan: 1000, maxLoan: 50000 },
-  { state: "Pennsylvania", minAPR: 5.99, maxAPR: 24.00, minLoan: 1000, maxLoan: 50000 },
-  { state: "Ohio", minAPR: 5.99, maxAPR: 28.00, minLoan: 1000, maxLoan: 50000 },
-  { state: "Ontario (CA)", minAPR: 6.99, maxAPR: 32.00, minLoan: 1000, maxLoan: 50000 },
-  { state: "British Columbia (CA)", minAPR: 6.99, maxAPR: 32.00, minLoan: 1000, maxLoan: 50000 },
-  { state: "Maharashtra (IN)", minAPR: 10.99, maxAPR: 35.99, minLoan: 1000, maxLoan: 50000 },
-];
 
 export default function RatesAndFeesPage() {
   return (
@@ -44,29 +31,29 @@ export default function RatesAndFeesPage() {
         </div>
       </section>
 
-      {/* Overview */}
+      {/* Top Value Cards */}
       <section className="py-16">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
             <div className="bg-white rounded-xl p-8 shadow-md border border-surface-dark text-center">
-              <p className="text-4xl font-bold text-primary">
-                {LOAN_LIMITS.minAPR}%
-              </p>
-              <p className="text-text-secondary mt-2">Starting APR</p>
+              <p className="text-4xl font-bold text-primary">10%</p>
+              <p className="text-text-secondary mt-2">Flat Rate</p>
             </div>
             <div className="bg-white rounded-xl p-8 shadow-md border border-surface-dark text-center">
               <p className="text-4xl font-bold text-primary">$0</p>
-              <p className="text-text-secondary mt-2">Prepayment Penalties</p>
+              <p className="text-text-secondary mt-2">Upfront Fees</p>
             </div>
             <div className="bg-white rounded-xl p-8 shadow-md border border-surface-dark text-center">
-              <p className="text-4xl font-bold text-primary">Fixed</p>
-              <p className="text-text-secondary mt-2">Interest Rate Type</p>
+              <p className="text-4xl font-bold text-primary">Flexible</p>
+              <p className="text-text-secondary mt-2">
+                Terms: 24–60 Months
+              </p>
             </div>
           </div>
 
           {/* Fee Schedule */}
           <h2 className="text-2xl font-bold text-text-primary mb-6">
-            Fee Schedule
+            Fee Schedule — No Hidden Costs
           </h2>
           <div className="bg-white rounded-xl shadow-md border border-surface-dark overflow-hidden mb-12">
             <table className="w-full">
@@ -82,13 +69,18 @@ export default function RatesAndFeesPage() {
               </thead>
               <tbody className="divide-y divide-surface-dark">
                 {[
-                  { fee: "Origination Fee", amount: "1% - 6% of loan amount" },
-                  { fee: "Late Payment Fee", amount: "$15 or 5% of payment, whichever is greater" },
-                  { fee: "Prepayment Penalty", amount: "None" },
-                  { fee: "Application Fee", amount: "None" },
-                  { fee: "Annual Fee", amount: "None" },
-                  { fee: "NSF/Returned Payment Fee", amount: "$15" },
-                  { fee: "Check Processing Fee", amount: "None (ACH only)" },
+                  { fee: "Origination Fee", amount: "$0 (None)" },
+                  { fee: "Upfront Processing Fee", amount: "$0 (None)" },
+                  {
+                    fee: "Late Payment Fee",
+                    amount: "$15 (After 5-day grace period)",
+                  },
+                  {
+                    fee: "Prepayment Penalty",
+                    amount: "None (Pay off early to save)",
+                  },
+                  { fee: "Application Fee", amount: "$0" },
+                  { fee: "Repayment Options", amount: "24 to 60 Months" },
                 ].map((item) => (
                   <tr key={item.fee}>
                     <td className="px-6 py-4 text-sm text-text-primary font-medium">
@@ -103,20 +95,25 @@ export default function RatesAndFeesPage() {
             </table>
           </div>
 
-          {/* State-Specific Rates */}
-          <h2 className="text-2xl font-bold text-text-primary mb-6">
-            Rate Ranges by State/Province
+          {/* Transparent Rates Nationwide */}
+          <h2 className="text-2xl font-bold text-text-primary mb-4">
+            Transparent Rates Nationwide (All 50 US States)
           </h2>
-          <div className="bg-white rounded-xl shadow-md border border-surface-dark overflow-hidden mb-8">
+          <p className="text-text-secondary mb-6">
+            Creek Lend provides a consistent 10% flat-fee regardless of your
+            state. We believe geography shouldn&apos;t dictate your cost of
+            capital.
+          </p>
+          <div className="bg-white rounded-xl shadow-md border border-surface-dark overflow-hidden mb-12">
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead className="bg-surface">
                   <tr>
                     <th className="text-left px-6 py-4 text-sm font-semibold text-text-primary">
-                      State/Province
+                      Region
                     </th>
                     <th className="text-left px-6 py-4 text-sm font-semibold text-text-primary">
-                      APR Range
+                      Flat Fee
                     </th>
                     <th className="text-left px-6 py-4 text-sm font-semibold text-text-primary">
                       Loan Range
@@ -124,41 +121,148 @@ export default function RatesAndFeesPage() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-surface-dark">
-                  {sampleRates.map((rate) => (
-                    <tr key={rate.state}>
-                      <td className="px-6 py-4 text-sm text-text-primary font-medium">
-                        {rate.state}
-                      </td>
-                      <td className="px-6 py-4 text-sm text-text-secondary">
-                        {rate.minAPR}% - {rate.maxAPR}%
-                      </td>
-                      <td className="px-6 py-4 text-sm text-text-secondary">
-                        ${rate.minLoan.toLocaleString()} - $
-                        {rate.maxLoan.toLocaleString()}
-                      </td>
-                    </tr>
-                  ))}
+                  <tr>
+                    <td className="px-6 py-4 text-sm text-text-primary font-medium">
+                      California (HQ)
+                    </td>
+                    <td className="px-6 py-4 text-sm text-text-secondary">
+                      10%
+                    </td>
+                    <td className="px-6 py-4 text-sm text-text-secondary">
+                      $2,000 – $10,000
+                    </td>
+                  </tr>
+                  <tr>
+                    <td className="px-6 py-4 text-sm text-text-primary font-medium">
+                      United States (All States)
+                    </td>
+                    <td className="px-6 py-4 text-sm text-text-secondary">
+                      10%
+                    </td>
+                    <td className="px-6 py-4 text-sm text-text-secondary">
+                      $2,000 – $10,000
+                    </td>
+                  </tr>
                 </tbody>
               </table>
             </div>
           </div>
 
-          {/* APR Disclosure */}
+          {/* The Power of the Flat Fee */}
+          <div className="bg-gradient-to-br from-primary/5 to-primary/10 rounded-xl p-8 mb-12">
+            <h2 className="text-2xl font-bold text-text-primary mb-4">
+              Finally, Math You Can Understand.
+            </h2>
+            <p className="text-text-secondary mb-6">
+              Most lenders use compounding interest that grows over time. Creek
+              Lend uses a one-time 10% fee. Whether you pay it back over 24
+              months or 60 months, the total cost of your loan never changes.
+            </p>
+            <ul className="space-y-3">
+              <li className="flex items-start space-x-3">
+                <span className="text-primary font-bold mt-0.5">&#10003;</span>
+                <span className="text-text-primary">
+                  Borrow $5,000: Repay <strong>$5,500</strong> total.
+                </span>
+              </li>
+              <li className="flex items-start space-x-3">
+                <span className="text-primary font-bold mt-0.5">&#10003;</span>
+                <span className="text-text-primary">
+                  Borrow $10,000: Repay <strong>$11,000</strong> total.
+                </span>
+              </li>
+              <li className="flex items-start space-x-3">
+                <span className="text-primary font-bold mt-0.5">&#10003;</span>
+                <span className="text-text-primary font-medium">
+                  No interest on interest. No surprises.
+                </span>
+              </li>
+            </ul>
+            <div className="mt-8 bg-white rounded-lg p-6 shadow-sm border border-surface-dark">
+              <p className="text-sm text-text-secondary mb-2">
+                60-month payment example
+              </p>
+              <p className="text-text-primary">
+                $5,000 loan = $5,500 total ={" "}
+                <span className="text-3xl font-bold text-primary">
+                  ~$91/mo
+                </span>
+              </p>
+              <p className="text-xs text-text-secondary mt-1">
+                Less than most cell phone bills.
+              </p>
+            </div>
+          </div>
+
+          {/* Trust Signals */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-12">
+            <div className="flex items-center space-x-3 bg-white rounded-xl p-5 shadow-sm border border-surface-dark">
+              <svg
+                className="w-8 h-8 text-primary flex-shrink-0"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"
+                />
+              </svg>
+              <span className="text-sm font-medium text-text-primary">
+                256-Bit Secure Data Encrypted
+              </span>
+            </div>
+            <div className="flex items-center space-x-3 bg-white rounded-xl p-5 shadow-sm border border-surface-dark">
+              <svg
+                className="w-8 h-8 text-primary flex-shrink-0"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                />
+              </svg>
+              <span className="text-sm font-medium text-text-primary">
+                $0 Upfront Cost Guarantee
+              </span>
+            </div>
+            <div className="flex items-center space-x-3 bg-white rounded-xl p-5 shadow-sm border border-surface-dark">
+              <svg
+                className="w-8 h-8 text-primary flex-shrink-0"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M3 21V5a2 2 0 012-2h6.5l1 1H21l-3 6 3 6h-8.5l-1-1H5a2 2 0 00-2 2z"
+                />
+              </svg>
+              <span className="text-sm font-medium text-text-primary">
+                California-Based & Operated
+              </span>
+            </div>
+          </div>
+
+          {/* Pricing Disclosure */}
           <div className="bg-surface rounded-xl p-6 text-sm text-text-secondary leading-relaxed">
             <h3 className="font-semibold text-text-primary mb-2">
-              APR Disclosure
+              Pricing Disclosure
             </h3>
             <p>
-              The Annual Percentage Rate (APR) is the cost of your loan
-              expressed as a yearly rate. APR ranges from {LOAN_LIMITS.minAPR}%
-              to {LOAN_LIMITS.maxAPR}% and is determined based on your credit
-              profile, income, loan amount, and loan term. The lowest rates are
-              available to borrowers with excellent credit. Not all applicants
-              will qualify for the lowest rate. Loan amounts range from $
-              {LOAN_LIMITS.minAmount.toLocaleString()} to $
-              {LOAN_LIMITS.maxAmount.toLocaleString()} with terms from{" "}
-              {LOAN_LIMITS.minTerm} to {LOAN_LIMITS.maxTerm} months. Rates and
-              terms are subject to change and may vary by state/province.
+              Creek Lend does not charge upfront fees. While federal law requires
+              the disclosure of an Annual Percentage Rate (APR)—which varies
+              between 3.8% and 9.5% based on your chosen 24–60 month term—our
+              actual cost is a fixed 10% flat fee. All loans are subject to PST
+              business hours for processing and approval.
             </p>
           </div>
         </div>

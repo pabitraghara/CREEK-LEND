@@ -3,7 +3,7 @@
 import { useState } from "react";
 import type { ApplicationData } from "../ApplicationWizard";
 import { identificationSchema, extractFieldErrors } from "@/lib/validation";
-import { US_STATES, CA_PROVINCES, IN_STATES } from "@/lib/constants";
+import { US_STATES } from "@/lib/constants";
 
 interface Props {
   data: ApplicationData;
@@ -19,17 +19,6 @@ export default function StepIdentification({
   onBack,
 }: Props) {
   const [errors, setErrors] = useState<Record<string, string>>({});
-
-  const getStateOptions = () => {
-    switch (data.country) {
-      case "CA":
-        return CA_PROVINCES;
-      case "IN":
-        return IN_STATES;
-      default:
-        return US_STATES;
-    }
-  };
 
   const handleNext = () => {
     const result = identificationSchema.safeParse({
@@ -63,11 +52,7 @@ export default function StepIdentification({
             htmlFor="ssn"
             className="block text-sm font-medium text-text-primary mb-1.5"
           >
-            {data.country === "US"
-              ? "Social Security Number (SSN) *"
-              : data.country === "CA"
-                ? "Social Insurance Number (SIN) *"
-                : "Aadhaar Number / PAN *"}
+            Social Security Number (SSN) *
           </label>
           <input
             type="password"
@@ -79,13 +64,7 @@ export default function StepIdentification({
                 ? "border-error"
                 : "border-surface-dark focus:border-primary"
             }`}
-            placeholder={
-              data.country === "US"
-                ? "XXX-XX-XXXX"
-                : data.country === "CA"
-                  ? "XXX-XXX-XXX"
-                  : "12-digit Aadhaar or PAN (e.g., ABCDE1234F)"
-            }
+            placeholder="XXX-XX-XXXX"
             autoComplete="off"
           />
           {errors.ssn && (
@@ -114,9 +93,7 @@ export default function StepIdentification({
             htmlFor="driverLicenseNumber"
             className="block text-sm font-medium text-text-primary mb-1.5"
           >
-            {data.country === "IN"
-              ? "Driving Licence / Voter ID Number *"
-              : "Driver\u2019s License Number *"}
+            Driver&rsquo;s License Number *
           </label>
           <input
             type="text"
@@ -130,11 +107,7 @@ export default function StepIdentification({
                 ? "border-error"
                 : "border-surface-dark focus:border-primary"
             }`}
-            placeholder={
-              data.country === "IN"
-                ? "Enter DL or Voter ID number"
-                : "Enter your DL number"
-            }
+            placeholder="Enter your DL number"
           />
           {errors.driverLicenseNumber && (
             <p className="text-error text-xs mt-1">
@@ -148,7 +121,7 @@ export default function StepIdentification({
             htmlFor="driverLicenseState"
             className="block text-sm font-medium text-text-primary mb-1.5"
           >
-            DL Issuing State/Province *
+            DL Issuing State *
           </label>
           <select
             id="driverLicenseState"
@@ -160,8 +133,8 @@ export default function StepIdentification({
                 : "border-surface-dark focus:border-primary"
             }`}
           >
-            <option value="">Select state/province</option>
-            {getStateOptions().map((s) => (
+            <option value="">Select state</option>
+            {US_STATES.map((s) => (
               <option key={s.value} value={s.value}>
                 {s.label}
               </option>
@@ -175,21 +148,29 @@ export default function StepIdentification({
         </div>
       </div>
 
-      <div className="mt-8 flex justify-between">
-        <button
-          type="button"
-          onClick={onBack}
-          className="text-text-secondary hover:text-text-primary font-medium px-6 py-3 transition-colors"
-        >
-          Back
-        </button>
-        <button
-          type="button"
-          onClick={handleNext}
-          className="bg-primary hover:bg-primary-dark text-white px-8 py-3 rounded-lg font-semibold transition-colors"
-        >
-          Continue
-        </button>
+      <div className="mt-8">
+        <div className="flex items-center justify-end gap-3 mb-2">
+          <span className="flex items-center gap-1 text-xs text-text-secondary">
+            <svg className="w-3.5 h-3.5 text-success" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" /></svg>
+            Your data is protected by bank-level security
+          </span>
+        </div>
+        <div className="flex justify-between">
+          <button
+            type="button"
+            onClick={onBack}
+            className="text-text-secondary hover:text-text-primary font-medium px-6 py-3 transition-colors"
+          >
+            Back
+          </button>
+          <button
+            type="button"
+            onClick={handleNext}
+            className="bg-primary hover:bg-primary-dark text-white px-8 py-3 rounded-lg font-semibold transition-colors"
+          >
+            Continue
+          </button>
+        </div>
       </div>
     </div>
   );

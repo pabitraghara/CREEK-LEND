@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import type { ApplicationData } from "../ApplicationWizard";
 import { bankingSchema, extractFieldErrors } from "@/lib/validation";
-import { ACCOUNT_TYPES, IN_ACCOUNT_TYPES } from "@/lib/constants";
+import { ACCOUNT_TYPES } from "@/lib/constants";
 import { apiUrl } from "@/lib/api";
 
 interface Props {
@@ -23,42 +23,20 @@ export default function StepBanking({
   const [lookingUp, setLookingUp] = useState(false);
   const [lookupError, setLookupError] = useState("");
 
-  const isIndia = data.country === "IN";
-  const isCanada = data.country === "CA";
-  const accountTypes = isIndia ? IN_ACCOUNT_TYPES : ACCOUNT_TYPES;
-
-  // Determine label and config based on country
-  const routingLabel = isIndia
-    ? "IFSC Code *"
-    : isCanada
-      ? "Transit/Institution Number *"
-      : "Routing Number *";
-
-  const routingPlaceholder = isIndia
-    ? "Enter 11-character IFSC code (e.g., SBIN0001234)"
-    : "Enter 9-digit routing number";
-
-  const routingMaxLength = isIndia ? 11 : 9;
-  const lookupLength = isIndia ? 11 : 9;
-
-  // Auto-lookup bank name when routing/IFSC reaches expected length
+  // Auto-lookup bank name when routing number reaches 9 digits
   useEffect(() => {
     const value = data.routingNumber;
-    const shouldLookup = isIndia
-      ? /^[A-Z]{4}0[A-Z0-9]{6}$/i.test(value)
-      : /^\d{9}$/.test(value);
+    const shouldLookup = /^\d{9}$/.test(value);
 
     if (shouldLookup) {
       setLookingUp(true);
       setLookupError("");
-      const lookupType = isIndia ? "ifsc" : "routing";
-      fetch(apiUrl(`/api/routing-lookup?routing=${value}&type=${lookupType}`))
+      fetch(apiUrl(`/api/routing-lookup?routing=${value}&type=routing`))
         .then((res) => res.json())
         .then((result) => {
           if (result.bankName) {
             updateData({ bankName: result.bankName });
           } else if (result.valid) {
-            // Routing number is valid but bank not in database
             setLookupError(
               "Valid routing number. Please enter bank name manually.",
             );
@@ -73,20 +51,10 @@ export default function StepBanking({
         })
         .finally(() => setLookingUp(false));
     }
-  }, [data.routingNumber, updateData, isIndia]);
+  }, [data.routingNumber, updateData]);
 
   const handleRoutingChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    let val = e.target.value;
-    if (isIndia) {
-      // IFSC: alphanumeric, uppercase
-      val = val
-        .replace(/[^a-zA-Z0-9]/g, "")
-        .toUpperCase()
-        .slice(0, 11);
-    } else {
-      // Routing number: digits only
-      val = val.replace(/\D/g, "").slice(0, 9);
-    }
+    const val = e.target.value.replace(/\D/g, "").slice(0, 9);
     updateData({ routingNumber: val });
   };
 
@@ -123,7 +91,7 @@ export default function StepBanking({
             htmlFor="routingNumber"
             className="block text-sm font-medium text-text-primary mb-1.5"
           >
-            {routingLabel}
+            Routing Number *
           </label>
           <input
             type="text"
@@ -135,15 +103,10 @@ export default function StepBanking({
                 ? "border-error"
                 : "border-surface-dark focus:border-primary"
             }`}
-            placeholder={routingPlaceholder}
-            maxLength={routingMaxLength}
-            inputMode={isIndia ? "text" : "numeric"}
+            placeholder="Enter 9-digit routing number"
+            maxLength={9}
+            inputMode="numeric"
           />
-          {isIndia && (
-            <p className="text-xs text-text-secondary mt-1">
-              Format: 4 letters + 0 + 6 characters (e.g., SBIN0001234)
-            </p>
-          )}
           {errors.routingNumber && (
             <p className="text-error text-xs mt-1">{errors.routingNumber}</p>
           )}
@@ -170,7 +133,7 @@ export default function StepBanking({
               placeholder={
                 lookingUp
                   ? "Looking up..."
-                  : `Bank name (auto-filled from ${isIndia ? "IFSC code" : "routing number"})`
+                  : "Bank name (auto-filled from routing number)"
               }
               readOnly={lookingUp}
             />
@@ -252,7 +215,7 @@ export default function StepBanking({
             Account Type *
           </label>
           <div className="grid grid-cols-2 gap-3">
-            {accountTypes.map((type) => (
+            {ACCOUNT_TYPES.map((type) => (
               <button
                 key={type.value}
                 type="button"
@@ -277,21 +240,29 @@ export default function StepBanking({
         </div>
       </div>
 
-      <div className="mt-8 flex justify-between">
-        <button
-          type="button"
-          onClick={onBack}
-          className="text-text-secondary hover:text-text-primary font-medium px-6 py-3 transition-colors"
-        >
-          Back
-        </button>
-        <button
-          type="button"
-          onClick={handleNext}
-          className="bg-primary hover:bg-primary-dark text-white px-8 py-3 rounded-lg font-semibold transition-colors"
-        >
-          Continue
-        </button>
+      <div className="mt-8">
+        <div className="flex items-center justify-end gap-3 mb-2">
+          <span className="flex items-center gap-1 text-xs text-text-secondary">
+            <svg className="w-3.5 h-3.5 text-success" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" /></svg>
+            Your data is protected by bank-level security
+          </span>
+        </div>
+        <div className="flex justify-between">
+          <button
+            type="button"
+            onClick={onBack}
+            className="text-text-secondary hover:text-text-primary font-medium px-6 py-3 transition-colors"
+          >
+            Back
+          </button>
+          <button
+            type="button"
+            onClick={handleNext}
+            className="bg-primary hover:bg-primary-dark text-white px-8 py-3 rounded-lg font-semibold transition-colors"
+          >
+            Continue
+          </button>
+        </div>
       </div>
     </div>
   );

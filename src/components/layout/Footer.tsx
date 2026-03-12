@@ -25,8 +25,8 @@ export default function Footer() {
             </div>
             <p className="text-white/70 text-sm leading-relaxed">
               Creek Lend is a direct lender providing personal loans to
-              borrowers across the United States, Canada, and India. We are
-              committed to transparent lending practices.
+              borrowers across the United States. We are committed to
+              transparent lending practices and PST-speed service.
             </p>
           </div>
 
@@ -128,7 +128,7 @@ export default function Footer() {
                     d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
                   />
                 </svg>
-                <span>Mon-Fri: 6AM - 5PM PST</span>
+                <span>Mon&ndash;Fri: 8 AM &ndash; 5 PM PST</span>
               </li>
             </ul>
           </div>
@@ -137,16 +137,69 @@ export default function Footer() {
         {/* APR Disclosure */}
         <div className="mt-8 pt-8 border-t border-white/10">
           <p className="text-xs text-white/50 leading-relaxed">
-            <strong>APR Disclosure:</strong> Annual Percentage Rate (APR) ranges
-            from {LOAN_LIMITS.minAPR}% to {LOAN_LIMITS.maxAPR}%. APR is
-            determined based on your credit profile, loan amount, loan term, and
-            credit history. Not all applicants will qualify for the lowest rate.
-            Loan amounts range from ${LOAN_LIMITS.minAmount.toLocaleString()} to
-            ${LOAN_LIMITS.maxAmount.toLocaleString()} with terms from{" "}
+            <strong>APR Disclosure:</strong> Creek Lend offers a fixed 10% APR
+            on all personal loans. Loan amounts range from $
+            {LOAN_LIMITS.minAmount.toLocaleString()} to $
+            {LOAN_LIMITS.maxAmount.toLocaleString()} with terms from{" "}
             {LOAN_LIMITS.minTerm} to {LOAN_LIMITS.maxTerm} months. Creek Lend is
-            a direct lender. This is not a loan broker or marketplace service.
+            a California-based direct lender. All loans are subject to credit
+            profile and income verification.
           </p>
         </div>
+
+        {/* Trust Signals */}
+        {/* <div className="mt-8 pt-8 border-t border-white/10 flex flex-col sm:flex-row justify-center items-center gap-8">
+          <div className="flex items-center space-x-2 text-white/70">
+            <svg
+              className="w-5 h-5 text-secondary flex-shrink-0"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"
+              />
+            </svg>
+            <span className="text-sm font-medium">256-Bit SSL Encrypted</span>
+          </div>
+          <div className="flex items-center space-x-2 text-white/70">
+            <svg
+              className="w-5 h-5 text-secondary flex-shrink-0"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+              />
+            </svg>
+            <span className="text-sm font-medium">$0 Application Fees</span>
+          </div>
+          <div className="flex items-center space-x-2 text-white/70">
+            <svg
+              className="w-5 h-5 text-secondary flex-shrink-0"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M3 21V5a2 2 0 012-2h6.5l1 1H21l-3 6 3 6h-8.5l-1-1H5a2 2 0 00-2 2z"
+              />
+            </svg>
+            <span className="text-sm font-medium">
+              California-Based Direct Lender
+            </span>
+          </div>
+        </div> */}
 
         {/* Copyright */}
         <div className="mt-6 pt-6 border-t border-white/10 flex flex-col sm:flex-row justify-between items-center gap-4">

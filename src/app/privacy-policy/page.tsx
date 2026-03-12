@@ -4,7 +4,7 @@ import { SITE_NAME, BUSINESS_EMAIL, SITE_URL } from "@/lib/constants";
 
 export const metadata: Metadata = {
   title: "Privacy Policy",
-  description: `Read ${SITE_NAME}'s Privacy Policy. Learn how we collect, use, and protect your personal information in compliance with GLBA and PIPEDA.`,
+  description: `Read ${SITE_NAME}'s Privacy Policy. Learn how we collect, use, and protect your personal information in compliance with GLBA and applicable privacy laws.`,
   alternates: { canonical: "/privacy-policy" },
 };
 
@@ -31,7 +31,7 @@ export default function PrivacyPolicyPage() {
             <div>
               <h2 className="text-2xl font-bold text-text-primary mb-4">1. Introduction</h2>
               <p>
-                {SITE_NAME} (&quot;we,&quot; &quot;us,&quot; or &quot;our&quot;) is committed to protecting your privacy. This Privacy Policy explains how we collect, use, disclose, and safeguard your personal information when you visit our website at {SITE_URL} and use our lending services. This policy complies with the Gramm-Leach-Bliley Act (GLBA), the Personal Information Protection and Electronic Documents Act (PIPEDA), and applicable state and provincial privacy laws.
+                {SITE_NAME} (&quot;we,&quot; &quot;us,&quot; or &quot;our&quot;) is committed to protecting your privacy. This Privacy Policy explains how we collect, use, disclose, and safeguard your personal information when you visit our website at {SITE_URL} and use our lending services. This policy complies with the Gramm-Leach-Bliley Act (GLBA) and applicable state privacy laws.
               </p>
             </div>
 
@@ -41,8 +41,8 @@ export default function PrivacyPolicyPage() {
               <h3 className="text-lg font-semibold text-text-primary mb-2">Personal Identifiers</h3>
               <ul className="list-disc pl-6 space-y-1">
                 <li>Full legal name, date of birth, email address, phone number</li>
-                <li>Social Security Number (SSN) or National Identification Number</li>
-                <li>Driver&apos;s license number and issuing state/province</li>
+                <li>Social Security Number (SSN)</li>
+                <li>Driver&apos;s license number and issuing state</li>
                 <li>Residential address</li>
               </ul>
               <h3 className="text-lg font-semibold text-text-primary mb-2 mt-4">Financial Information</h3>
@@ -89,20 +89,7 @@ export default function PrivacyPolicyPage() {
             </div>
 
             <div>
-              <h2 className="text-2xl font-bold text-text-primary mb-4">5. PIPEDA Compliance (Canada)</h2>
-              <p>
-                For Canadian residents, we comply with the Personal Information Protection and Electronic Documents Act (PIPEDA). We collect, use, and disclose your personal information only with your knowledge and consent. You have the right to:
-              </p>
-              <ul className="list-disc pl-6 space-y-2 mt-3">
-                <li>Access your personal information held by us</li>
-                <li>Challenge the accuracy and completeness of your information</li>
-                <li>Withdraw your consent for certain uses of your information</li>
-                <li>File a complaint with the Privacy Commissioner of Canada</li>
-              </ul>
-            </div>
-
-            <div>
-              <h2 className="text-2xl font-bold text-text-primary mb-4">6. Data Security</h2>
+              <h2 className="text-2xl font-bold text-text-primary mb-4">5. Data Security</h2>
               <p>
                 We implement industry-standard security measures to protect your personal information:
               </p>
@@ -168,7 +155,7 @@ export default function PrivacyPolicyPage() {
                 <br />
                 {SITE_NAME}
                 <br />
-                123 Financial District, New York, NY 10004
+                355 S Grand Ave, Office #2 W, Los Angeles, CA 90071
               </p>
             </div>
           </div>

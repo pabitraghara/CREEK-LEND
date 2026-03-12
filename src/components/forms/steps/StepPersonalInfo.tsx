@@ -34,10 +34,13 @@ export default function StepPersonalInfo({ data, updateData, onNext }: Props) {
   return (
     <div>
       <h2 className="text-xl font-bold text-text-primary mb-1">
-        Personal Information
+        Start Your Secure Application
       </h2>
-      <p className="text-sm text-text-secondary mb-6">
-        Please provide your legal name as it appears on your ID.
+      <p className="text-sm text-text-secondary mb-2">
+        We use a &ldquo;soft pull&rdquo; to check your eligibility, which means zero impact on your credit score.
+      </p>
+      <p className="text-xs text-blue-600 bg-blue-50 rounded-lg px-3 py-2 mb-6">
+        Creek Lend is a California-based direct lender serving all 50 US states.
       </p>
 
       <div className="space-y-5">
@@ -137,7 +140,11 @@ export default function StepPersonalInfo({ data, updateData, onNext }: Props) {
         </div>
       </div>
 
-      <div className="mt-8 flex justify-end">
+      <div className="mt-8 flex items-center justify-end gap-3">
+        <span className="flex items-center gap-1 text-xs text-text-secondary">
+          <svg className="w-3.5 h-3.5 text-success" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" /></svg>
+          Your data is protected by bank-level security
+        </span>
         <button
           type="button"
           onClick={handleNext}

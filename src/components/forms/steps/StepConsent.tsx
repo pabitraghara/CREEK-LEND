@@ -164,30 +164,38 @@ export default function StepConsent({ data, updateData, onBack, onSubmit, isSubm
       {/* Jornaya/TrustedForm placeholder */}
       <input type="hidden" id="leadid_token" name="universal_leadid" value="" />
 
-      <div className="flex justify-between">
-        <button
-          type="button"
-          onClick={onBack}
-          className="text-text-secondary hover:text-text-primary font-medium px-6 py-3 transition-colors"
-          disabled={isSubmitting}
-        >
-          Back
-        </button>
-        <button
-          type="button"
-          onClick={handleSubmit}
-          disabled={isSubmitting}
-          className="bg-primary hover:bg-primary-dark text-white px-10 py-3 rounded-lg font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
-        >
-          {isSubmitting ? (
-            <>
-              <div className="animate-spin w-4 h-4 border-2 border-white border-t-transparent rounded-full" />
-              Submitting...
-            </>
-          ) : (
-            "Submit Application"
-          )}
-        </button>
+      <div>
+        <div className="flex items-center justify-end gap-3 mb-2">
+          <span className="flex items-center gap-1 text-xs text-text-secondary">
+            <svg className="w-3.5 h-3.5 text-success" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" /></svg>
+            Your data is protected by bank-level security
+          </span>
+        </div>
+        <div className="flex justify-between">
+          <button
+            type="button"
+            onClick={onBack}
+            className="text-text-secondary hover:text-text-primary font-medium px-6 py-3 transition-colors"
+            disabled={isSubmitting}
+          >
+            Back
+          </button>
+          <button
+            type="button"
+            onClick={handleSubmit}
+            disabled={isSubmitting}
+            className="bg-primary hover:bg-primary-dark text-white px-10 py-3 rounded-lg font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+          >
+            {isSubmitting ? (
+              <>
+                <div className="animate-spin w-4 h-4 border-2 border-white border-t-transparent rounded-full" />
+                Submitting...
+              </>
+            ) : (
+              "Submit Application"
+            )}
+          </button>
+        </div>
       </div>
     </div>
   );

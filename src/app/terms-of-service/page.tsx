@@ -40,7 +40,7 @@ export default function TermsOfServicePage() {
               <p>To use our lending services, you must:</p>
               <ul className="list-disc pl-6 space-y-2 mt-3">
                 <li>Be at least 18 years of age</li>
-                <li>Be a legal resident of the United States, Canada, or India</li>
+                <li>Be a legal resident of the United States</li>
                 <li>Have a valid government-issued identification</li>
                 <li>Have a verifiable source of income</li>
                 <li>Have a valid bank account capable of receiving ACH transfers</li>
@@ -102,7 +102,7 @@ export default function TermsOfServicePage() {
             <div>
               <h2 className="text-2xl font-bold text-text-primary mb-4">9. Governing Law</h2>
               <p>
-                These Terms shall be governed by and construed in accordance with the laws of the State of New York, United States, without regard to its conflict of law provisions. For Canadian residents, applicable Canadian federal and provincial laws shall also apply.
+                These Terms shall be governed by and construed in accordance with the laws of the State of California, United States, without regard to its conflict of law provisions.
               </p>
             </div>
 

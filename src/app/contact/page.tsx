@@ -93,7 +93,7 @@ export default function ContactPage() {
               </h3>
               <p className="text-primary font-medium">{BUSINESS_PHONE}</p>
               <p className="text-sm text-text-secondary mt-2">
-                Toll Free: Mon-Fri 6AM - 5PM PST
+                Mon&ndash;Fri: 8 AM &ndash; 5 PM PST
               </p>
             </div>
 
@@ -129,6 +129,9 @@ export default function ContactPage() {
                 {BUSINESS_ADDRESS.city}, {BUSINESS_ADDRESS.state}{" "}
                 {BUSINESS_ADDRESS.zip}
               </p>
+              <p className="text-xs text-primary font-medium mt-2">
+                California-Based Support
+              </p>
             </div>
           </div>
 
@@ -147,8 +150,8 @@ export default function ContactPage() {
             </h3>
             <div className="space-y-3 text-sm">
               {[
-                { day: "Monday - Friday", hours: "6:00 AM - 5:00 PM PST" },
-                { day: "Saturday", hours: "6:00 AM - 4:00 PM PST" },
+                { day: "Monday - Friday", hours: "8:00 AM - 5:00 PM PST" },
+                { day: "Saturday", hours: "Closed" },
                 { day: "Sunday", hours: "Closed" },
               ].map((schedule) => (
                 <div

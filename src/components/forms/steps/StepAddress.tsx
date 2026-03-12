@@ -3,7 +3,7 @@
 import { useState } from "react";
 import type { ApplicationData } from "../ApplicationWizard";
 import { addressSchema, extractFieldErrors } from "@/lib/validation";
-import { US_STATES, CA_PROVINCES, IN_STATES } from "@/lib/constants";
+import { US_STATES } from "@/lib/constants";
 
 interface Props {
   data: ApplicationData;
@@ -14,14 +14,6 @@ interface Props {
 
 export default function StepAddress({ data, updateData, onNext, onBack }: Props) {
   const [errors, setErrors] = useState<Record<string, string>>({});
-
-  const getStateOptions = () => {
-    switch (data.country) {
-      case "CA": return CA_PROVINCES;
-      case "IN": return IN_STATES;
-      default: return US_STATES;
-    }
-  };
 
   const handleNext = () => {
     const result = addressSchema.safeParse({
@@ -51,27 +43,6 @@ export default function StepAddress({ data, updateData, onNext, onBack }: Props)
       </p>
 
       <div className="space-y-5">
-        <div>
-          <label htmlFor="country" className="block text-sm font-medium text-text-primary mb-1.5">
-            Country *
-          </label>
-          <select
-            id="country"
-            value={data.country}
-            onChange={(e) =>
-              updateData({
-                country: e.target.value as "US" | "CA" | "IN",
-                state: "",
-              })
-            }
-            className="w-full px-4 py-3 border border-surface-dark rounded-lg focus:border-primary transition-colors"
-          >
-            <option value="US">United States</option>
-            <option value="CA">Canada</option>
-            <option value="IN">India</option>
-          </select>
-        </div>
-
         <div>
           <label htmlFor="streetAddress" className="block text-sm font-medium text-text-primary mb-1.5">
             Street Address *
@@ -112,7 +83,7 @@ export default function StepAddress({ data, updateData, onNext, onBack }: Props)
           </div>
           <div>
             <label htmlFor="state" className="block text-sm font-medium text-text-primary mb-1.5">
-              {data.country === "CA" ? "Province *" : "State *"}
+              State *
             </label>
             <select
               id="state"
@@ -122,8 +93,8 @@ export default function StepAddress({ data, updateData, onNext, onBack }: Props)
                 errors.state ? "border-error" : "border-surface-dark focus:border-primary"
               }`}
             >
-              <option value="">Select {data.country === "CA" ? "province" : "state"}</option>
-              {getStateOptions().map((s) => (
+              <option value="">Select state</option>
+              {US_STATES.map((s) => (
                 <option key={s.value} value={s.value}>
                   {s.label}
                 </option>
@@ -137,7 +108,7 @@ export default function StepAddress({ data, updateData, onNext, onBack }: Props)
 
         <div className="sm:w-1/2">
           <label htmlFor="zipCode" className="block text-sm font-medium text-text-primary mb-1.5">
-            {data.country === "CA" ? "Postal Code *" : data.country === "IN" ? "PIN Code *" : "ZIP Code *"}
+            ZIP Code *
           </label>
           <input
             type="text"
@@ -147,7 +118,7 @@ export default function StepAddress({ data, updateData, onNext, onBack }: Props)
             className={`w-full px-4 py-3 border rounded-lg transition-colors ${
               errors.zipCode ? "border-error" : "border-surface-dark focus:border-primary"
             }`}
-            placeholder={data.country === "CA" ? "A1A 1A1" : data.country === "IN" ? "110001" : "10001"}
+            placeholder="10001"
           />
           {errors.zipCode && (
             <p className="text-error text-xs mt-1">{errors.zipCode}</p>
@@ -155,13 +126,21 @@ export default function StepAddress({ data, updateData, onNext, onBack }: Props)
         </div>
       </div>
 
-      <div className="mt-8 flex justify-between">
-        <button type="button" onClick={onBack} className="text-text-secondary hover:text-text-primary font-medium px-6 py-3 transition-colors">
-          Back
-        </button>
-        <button type="button" onClick={handleNext} className="bg-primary hover:bg-primary-dark text-white px-8 py-3 rounded-lg font-semibold transition-colors">
-          Continue
-        </button>
+      <div className="mt-8">
+        <div className="flex items-center justify-end gap-3 mb-2">
+          <span className="flex items-center gap-1 text-xs text-text-secondary">
+            <svg className="w-3.5 h-3.5 text-success" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" /></svg>
+            Your data is protected by bank-level security
+          </span>
+        </div>
+        <div className="flex justify-between">
+          <button type="button" onClick={onBack} className="text-text-secondary hover:text-text-primary font-medium px-6 py-3 transition-colors">
+            Back
+          </button>
+          <button type="button" onClick={handleNext} className="bg-primary hover:bg-primary-dark text-white px-8 py-3 rounded-lg font-semibold transition-colors">
+            Continue
+          </button>
+        </div>
       </div>
     </div>
   );

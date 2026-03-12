@@ -10,8 +10,6 @@ export function FinancialServiceSchema() {
       "Creek Lend is a direct personal loan provider offering competitive rates for debt consolidation, home improvement, medical expenses, and more.",
     areaServed: [
       { "@type": "Country", name: "United States" },
-      { "@type": "Country", name: "Canada" },
-      { "@type": "Country", name: "India" },
     ],
     serviceType: "Personal Loans",
     provider: {

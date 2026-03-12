@@ -72,10 +72,6 @@ export default function FairLendingPage() {
                   <strong>Home Mortgage Disclosure Act (HMDA):</strong> Requires
                   collection and reporting of lending data.
                 </li>
-                <li>
-                  <strong>Canadian Human Rights Act:</strong> Prohibits
-                  discrimination in the provision of services.
-                </li>
               </ul>
             </div>
 
@@ -122,9 +118,6 @@ export default function FairLendingPage() {
                 </li>
                 <li>U.S. Department of Housing and Urban Development (HUD)</li>
                 <li>Your state&apos;s Attorney General office</li>
-                <li>
-                  The Canadian Human Rights Commission (for Canadian residents)
-                </li>
                 <li>
                   {SITE_NAME} directly at{" "}
                   <a

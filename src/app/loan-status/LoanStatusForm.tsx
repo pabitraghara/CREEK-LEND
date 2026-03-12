@@ -183,11 +183,48 @@ export default function LoanStatusForm() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-primary hover:bg-primary-dark text-white py-3 rounded-lg font-semibold transition-colors duration-200 shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full bg-success hover:bg-success/90 text-white py-3 rounded-lg font-semibold transition-colors duration-200 shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {loading ? "Looking up..." : "Check Status"}
           </button>
         </form>
+
+        {/* Process Guarantee */}
+        <div className="mt-4 bg-surface rounded-lg p-4 border border-surface-dark">
+          <p className="text-sm text-text-secondary leading-relaxed">
+            <strong className="text-text-primary">Our PST Commitment:</strong>{" "}
+            Applications finalized by 2 PM PST are processed for next-day
+            funding. Our California team is currently reviewing applications from{" "}
+            {new Date().toLocaleDateString("en-US", {
+              year: "numeric",
+              month: "long",
+              day: "numeric",
+            })}
+            .
+          </p>
+        </div>
+
+        {/* Trust Signal Badges */}
+        <div className="mt-6 flex flex-col sm:flex-row items-center justify-center gap-4 text-xs text-text-secondary">
+          <span className="flex items-center gap-1.5">
+            <svg className="w-4 h-4 text-success" fill="currentColor" viewBox="0 0 20 20">
+              <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" />
+            </svg>
+            256-Bit SSL Encrypted Security
+          </span>
+          <span className="flex items-center gap-1.5">
+            <svg className="w-4 h-4 text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M3 21V3h18v18H3zm4-4h10M7 13h10M7 9h10" />
+            </svg>
+            Proudly Based in Los Angeles, California
+          </span>
+          <span className="flex items-center gap-1.5">
+            <svg className="w-4 h-4 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            Real-Time PST Processing
+          </span>
+        </div>
       </div>
 
       {/* Results */}

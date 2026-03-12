@@ -15,8 +15,8 @@ export const BUSINESS_ADDRESS = {
 };
 
 export const BUSINESS_HOURS = {
-  monday_friday: "6AM - 5PM PST",
-  saturday: "6AM - 4PM PST",
+  monday_friday: "8 AM - 5 PM PST",
+  saturday: "Closed",
   sunday: "Closed",
 };
 
@@ -25,10 +25,10 @@ export const BUSINESS_TOLL_FREE = "(747) 200-5228";
 export const LOAN_LIMITS = {
   minAmount: 2000,
   maxAmount: 10000,
-  minTerm: 12,
+  minTerm: 24,
   maxTerm: 60,
-  minAPR: 5.99,
-  maxAPR: 35.99,
+  minAPR: 10,
+  maxAPR: 10,
 };
 
 export const LOAN_PURPOSES = [
@@ -95,58 +95,7 @@ export const US_STATES = [
   { value: "DC", label: "District of Columbia" },
 ];
 
-export const CA_PROVINCES = [
-  { value: "AB", label: "Alberta" },
-  { value: "BC", label: "British Columbia" },
-  { value: "MB", label: "Manitoba" },
-  { value: "NB", label: "New Brunswick" },
-  { value: "NL", label: "Newfoundland and Labrador" },
-  { value: "NS", label: "Nova Scotia" },
-  { value: "NT", label: "Northwest Territories" },
-  { value: "NU", label: "Nunavut" },
-  { value: "ON", label: "Ontario" },
-  { value: "PE", label: "Prince Edward Island" },
-  { value: "QC", label: "Quebec" },
-  { value: "SK", label: "Saskatchewan" },
-  { value: "YT", label: "Yukon" },
-];
-
-export const IN_STATES = [
-  { value: "AN", label: "Andaman and Nicobar Islands" },
-  { value: "AP", label: "Andhra Pradesh" },
-  { value: "AR", label: "Arunachal Pradesh" },
-  { value: "AS", label: "Assam" },
-  { value: "BR", label: "Bihar" },
-  { value: "CH", label: "Chandigarh" },
-  { value: "CT", label: "Chhattisgarh" },
-  { value: "DL", label: "Delhi" },
-  { value: "GA", label: "Goa" },
-  { value: "GJ", label: "Gujarat" },
-  { value: "HR", label: "Haryana" },
-  { value: "HP", label: "Himachal Pradesh" },
-  { value: "JK", label: "Jammu and Kashmir" },
-  { value: "JH", label: "Jharkhand" },
-  { value: "KA", label: "Karnataka" },
-  { value: "KL", label: "Kerala" },
-  { value: "MP", label: "Madhya Pradesh" },
-  { value: "MH", label: "Maharashtra" },
-  { value: "MN", label: "Manipur" },
-  { value: "ML", label: "Meghalaya" },
-  { value: "MZ", label: "Mizoram" },
-  { value: "NL", label: "Nagaland" },
-  { value: "OR", label: "Odisha" },
-  { value: "PB", label: "Punjab" },
-  { value: "RJ", label: "Rajasthan" },
-  { value: "SK", label: "Sikkim" },
-  { value: "TN", label: "Tamil Nadu" },
-  { value: "TG", label: "Telangana" },
-  { value: "TR", label: "Tripura" },
-  { value: "UP", label: "Uttar Pradesh" },
-  { value: "UT", label: "Uttarakhand" },
-  { value: "WB", label: "West Bengal" },
-];
-
-export const ALLOWED_COUNTRIES = ["US", "CA", "IN"];
+export const ALLOWED_COUNTRIES = ["US"];
 
 export const EMPLOYMENT_STATUSES = [
   { value: "employed", label: "Employed" },
@@ -160,10 +109,7 @@ export const ACCOUNT_TYPES = [
   { value: "savings", label: "Savings" },
 ];
 
-export const IN_ACCOUNT_TYPES = [
-  { value: "savings", label: "Savings" },
-  { value: "checking", label: "Current" },
-];
+
 
 export const NAV_LINKS = [
   { href: "/", label: "Home" },

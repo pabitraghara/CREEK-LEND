@@ -1,67 +1,114 @@
 "use client";
 
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import Link from "next/link";
 import { FAQSchema } from "@/components/ui/JsonLd";
 import { SITE_NAME, LOAN_LIMITS } from "@/lib/constants";
 
-const faqs = [
+const faqs: { question: string; answer: ReactNode; plainAnswer: string }[] = [
   {
     question: "What is Creek Lend?",
-    answer: `${SITE_NAME} is a direct personal loan provider. We are not a marketplace or broker — we fund loans directly. This means faster decisions, competitive rates, and a streamlined process for borrowers in the United States, Canada, and India.`,
+    plainAnswer: `${SITE_NAME} is a California-based direct personal loan provider. We are not a marketplace or broker—we fund loans directly from our headquarters. This means faster decisions and a streamlined process for borrowers across the United States.`,
+    answer: (
+      <>
+        {SITE_NAME} is a California-based direct personal loan provider. We are
+        not a marketplace or broker—we fund loans directly from our
+        headquarters. This means faster decisions and a streamlined process for
+        borrowers across the <strong>United States</strong>.
+      </>
+    ),
   },
   {
     question: "How much can I borrow?",
-    answer: `Personal loan amounts range from $${LOAN_LIMITS.minAmount.toLocaleString()} to $${LOAN_LIMITS.maxAmount.toLocaleString()} with repayment terms from ${LOAN_LIMITS.minTerm} to ${LOAN_LIMITS.maxTerm} months. The amount you qualify for depends on your credit profile, income, and other factors.`,
+    plainAnswer: `Personal loan amounts range from $${LOAN_LIMITS.minAmount.toLocaleString()} to $${LOAN_LIMITS.maxAmount.toLocaleString()}. The specific amount you qualify for is based on your income and other financial factors.`,
+    answer: (
+      <>
+        Personal loan amounts range from{" "}
+        <strong>
+          ${LOAN_LIMITS.minAmount.toLocaleString()} to $
+          {LOAN_LIMITS.maxAmount.toLocaleString()}
+        </strong>
+        . The specific amount you qualify for is based on your income and other
+        financial factors.
+      </>
+    ),
   },
   {
     question: "What are the interest rates?",
-    answer: `APRs range from ${LOAN_LIMITS.minAPR}% to ${LOAN_LIMITS.maxAPR}%. Your specific rate is determined by your credit score, income, loan amount, and loan term. The lowest rates are reserved for borrowers with excellent credit.`,
+    plainAnswer: `We offer a fixed ${LOAN_LIMITS.minAPR}% APR for our personal loans. Unlike traditional lenders with fluctuating ranges, we provide one clear rate to simplify your borrowing experience.`,
+    answer: (
+      <>
+        We offer a <strong>fixed {LOAN_LIMITS.minAPR}% APR</strong> for our
+        personal loans. Unlike traditional lenders with fluctuating ranges, we
+        provide one clear rate to simplify your borrowing experience.
+      </>
+    ),
   },
   {
-    question: "Will checking my rate affect my credit score?",
-    answer:
-      "No. When you check your rate with us, we perform a soft credit inquiry that does not affect your credit score. A hard inquiry is only performed if you accept a loan offer and proceed with the full application.",
+    question: "How long do I have to repay my loan?",
+    plainAnswer: `We provide flexible repayment terms ranging from ${LOAN_LIMITS.minTerm} to ${LOAN_LIMITS.maxTerm} months. You can choose the term that best fits your monthly budget.`,
+    answer: (
+      <>
+        We provide flexible repayment terms ranging from{" "}
+        <strong>
+          {LOAN_LIMITS.minTerm} to {LOAN_LIMITS.maxTerm} months
+        </strong>
+        . You can choose the term that best fits your monthly budget.
+      </>
+    ),
   },
   {
     question: "How fast can I get my funds?",
-    answer:
-      "Most approved borrowers receive their funds as fast as the next business day after accepting their loan offer. Funds are deposited directly into your bank account via ACH transfer.",
-  },
-  {
-    question: "What can I use a personal loan for?",
-    answer:
-      "You can use a Creek Lend personal loan for debt consolidation, home improvement, medical expenses, auto expenses, business needs, education, and more. The funds are deposited directly to you with no restrictions on use.",
+    plainAnswer:
+      "Our team operates in Pacific Standard Time (PST). Most approved borrowers receive their funds as fast as the next business day after accepting their loan offer. Funds are deposited directly into your bank account via ACH transfer.",
+    answer: (
+      <>
+        Our team operates in <strong>Pacific Standard Time (PST)</strong>. Most
+        approved borrowers receive their funds as fast as the next business day
+        after accepting their loan offer. Funds are deposited directly into your
+        bank account via ACH transfer.
+      </>
+    ),
   },
   {
     question: "Are there any prepayment penalties?",
-    answer:
-      "No. You can pay off your loan early at any time with no prepayment penalties. We believe you should be rewarded, not penalized, for paying off your loan ahead of schedule.",
+    plainAnswer:
+      "No. You can pay off your loan early at any time with zero prepayment penalties. We believe you should be rewarded for achieving financial freedom ahead of schedule.",
+    answer: (
+      <>
+        No. You can pay off your loan early at any time with{" "}
+        <strong>zero prepayment penalties</strong>. We believe you should be
+        rewarded for achieving financial freedom ahead of schedule.
+      </>
+    ),
   },
   {
     question: "What are the eligibility requirements?",
-    answer:
-      "To qualify, you must be at least 18 years old, be a resident of the United States, Canada, or India, have a valid government-issued ID, have a verifiable source of income, and have a bank account for direct deposit.",
-  },
-  {
-    question: "Is my personal information secure?",
-    answer:
-      "Absolutely. We use bank-level AES-256 encryption to protect all sensitive data including SSNs and banking information. Our systems are regularly audited, and we never sell your personal information to third parties.",
+    plainAnswer:
+      "To qualify, you must be at least 18 years old, be a resident of the United States, have a valid government-issued ID, a verifiable source of income, and a bank account for direct deposit.",
+    answer: (
+      <>
+        To qualify, you must be at least 18 years old, be a{" "}
+        <strong>resident of the United States</strong>, have a valid
+        government-issued ID, a verifiable source of income, and a bank account
+        for direct deposit.
+      </>
+    ),
   },
   {
     question: "What fees does Creek Lend charge?",
-    answer:
-      "We charge an origination fee of 1-6% of the loan amount, which is deducted from the loan proceeds. There are no application fees, no annual fees, and no prepayment penalties. Late payment fees may apply if a payment is missed.",
-  },
-  {
-    question: "How do I make payments?",
-    answer:
-      "Payments are made via automatic ACH withdrawal from your bank account on your chosen payment date each month. You can also make additional payments at any time through your online account portal.",
-  },
-  {
-    question: "Can I apply if I have bad credit?",
-    answer:
-      "We consider applications from borrowers across the credit spectrum. While your credit score is a factor, we also consider your income, employment history, and overall financial picture. Borrowers with lower credit scores may qualify at higher rates.",
+    plainAnswer:
+      "We pride ourselves on transparency. There are no application fees, no annual fees, and no upfront costs. A standard origination fee applies, which is deducted from your loan proceeds at the time of funding.",
+    answer: (
+      <>
+        We pride ourselves on transparency. There are{" "}
+        <strong>
+          no application fees, no annual fees, and no upfront costs
+        </strong>
+        . A standard origination fee applies, which is deducted from your loan
+        proceeds at the time of funding.
+      </>
+    ),
   },
 ];
 
@@ -72,7 +119,7 @@ function FAQItem({
   onToggle,
 }: {
   question: string;
-  answer: string;
+  answer: ReactNode;
   isOpen: boolean;
   onToggle: () => void;
 }) {
@@ -116,7 +163,12 @@ export default function FAQPage() {
 
   return (
     <>
-      <FAQSchema faqs={faqs} />
+      <FAQSchema
+        faqs={faqs.map(({ question, plainAnswer }) => ({
+          question,
+          answer: plainAnswer,
+        }))}
+      />
 
       {/* Hero */}
       <section className="bg-gradient-to-br from-primary to-primary-dark text-white py-16 sm:py-20">
@@ -145,6 +197,65 @@ export default function FAQPage() {
                 }
               />
             ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center mb-7">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-6">
+          <div className="flex items-center justify-center gap-2 bg-surface rounded-lg py-3 px-4">
+            <svg
+              className="w-5 h-5 text-primary flex-shrink-0"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"
+              />
+            </svg>
+            <span className="text-xs font-medium text-text-secondary">
+              Secure 256-Bit SSL Encrypted
+            </span>
+          </div>
+          <div className="flex items-center justify-center gap-2 bg-surface rounded-lg py-3 px-4">
+            <svg
+              className="w-5 h-5 text-primary flex-shrink-0"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M3 21V5a2 2 0 012-2h6.5l1 1H21l-3 6 3 6h-8.5l-1-1H5a2 2 0 00-2 2z"
+              />
+            </svg>
+            <span className="text-xs font-medium text-text-secondary">
+              Proudly Based in California
+            </span>
+          </div>
+          <div className="flex items-center justify-center gap-2 bg-surface rounded-lg py-3 px-4">
+            <svg
+              className="w-5 h-5 text-primary flex-shrink-0"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"
+              />
+            </svg>
+            <span className="text-xs font-medium text-text-secondary">
+              $0 Upfront Application Fees
+            </span>
           </div>
         </div>
       </section>

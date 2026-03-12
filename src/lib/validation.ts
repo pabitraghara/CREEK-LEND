@@ -37,13 +37,7 @@ export const identificationSchema = z.object({
     .refine(
       (val) =>
         // US SSN: XXX-XX-XXXX
-        /^\d{3}-?\d{2}-?\d{4}$/.test(val) ||
-        // Canada SIN: XXX-XXX-XXX
-        /^\d{3}-?\d{3}-?\d{3}$/.test(val) ||
-        // India Aadhaar: 12 digits
-        /^\d{12}$/.test(val) ||
-        // India PAN: ABCDE1234F
-        /^[A-Z]{5}\d{4}[A-Z]$/i.test(val),
+        /^\d{3}-?\d{2}-?\d{4}$/.test(val),
       { message: "Please enter a valid identification number" }
     ),
   driverLicenseNumber: z
@@ -66,10 +60,10 @@ export const addressSchema = z.object({
   zipCode: z
     .string()
     .regex(
-      /^(\d{5}(-\d{4})?|[A-Za-z]\d[A-Za-z]\s?\d[A-Za-z]\d|\d{6})$/,
-      "Please enter a valid postal code"
+      /^\d{5}(-\d{4})?$/,
+      "Please enter a valid ZIP code"
     ),
-  country: z.enum(["US", "CA", "IN"]),
+  country: z.enum(["US"]),
 });
 
 export const employmentSchema = z.object({

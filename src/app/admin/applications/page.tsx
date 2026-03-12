@@ -32,7 +32,7 @@ const STATUS_COLORS: Record<string, string> = {
 };
 
 const STATUSES = ["all", "pending", "reviewing", "approved", "declined", "funded"];
-const COUNTRIES = ["all", "US", "CA", "IN"];
+const COUNTRIES = ["all", "US"];
 
 function formatCurrency(amount: number) {
   return new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 }).format(amount);

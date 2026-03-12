@@ -89,7 +89,7 @@ export default function DirectLenderDisclosurePage() {
                 Licensing
               </h2>
               <p>
-                {SITE_NAME} is licensed to lend in the states and provinces where it operates. Our NMLS number is XXXXXXX. You can verify our licensing status through the NMLS Consumer Access website. For Canadian operations, we are registered with applicable provincial regulatory bodies.
+                {SITE_NAME} is licensed to lend in the states where it operates. Our NMLS number is XXXXXXX. You can verify our licensing status through the NMLS Consumer Access website.
               </p>
             </div>
 
