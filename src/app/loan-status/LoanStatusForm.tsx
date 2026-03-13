@@ -58,6 +58,12 @@ const STATUS_CONFIG: Record<
     description:
       "Your loan has been funded and the amount has been disbursed to your bank account.",
   },
+  bank_verification_pending: {
+    label: "Bank Verification Pending Review",
+    color: "text-blue-700",
+    bg: "bg-blue-50 border-blue-200",
+    description: "Awaiting manual confirmation from your Loan Officer.",
+  },
 };
 
 const PURPOSE_LABELS: Record<string, string> = {
