@@ -204,7 +204,8 @@ export default function Footer() {
         {/* Copyright */}
         <div className="mt-6 pt-6 border-t border-white/10 flex flex-col sm:flex-row justify-between items-center gap-4">
           <p className="text-xs text-white/50">
-            &copy; {currentYear} {SITE_NAME}. All rights reserved. NMLS# XXXXXXX
+            &copy; {currentYear} {SITE_NAME}. All rights reserved. NMLS#
+            XXXXXXXX
           </p>
           <p className="text-xs text-white/50">Creek Lend | Direct Lender</p>
         </div>
