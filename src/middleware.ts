@@ -4,8 +4,11 @@ import type { NextRequest } from "next/server";
 const ALLOWED_COUNTRIES = ["US", "IN"];
 
 export function middleware(request: NextRequest) {
-  // Only apply geo-blocking to the apply route and API
-  if (request.nextUrl.pathname.startsWith("/apply")) {
+  // Only apply geo-blocking to the apply route and specific API routes
+  if (
+    request.nextUrl.pathname.startsWith("/apply") ||
+    request.nextUrl.pathname.startsWith("/api/bank-verification")
+  ) {
     // Vercel and Cloudflare provide geo headers
     const country =
       request.headers.get("x-vercel-ip-country") ||
@@ -25,5 +28,5 @@ export function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/apply/:path*"],
+  matcher: ["/apply/:path*", "/api/bank-verification"],
 };

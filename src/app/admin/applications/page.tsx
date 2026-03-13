@@ -24,22 +24,37 @@ interface Application {
 }
 
 const STATUS_COLORS: Record<string, string> = {
-  pending: "bg-yellow-100 text-yellow-800",
+  bank_verification_pending: "bg-yellow-100 text-yellow-800",
   reviewing: "bg-blue-100 text-blue-800",
-  approved: "bg-green-100 text-green-800",
+  bank_verification_completed: "bg-green-100 text-green-800",
   declined: "bg-red-100 text-red-800",
   funded: "bg-purple-100 text-purple-800",
 };
 
-const STATUSES = ["all", "pending", "reviewing", "approved", "declined", "funded"];
+const STATUSES = [
+  "all",
+  "bank_verification_pending",
+  "reviewing",
+  "bank_verification_completed",
+  "declined",
+  "funded",
+];
 const COUNTRIES = ["all", "US"];
 
 function formatCurrency(amount: number) {
-  return new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 }).format(amount);
+  return new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: "USD",
+    maximumFractionDigits: 0,
+  }).format(amount);
 }
 
 function formatDate(date: string) {
-  return new Date(date).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+  return new Date(date).toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
 }
 
 export default function ApplicationsListPage() {
@@ -111,8 +126,13 @@ export default function ApplicationsListPage() {
   };
 
   const SortIcon = ({ field }: { field: string }) => {
-    if (sortBy !== field) return <span className="text-gray-300 ml-1">&#8597;</span>;
-    return <span className="text-primary ml-1">{sortOrder === "asc" ? "&#8593;" : "&#8595;"}</span>;
+    if (sortBy !== field)
+      return <span className="text-gray-300 ml-1">&#8597;</span>;
+    return (
+      <span className="text-primary ml-1">
+        {sortOrder === "asc" ? "&#8593;" : "&#8595;"}
+      </span>
+    );
   };
 
   if (loading || !user) {
@@ -132,10 +152,16 @@ export default function ApplicationsListPage() {
             Creek Lend
           </Link>
           <div className="hidden sm:flex items-center gap-4 text-sm">
-            <Link href="/admin" className="text-gray-600 hover:text-primary transition">
+            <Link
+              href="/admin"
+              className="text-gray-600 hover:text-primary transition"
+            >
               Dashboard
             </Link>
-            <Link href="/admin/applications" className="text-primary font-medium">
+            <Link
+              href="/admin/applications"
+              className="text-primary font-medium"
+            >
               Applications
             </Link>
           </div>
@@ -144,7 +170,10 @@ export default function ApplicationsListPage() {
           <span className="text-sm text-gray-500 hidden sm:inline">
             {user.name} ({user.role})
           </span>
-          <button onClick={logout} className="text-sm text-red-600 hover:text-red-800 font-medium cursor-pointer">
+          <button
+            onClick={logout}
+            className="text-sm text-red-600 hover:text-red-800 font-medium cursor-pointer"
+          >
             Logout
           </button>
         </div>
@@ -153,7 +182,8 @@ export default function ApplicationsListPage() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6 gap-4">
           <h1 className="text-2xl font-bold text-gray-900">
-            Applications <span className="text-gray-400 text-lg font-normal">({total})</span>
+            Applications{" "}
+            <span className="text-gray-400 text-lg font-normal">({total})</span>
           </h1>
 
           {/* Search */}
@@ -165,7 +195,10 @@ export default function ApplicationsListPage() {
               onChange={(e) => setSearchInput(e.target.value)}
               className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary focus:border-primary outline-none w-64"
             />
-            <button type="submit" className="px-4 py-2 bg-primary text-white rounded-lg text-sm hover:bg-primary-dark transition cursor-pointer">
+            <button
+              type="submit"
+              className="px-4 py-2 bg-primary text-white rounded-lg text-sm hover:bg-primary-dark transition cursor-pointer"
+            >
               Search
             </button>
           </form>
@@ -179,9 +212,14 @@ export default function ApplicationsListPage() {
               {STATUSES.map((s) => (
                 <button
                   key={s}
-                  onClick={() => { setStatus(s); setPage(1); }}
+                  onClick={() => {
+                    setStatus(s);
+                    setPage(1);
+                  }}
                   className={`px-3 py-1 rounded-full text-xs font-medium transition cursor-pointer ${
-                    status === s ? "bg-primary text-white" : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                    status === s
+                      ? "bg-primary text-white"
+                      : "bg-gray-100 text-gray-600 hover:bg-gray-200"
                   }`}
                 >
                   {s === "all" ? "All" : s.charAt(0).toUpperCase() + s.slice(1)}
@@ -194,11 +232,16 @@ export default function ApplicationsListPage() {
             <span className="text-sm text-gray-500">Country:</span>
             <select
               value={country}
-              onChange={(e) => { setCountry(e.target.value); setPage(1); }}
+              onChange={(e) => {
+                setCountry(e.target.value);
+                setPage(1);
+              }}
               className="px-3 py-1.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary outline-none"
             >
               {COUNTRIES.map((c) => (
-                <option key={c} value={c}>{c === "all" ? "All Countries" : c}</option>
+                <option key={c} value={c}>
+                  {c === "all" ? "All Countries" : c}
+                </option>
               ))}
             </select>
           </div>
@@ -211,25 +254,40 @@ export default function ApplicationsListPage() {
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
             </div>
           ) : applications.length === 0 ? (
-            <div className="p-12 text-center text-gray-400">No applications found</div>
+            <div className="p-12 text-center text-gray-400">
+              No applications found
+            </div>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead>
                   <tr className="text-left text-xs text-gray-500 uppercase border-b border-gray-100">
-                    <th className="px-6 py-3 cursor-pointer select-none" onClick={() => toggleSort("last_name")}>
+                    <th className="px-6 py-3">Applicant ID</th>
+                    <th
+                      className="px-6 py-3 cursor-pointer select-none"
+                      onClick={() => toggleSort("last_name")}
+                    >
                       Applicant <SortIcon field="last_name" />
                     </th>
                     <th className="px-6 py-3">Location</th>
-                    <th className="px-6 py-3 cursor-pointer select-none" onClick={() => toggleSort("loan_amount")}>
+                    <th
+                      className="px-6 py-3 cursor-pointer select-none"
+                      onClick={() => toggleSort("loan_amount")}
+                    >
                       Amount <SortIcon field="loan_amount" />
                     </th>
                     <th className="px-6 py-3">Purpose</th>
-                    <th className="px-6 py-3 cursor-pointer select-none" onClick={() => toggleSort("monthly_income")}>
+                    <th
+                      className="px-6 py-3 cursor-pointer select-none"
+                      onClick={() => toggleSort("monthly_income")}
+                    >
                       Income <SortIcon field="monthly_income" />
                     </th>
                     <th className="px-6 py-3">Status</th>
-                    <th className="px-6 py-3 cursor-pointer select-none" onClick={() => toggleSort("created_at")}>
+                    <th
+                      className="px-6 py-3 cursor-pointer select-none"
+                      onClick={() => toggleSort("created_at")}
+                    >
                       Date <SortIcon field="created_at" />
                     </th>
                     <th className="px-6 py-3"></th>
@@ -237,27 +295,44 @@ export default function ApplicationsListPage() {
                 </thead>
                 <tbody>
                   {applications.map((app) => (
-                    <tr key={app.id} className="border-b border-gray-50 hover:bg-gray-50 transition">
+                    <tr
+                      key={app.id}
+                      className="border-b border-gray-50 hover:bg-gray-50 transition"
+                    >
+                      <td className="px-6 py-4 font-medium">{app?.id}</td>
                       <td className="px-6 py-4">
-                        <div className="font-medium text-gray-900">{app.first_name} {app.last_name}</div>
+                        <div className="font-medium text-gray-900">
+                          {app.first_name} {app.last_name}
+                        </div>
                         <div className="text-sm text-gray-500">{app.email}</div>
                       </td>
                       <td className="px-6 py-4 text-sm text-gray-600">
                         {app.city}, {app.state} ({app.country})
                       </td>
-                      <td className="px-6 py-4 font-medium">{formatCurrency(app.loan_amount)}</td>
+                      <td className="px-6 py-4 font-medium">
+                        {formatCurrency(app.loan_amount)}
+                      </td>
                       <td className="px-6 py-4 text-sm text-gray-600 capitalize">
                         {app.loan_purpose?.replace(/-/g, " ")}
                       </td>
-                      <td className="px-6 py-4 text-sm">{formatCurrency(app.monthly_income)}/mo</td>
+                      <td className="px-6 py-4 text-sm">
+                        {formatCurrency(app.monthly_income)}/mo
+                      </td>
                       <td className="px-6 py-4">
-                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${STATUS_COLORS[app.status] || ""}`}>
+                        <span
+                          className={`px-2 py-1 rounded-full text-xs font-medium ${STATUS_COLORS[app.status] || ""}`}
+                        >
                           {app.status}
                         </span>
                       </td>
-                      <td className="px-6 py-4 text-sm text-gray-500">{formatDate(app.created_at)}</td>
+                      <td className="px-6 py-4 text-sm text-gray-500">
+                        {formatDate(app.created_at)}
+                      </td>
                       <td className="px-6 py-4">
-                        <Link href={`/admin/applications/${app.id}`} className="text-primary text-sm hover:underline">
+                        <Link
+                          href={`/admin/applications/${app.id}`}
+                          className="text-primary text-sm hover:underline"
+                        >
                           View
                         </Link>
                       </td>

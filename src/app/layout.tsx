@@ -5,6 +5,7 @@ import { GoogleAnalytics, GoogleTagManager, GTMNoScript } from "@/components/ana
 import { MetaPixel } from "@/components/analytics/MetaPixel";
 import { FinancialServiceSchema } from "@/components/ui/JsonLd";
 import { SITE_NAME, SITE_URL, SITE_DESCRIPTION } from "@/lib/constants";
+import { Toaster } from "react-hot-toast";
 import "./globals.css";
 
 const inter = Inter({
@@ -81,6 +82,7 @@ export default function RootLayout({
         <GoogleTagManager />
         <GoogleAnalytics />
         <MetaPixel />
+        <Toaster position="top-center" toastOptions={{ duration: 4000 }} />
         <ConditionalLayout>{children}</ConditionalLayout>
       </body>
     </html>

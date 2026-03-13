@@ -35,11 +35,19 @@ const STATUS_COLORS: Record<string, string> = {
 };
 
 function formatCurrency(amount: number) {
-  return new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 }).format(amount);
+  return new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: "USD",
+    maximumFractionDigits: 0,
+  }).format(amount);
 }
 
 function formatDate(date: string) {
-  return new Date(date).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+  return new Date(date).toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
 }
 
 export default function AdminDashboard() {
@@ -61,7 +69,9 @@ export default function AdminDashboard() {
 
     Promise.all([
       adminFetch("/api/admin/stats").then((r) => r.json()),
-      adminFetch("/api/admin/applications?limit=5&sortBy=created_at&sortOrder=desc").then((r) => r.json()),
+      adminFetch(
+        "/api/admin/applications?limit=5&sortBy=created_at&sortOrder=desc",
+      ).then((r) => r.json()),
     ])
       .then(([statsData, appsData]) => {
         setStats(statsData.stats);
@@ -91,7 +101,10 @@ export default function AdminDashboard() {
             <Link href="/admin" className="text-primary font-medium">
               Dashboard
             </Link>
-            <Link href="/admin/applications" className="text-gray-600 hover:text-primary transition">
+            <Link
+              href="/admin/applications"
+              className="text-gray-600 hover:text-primary transition"
+            >
               Applications
             </Link>
           </div>
@@ -121,12 +134,36 @@ export default function AdminDashboard() {
             {/* Stats Grid */}
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-8">
               {[
-                { label: "Total", value: stats?.total ?? 0, color: "bg-gray-100" },
-                { label: "Pending", value: stats?.pending ?? 0, color: "bg-yellow-50" },
-                { label: "Reviewing", value: stats?.reviewing ?? 0, color: "bg-blue-50" },
-                { label: "Approved", value: stats?.approved ?? 0, color: "bg-green-50" },
-                { label: "Declined", value: stats?.declined ?? 0, color: "bg-red-50" },
-                { label: "Funded", value: stats?.funded ?? 0, color: "bg-purple-50" },
+                {
+                  label: "Total",
+                  value: stats?.total ?? 0,
+                  color: "bg-gray-100",
+                },
+                {
+                  label: " Bank Verification Pending",
+                  value: stats?.pending ?? 0,
+                  color: "bg-yellow-50",
+                },
+                {
+                  label: "Reviewing",
+                  value: stats?.reviewing ?? 0,
+                  color: "bg-blue-50",
+                },
+                {
+                  label: "Bank Verification Completed",
+                  value: stats?.approved ?? 0,
+                  color: "bg-green-50",
+                },
+                {
+                  label: "Declined",
+                  value: stats?.declined ?? 0,
+                  color: "bg-red-50",
+                },
+                {
+                  label: "Funded",
+                  value: stats?.funded ?? 0,
+                  color: "bg-purple-50",
+                },
               ].map((s) => (
                 <div key={s.label} className={`${s.color} rounded-xl p-4`}>
                   <p className="text-sm text-gray-500">{s.label}</p>
@@ -139,29 +176,41 @@ export default function AdminDashboard() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
               <div className="bg-white rounded-xl border border-gray-200 p-6">
                 <p className="text-sm text-gray-500">Total Loan Amount</p>
-                <p className="text-3xl font-bold text-primary">{formatCurrency(stats?.totalLoanAmount ?? 0)}</p>
+                <p className="text-3xl font-bold text-primary">
+                  {formatCurrency(stats?.totalLoanAmount ?? 0)}
+                </p>
               </div>
               <div className="bg-white rounded-xl border border-gray-200 p-6">
                 <p className="text-sm text-gray-500">Average Loan Amount</p>
-                <p className="text-3xl font-bold text-primary">{formatCurrency(stats?.averageLoanAmount ?? 0)}</p>
+                <p className="text-3xl font-bold text-primary">
+                  {formatCurrency(stats?.averageLoanAmount ?? 0)}
+                </p>
               </div>
             </div>
 
             {/* Recent Applications */}
             <div className="bg-white rounded-xl border border-gray-200">
               <div className="p-6 border-b border-gray-200 flex items-center justify-between">
-                <h2 className="text-lg font-semibold text-gray-900">Recent Applications</h2>
-                <Link href="/admin/applications" className="text-sm text-primary hover:underline">
+                <h2 className="text-lg font-semibold text-gray-900">
+                  Recent Applications
+                </h2>
+                <Link
+                  href="/admin/applications"
+                  className="text-sm text-primary hover:underline"
+                >
                   View All
                 </Link>
               </div>
               {recentApps.length === 0 ? (
-                <div className="p-12 text-center text-gray-400">No applications yet</div>
+                <div className="p-12 text-center text-gray-400">
+                  No applications yet
+                </div>
               ) : (
                 <div className="overflow-x-auto">
                   <table className="w-full">
                     <thead>
                       <tr className="text-left text-xs text-gray-500 uppercase border-b border-gray-100">
+                        <th className="px-6 py-3">Applicant ID</th>
                         <th className="px-6 py-3">Applicant</th>
                         <th className="px-6 py-3">Amount</th>
                         <th className="px-6 py-3">Status</th>
@@ -171,22 +220,37 @@ export default function AdminDashboard() {
                     </thead>
                     <tbody>
                       {recentApps.map((app) => (
-                        <tr key={app.id} className="border-b border-gray-50 hover:bg-gray-50">
+                        <tr
+                          key={app.id}
+                          className="border-b border-gray-50 hover:bg-gray-50"
+                        >
+                          <td className="px-6 py-4 font-medium">{app?.id}</td>
                           <td className="px-6 py-4">
                             <div className="font-medium text-gray-900">
                               {app.first_name} {app.last_name}
                             </div>
-                            <div className="text-sm text-gray-500">{app.email}</div>
+                            <div className="text-sm text-gray-500">
+                              {app.email}
+                            </div>
                           </td>
-                          <td className="px-6 py-4 font-medium">{formatCurrency(app.loan_amount)}</td>
+                          <td className="px-6 py-4 font-medium">
+                            {formatCurrency(app.loan_amount)}
+                          </td>
                           <td className="px-6 py-4">
-                            <span className={`px-2 py-1 rounded-full text-xs font-medium ${STATUS_COLORS[app.status] || ""}`}>
+                            <span
+                              className={`px-2 py-1 rounded-full text-xs font-medium ${STATUS_COLORS[app.status] || ""}`}
+                            >
                               {app.status}
                             </span>
                           </td>
-                          <td className="px-6 py-4 text-sm text-gray-500">{formatDate(app.created_at)}</td>
+                          <td className="px-6 py-4 text-sm text-gray-500">
+                            {formatDate(app.created_at)}
+                          </td>
                           <td className="px-6 py-4">
-                            <Link href={`/admin/applications/${app.id}`} className="text-primary text-sm hover:underline">
+                            <Link
+                              href={`/admin/applications/${app.id}`}
+                              className="text-primary text-sm hover:underline"
+                            >
                               View
                             </Link>
                           </td>
