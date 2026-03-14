@@ -16,7 +16,7 @@ export const personalInfoSchema = z.object({
     .string()
     .min(10, "Please enter a valid phone number")
     .regex(
-      /^\+?\d[\d\s().-]{8,}$/,
+      /^\(?\d{3}\)?\s?\d{3}[-.\s]?\d{4}$/,
       "Please enter a valid phone number"
     ),
   dateOfBirth: z.string().refine(

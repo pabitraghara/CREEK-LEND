@@ -110,11 +110,22 @@ export default function StepPersonalInfo({ data, updateData, onNext }: Props) {
             type="tel"
             id="phone"
             value={data.phone}
-            onChange={(e) => updateData({ phone: e.target.value })}
+            onChange={(e) => {
+              const digits = e.target.value.replace(/\D/g, "").slice(0, 10);
+              let formatted = digits;
+              if (digits.length > 6) {
+                formatted = `(${digits.slice(0, 3)}) ${digits.slice(3, 6)}-${digits.slice(6)}`;
+              } else if (digits.length > 3) {
+                formatted = `(${digits.slice(0, 3)}) ${digits.slice(3)}`;
+              } else if (digits.length > 0) {
+                formatted = `(${digits}`;
+              }
+              updateData({ phone: formatted });
+            }}
             className={`w-full px-4 py-3 border rounded-lg transition-colors ${
               errors.phone ? "border-error" : "border-surface-dark focus:border-primary"
             }`}
-            placeholder="(555) 123-4567"
+            placeholder="(444) 444-4444"
           />
           {errors.phone && (
             <p className="text-error text-xs mt-1">{errors.phone}</p>

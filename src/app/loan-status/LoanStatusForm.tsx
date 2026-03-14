@@ -64,6 +64,13 @@ const STATUS_CONFIG: Record<
     bg: "bg-blue-50 border-blue-200",
     description: "Awaiting manual confirmation from your Loan Officer.",
   },
+  pending_bank_verification: {
+    label: "Bank Verification Required",
+    color: "text-orange-700",
+    bg: "bg-orange-50 border-orange-200",
+    description:
+      "Please complete your bank verification to proceed with your loan application.",
+  },
 };
 
 const PURPOSE_LABELS: Record<string, string> = {
@@ -77,13 +84,11 @@ const PURPOSE_LABELS: Record<string, string> = {
 };
 
 function formatDate(dateStr: string): string {
-  return new Date(dateStr).toLocaleDateString("en-US", {
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
+  const d = new Date(dateStr);
+  const day = String(d.getDate()).padStart(2, "0");
+  const month = String(d.getMonth() + 1).padStart(2, "0");
+  const year = d.getFullYear();
+  return `${day}/${month}/${year}`;
 }
 
 function formatCurrency(amount: number): string {
@@ -276,6 +281,29 @@ export default function LoanStatusForm() {
               {statusInfo.description}
             </p>
           </div>
+
+          {/* Bank Verification CTA */}
+          {(loan.status === "bank_verification_pending" ||
+            loan.status === "pending_bank_verification" ||
+            loan.status === "reviewing") && (
+            <div className="bg-white rounded-2xl shadow-lg p-6 border border-surface-dark text-center">
+              <h3 className="text-lg font-bold text-text-primary mb-2">
+                Complete Bank Verification
+              </h3>
+              <p className="text-sm text-text-secondary mb-4">
+                To expedite your loan funding, please complete bank verification
+                using the secure link below.
+              </p>
+              <a
+                href="/verify-bank"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-block bg-primary hover:bg-primary-dark text-white font-semibold py-3 px-8 rounded-lg transition-colors shadow-md hover:shadow-lg"
+              >
+                Verify Your Bank Account
+              </a>
+            </div>
+          )}
 
           {/* Loan Details Card */}
           <div className="bg-white rounded-2xl shadow-lg p-8 border border-surface-dark">

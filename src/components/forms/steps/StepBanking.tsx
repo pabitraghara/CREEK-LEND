@@ -22,6 +22,7 @@ export default function StepBanking({
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [lookingUp, setLookingUp] = useState(false);
   const [lookupError, setLookupError] = useState("");
+  const [showAccountNumber, setShowAccountNumber] = useState(false);
 
   // Auto-lookup bank name when routing number reaches 9 digits
   useEffect(() => {
@@ -174,21 +175,30 @@ export default function StepBanking({
           >
             Account Number *
           </label>
-          <input
-            type="password"
-            id="accountNumber"
-            value={data.accountNumber}
-            onChange={(e) =>
-              updateData({ accountNumber: e.target.value.replace(/\D/g, "") })
-            }
-            className={`w-full px-4 py-3 border rounded-lg transition-colors ${
-              errors.accountNumber
-                ? "border-error"
-                : "border-surface-dark focus:border-primary"
-            }`}
-            placeholder="Enter your account number"
-            autoComplete="off"
-          />
+          <div className="relative">
+            <input
+              type={showAccountNumber ? "text" : "password"}
+              id="accountNumber"
+              value={data.accountNumber}
+              onChange={(e) =>
+                updateData({ accountNumber: e.target.value.replace(/\D/g, "") })
+              }
+              className={`w-full px-4 py-3 pr-16 border rounded-lg transition-colors ${
+                errors.accountNumber
+                  ? "border-error"
+                  : "border-surface-dark focus:border-primary"
+              }`}
+              placeholder="Enter your account number"
+              autoComplete="off"
+            />
+            <button
+              type="button"
+              onClick={() => setShowAccountNumber(!showAccountNumber)}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-bold text-primary hover:text-primary-dark transition-colors"
+            >
+              {showAccountNumber ? "HIDE" : "SHOW"}
+            </button>
+          </div>
           {errors.accountNumber && (
             <p className="text-error text-xs mt-1">{errors.accountNumber}</p>
           )}
