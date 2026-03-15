@@ -30,6 +30,7 @@ const STATUS_COLORS: Record<string, string> = {
   declined: "bg-red-100 text-red-800",
   funded: "bg-purple-100 text-purple-800",
   bank_verification_failed: "bg-red-100 text-red-800",
+  bank_verification_in_progress: "bg-indigo-100 text-indigo-800",
 };
 
 const STATUSES = [
@@ -40,6 +41,7 @@ const STATUSES = [
   "declined",
   "funded",
   "bank_verification_failed",
+  "bank_verification_in_progress",
 ];
 const COUNTRIES = ["all", "US"];
 

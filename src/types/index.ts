@@ -45,7 +45,7 @@ export interface LoanApplication {
   userAgent: string;
   leadId: string; // Jornaya/TrustedForm
   createdAt: string;
-  status: 'pending' | 'reviewing' | 'approved' | 'declined' | 'bank_verification_failed';
+  status: 'pending' | 'reviewing' | 'approved' | 'declined' | 'bank_verification_failed' | 'bank_verification_in_progress';
 }
 
 export interface FormStep {

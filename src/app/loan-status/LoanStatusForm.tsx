@@ -78,6 +78,13 @@ const STATUS_CONFIG: Record<
     description:
       "Your bank verification was unsuccessful. Please re-submit your bank details or contact our support team for assistance.",
   },
+  bank_verification_in_progress: {
+    label: "Bank Verification In Progress",
+    color: "text-indigo-700",
+    bg: "bg-indigo-50 border-indigo-200",
+    description:
+      "Your bank verification is currently being processed. Please allow some time for the verification to complete.",
+  },
 };
 
 const PURPOSE_LABELS: Record<string, string> = {

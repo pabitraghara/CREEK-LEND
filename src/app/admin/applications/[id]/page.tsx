@@ -85,6 +85,7 @@ const STATUS_COLORS: Record<string, string> = {
   declined: "bg-red-100 text-red-800 border-red-200",
   funded: "bg-purple-100 text-purple-800 border-purple-200",
   bank_verification_failed: "bg-red-100 text-red-800 border-red-200",
+  bank_verification_in_progress: "bg-indigo-100 text-indigo-800 border-indigo-200",
 };
 
 const ALL_STATUSES = [
@@ -94,6 +95,7 @@ const ALL_STATUSES = [
   "declined",
   "funded",
   "bank_verification_failed",
+  "bank_verification_in_progress",
 ];
 
 function formatCurrency(amount: number) {
