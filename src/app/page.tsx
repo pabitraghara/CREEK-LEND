@@ -27,7 +27,7 @@ export default function HomePage() {
                   prefetch={false}
                   className="bg-secondary hover:bg-secondary-light text-primary-dark px-8 py-4 rounded-lg font-bold text-lg text-center transition-all duration-200 shadow-lg hover:shadow-xl"
                 >
-                  Check Your Rate
+                  Get Started Now
                 </Link>
                 <Link
                   href="/how-it-works"
@@ -438,7 +438,7 @@ export default function HomePage() {
               href="/apply"
               className="bg-secondary hover:bg-secondary-light text-primary-dark px-10 py-4 rounded-lg font-bold text-lg transition-all duration-200 shadow-lg hover:shadow-xl inline-block"
             >
-              Check Your Rate — No Credit Impact
+              Get Started Now — No Credit Impact
             </Link>
           </div>
         </div>

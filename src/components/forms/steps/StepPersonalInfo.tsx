@@ -137,10 +137,21 @@ export default function StepPersonalInfo({ data, updateData, onNext }: Props) {
             Date of Birth *
           </label>
           <input
-            type="date"
+            type="text"
             id="dateOfBirth"
             value={data.dateOfBirth}
-            onChange={(e) => updateData({ dateOfBirth: e.target.value })}
+            onChange={(e) => {
+              const digits = e.target.value.replace(/\D/g, "").slice(0, 8);
+              let formatted = digits;
+              if (digits.length > 4) {
+                formatted = `${digits.slice(0, 2)}/${digits.slice(2, 4)}/${digits.slice(4)}`;
+              } else if (digits.length > 2) {
+                formatted = `${digits.slice(0, 2)}/${digits.slice(2)}`;
+              }
+              updateData({ dateOfBirth: formatted });
+            }}
+            placeholder="MM/DD/YYYY"
+            maxLength={10}
             className={`w-full px-4 py-3 border rounded-lg transition-colors ${
               errors.dateOfBirth ? "border-error" : "border-surface-dark focus:border-primary"
             }`}

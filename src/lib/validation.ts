@@ -19,15 +19,22 @@ export const personalInfoSchema = z.object({
       /^\(?\d{3}\)?\s?\d{3}[-.\s]?\d{4}$/,
       "Please enter a valid phone number"
     ),
-  dateOfBirth: z.string().refine(
-    (dob) => {
-      const date = new Date(dob);
-      const now = new Date();
-      const age = now.getFullYear() - date.getFullYear();
-      return age >= 18 && age <= 100;
-    },
-    { message: "You must be at least 18 years old" }
-  ),
+  dateOfBirth: z
+    .string()
+    .regex(/^\d{2}\/\d{2}\/\d{4}$/, "Please enter date as MM/DD/YYYY")
+    .refine(
+      (dob) => {
+        const [month, day, year] = dob.split("/").map(Number);
+        const date = new Date(year, month - 1, day);
+        if (date.getMonth() !== month - 1 || date.getDate() !== day) return false;
+        const now = new Date();
+        const age = now.getFullYear() - date.getFullYear();
+        const monthDiff = now.getMonth() - date.getMonth();
+        const actualAge = monthDiff < 0 || (monthDiff === 0 && now.getDate() < date.getDate()) ? age - 1 : age;
+        return actualAge >= 18 && actualAge <= 100;
+      },
+      { message: "You must be at least 18 years old" }
+    ),
 });
 
 export const identificationSchema = z.object({

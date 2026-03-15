@@ -72,6 +72,9 @@ export default function ApplicationsListPage() {
   const [country, setCountry] = useState("all");
   const [search, setSearch] = useState("");
   const [searchInput, setSearchInput] = useState("");
+  const [filterDate, setFilterDate] = useState(
+    new Date().toISOString().split("T")[0],
+  );
   const [sortBy, setSortBy] = useState("created_at");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
   const [dataLoading, setDataLoading] = useState(true);
@@ -93,6 +96,9 @@ export default function ApplicationsListPage() {
     if (status !== "all") params.set("status", status);
     if (country !== "all") params.set("country", country);
     if (search) params.set("search", search);
+    if (!searchInput) {
+      if (filterDate) params.set("date", filterDate);
+    }
 
     try {
       const res = await adminFetch(`/api/admin/applications?${params}`);
@@ -105,7 +111,17 @@ export default function ApplicationsListPage() {
     } finally {
       setDataLoading(false);
     }
-  }, [user, page, status, country, search, sortBy, sortOrder, adminFetch]);
+  }, [
+    user,
+    page,
+    status,
+    country,
+    search,
+    filterDate,
+    sortBy,
+    sortOrder,
+    adminFetch,
+  ]);
 
   useEffect(() => {
     fetchApplications();
@@ -132,7 +148,7 @@ export default function ApplicationsListPage() {
       return <span className="text-gray-300 ml-1">&#8597;</span>;
     return (
       <span className="text-primary ml-1">
-        {sortOrder === "asc" ? "&#8593;" : "&#8595;"}
+        {sortOrder === "asc" ? "↑" : "↓"}
       </span>
     );
   };
@@ -192,7 +208,7 @@ export default function ApplicationsListPage() {
           <form onSubmit={handleSearch} className="flex gap-2">
             <input
               type="text"
-              placeholder="Search name or email..."
+              placeholder="Search by name, email, or ID"
               value={searchInput}
               onChange={(e) => setSearchInput(e.target.value)}
               className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary focus:border-primary outline-none w-64"
@@ -228,6 +244,30 @@ export default function ApplicationsListPage() {
                 </button>
               ))}
             </div>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <span className="text-sm text-gray-500">Date:</span>
+            <input
+              type="date"
+              value={filterDate}
+              onChange={(e) => {
+                setFilterDate(e.target.value);
+                setPage(1);
+              }}
+              className="px-3 py-1.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary outline-none"
+            />
+            {filterDate !== new Date().toISOString().split("T")[0] && (
+              <button
+                onClick={() => {
+                  setFilterDate(new Date().toISOString().split("T")[0]);
+                  setPage(1);
+                }}
+                className="text-xs text-primary hover:underline cursor-pointer"
+              >
+                Today
+              </button>
+            )}
           </div>
 
           <div className="flex items-center gap-2">
@@ -287,7 +327,7 @@ export default function ApplicationsListPage() {
                     </th>
                     <th className="px-6 py-3">Status</th>
                     <th
-                      className="px-6 py-3 cursor-pointer select-none"
+                      className="px-6 py-3 cursor-pointer select-none  flex items-center gap-2"
                       onClick={() => toggleSort("created_at")}
                     >
                       Date <SortIcon field="created_at" />

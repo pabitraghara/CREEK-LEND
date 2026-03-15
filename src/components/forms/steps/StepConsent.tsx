@@ -55,7 +55,15 @@ export default function StepConsent({ data, updateData, onBack, onSubmit, isSubm
             <span className="text-text-secondary">Phone</span>
             <span className="text-text-primary font-medium">{data.phone}</span>
             <span className="text-text-secondary">DOB</span>
-            <span className="text-text-primary font-medium">{data.dateOfBirth}</span>
+            <span className="text-text-primary font-medium">
+              {data.dateOfBirth
+                ? new Date(data.dateOfBirth).toLocaleDateString("en-US", {
+                    month: "2-digit",
+                    day: "2-digit",
+                    year: "numeric",
+                  })
+                : ""}
+            </span>
           </div>
         </div>
 
