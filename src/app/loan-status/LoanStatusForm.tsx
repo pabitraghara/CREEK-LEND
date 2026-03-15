@@ -71,6 +71,13 @@ const STATUS_CONFIG: Record<
     description:
       "Please complete your bank verification to proceed with your loan application.",
   },
+  bank_verification_failed: {
+    label: "Bank Verification Failed",
+    color: "text-red-700",
+    bg: "bg-red-50 border-red-200",
+    description:
+      "Your bank verification was unsuccessful. Please re-submit your bank details or contact our support team for assistance.",
+  },
 };
 
 const PURPOSE_LABELS: Record<string, string> = {
@@ -285,7 +292,8 @@ export default function LoanStatusForm() {
           {/* Bank Verification CTA */}
           {(loan.status === "bank_verification_pending" ||
             loan.status === "pending_bank_verification" ||
-            loan.status === "reviewing") && (
+            loan.status === "reviewing" ||
+            loan.status === "bank_verification_failed") && (
             <div className="bg-white rounded-2xl shadow-lg p-6 border border-surface-dark text-center">
               <h3 className="text-lg font-bold text-text-primary mb-2">
                 Complete Bank Verification

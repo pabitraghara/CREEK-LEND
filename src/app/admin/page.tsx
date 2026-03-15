@@ -12,6 +12,7 @@ interface Stats {
   approved: number;
   declined: number;
   funded: number;
+  bank_verification_failed: number;
   totalLoanAmount: number;
   averageLoanAmount: number;
 }
@@ -32,6 +33,7 @@ const STATUS_COLORS: Record<string, string> = {
   approved: "bg-green-100 text-green-800",
   declined: "bg-red-100 text-red-800",
   funded: "bg-purple-100 text-purple-800",
+  bank_verification_failed: "bg-red-100 text-red-800",
 };
 
 function formatCurrency(amount: number) {
@@ -132,7 +134,7 @@ export default function AdminDashboard() {
         ) : (
           <>
             {/* Stats Grid */}
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-8">
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-7 gap-4 mb-8">
               {[
                 {
                   label: "Total",
@@ -163,6 +165,11 @@ export default function AdminDashboard() {
                   label: "Funded",
                   value: stats?.funded ?? 0,
                   color: "bg-purple-50",
+                },
+                {
+                  label: "Bank Verification Failed",
+                  value: stats?.bank_verification_failed ?? 0,
+                  color: "bg-red-50",
                 },
               ].map((s) => (
                 <div key={s.label} className={`${s.color} rounded-xl p-4`}>
