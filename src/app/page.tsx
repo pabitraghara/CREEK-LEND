@@ -27,7 +27,7 @@ export default function HomePage() {
                   prefetch={false}
                   className="bg-secondary hover:bg-secondary-light text-primary-dark px-8 py-4 rounded-lg font-bold text-lg text-center transition-all duration-200 shadow-lg hover:shadow-xl"
                 >
-                  Get Started Now
+                  Get Started
                 </Link>
                 <Link
                   href="/how-it-works"
