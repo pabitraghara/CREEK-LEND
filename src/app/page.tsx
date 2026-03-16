@@ -13,7 +13,7 @@ export default function HomePage() {
               <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold leading-tight">
                 $2,000 to $10,000.
                 <span className="block text-secondary mt-2">
-                  Fixed 10% Rate. Funded Tomorrow.
+                  Fixed 10% APR. Funded Tomorrow.
                 </span>
               </h1>
               <p className="mt-6 text-lg sm:text-xl text-white/80 leading-relaxed max-w-lg">
