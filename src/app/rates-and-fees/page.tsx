@@ -45,9 +45,7 @@ export default function RatesAndFeesPage() {
             </div>
             <div className="bg-white rounded-xl p-8 shadow-md border border-surface-dark text-center">
               <p className="text-4xl font-bold text-primary">Flexible</p>
-              <p className="text-text-secondary mt-2">
-                Terms: 24–60 Months
-              </p>
+              <p className="text-text-secondary mt-2">Terms: 24–60 Months</p>
             </div>
           </div>
 
@@ -80,7 +78,10 @@ export default function RatesAndFeesPage() {
                     amount: "None (Pay off early to save)",
                   },
                   { fee: "Application Fee", amount: "$0" },
-                  { fee: "Repayment Options", amount: "24 to 60 Months" },
+                  {
+                    fee: "Repayment Options",
+                    amount: "Fixed 24 to 60 Month Terms",
+                  },
                 ].map((item) => (
                   <tr key={item.fee}>
                     <td className="px-6 py-4 text-sm text-text-primary font-medium">
@@ -100,9 +101,13 @@ export default function RatesAndFeesPage() {
             Transparent Rates Nationwide (All 50 US States)
           </h2>
           <p className="text-text-secondary mb-6">
-            Creek Lend provides a consistent 10% flat-fee regardless of your
+            Creek Lend provides a consistent fixed 10% APR regardless of your
             state. We believe geography shouldn&apos;t dictate your cost of
             capital.
+          </p>
+          <p className="text-xs text-text-secondary mb-6 italic">
+            Availability of specific loan terms may vary based on
+            state-specific regulations.
           </p>
           <div className="bg-white rounded-xl shadow-md border border-surface-dark overflow-hidden mb-12">
             <div className="overflow-x-auto">
@@ -154,38 +159,40 @@ export default function RatesAndFeesPage() {
               Finally, Math You Can Understand.
             </h2>
             <p className="text-text-secondary mb-6">
-              Most lenders use compounding interest that grows over time. Creek
-              Lend uses a one-time 10% fee. Whether you pay it back over 24
-              months or 60 months, the total cost of your loan never changes.
+              Most lenders hide behind confusing compound interest formulas.
+              Creek Lend keeps it simple with a fixed 10% APR so you always know
+              exactly what you&apos;ll pay each month.
             </p>
             <ul className="space-y-3">
               <li className="flex items-start space-x-3">
                 <span className="text-primary font-bold mt-0.5">&#10003;</span>
                 <span className="text-text-primary">
-                  Borrow $5,000: Repay <strong>$5,500</strong> total.
+                  Borrow $2,000: Repay just <strong>$92.29/mo</strong> for 24
+                  months.
                 </span>
               </li>
               <li className="flex items-start space-x-3">
                 <span className="text-primary font-bold mt-0.5">&#10003;</span>
                 <span className="text-text-primary">
-                  Borrow $10,000: Repay <strong>$11,000</strong> total.
+                  Borrow $5,000: Repay just <strong>$106.24/mo</strong> for 60
+                  months.
                 </span>
               </li>
               <li className="flex items-start space-x-3">
                 <span className="text-primary font-bold mt-0.5">&#10003;</span>
                 <span className="text-text-primary font-medium">
-                  No interest on interest. No surprises.
+                  No hidden maintenance or service fees.
                 </span>
               </li>
             </ul>
             <div className="mt-8 bg-white rounded-lg p-6 shadow-sm border border-surface-dark">
               <p className="text-sm text-text-secondary mb-2">
-                60-month payment example
+                Monthly payment example
               </p>
               <p className="text-text-primary">
-                $5,000 loan = $5,500 total ={" "}
+                $5,000 loan at 10% APR for 60 months ={" "}
                 <span className="text-3xl font-bold text-primary">
-                  ~$91/mo
+                  $106.24/mo
                 </span>
               </p>
               <p className="text-xs text-text-secondary mt-1">
@@ -258,11 +265,10 @@ export default function RatesAndFeesPage() {
               Pricing Disclosure
             </h3>
             <p>
-              Creek Lend does not charge upfront fees. While federal law requires
-              the disclosure of an Annual Percentage Rate (APR)—which varies
-              between 3.8% and 9.5% based on your chosen 24–60 month term—our
-              actual cost is a fixed 10% flat fee. All loans are subject to PST
-              business hours for processing and approval.
+              Creek Lend offers a fixed 10% Annual Percentage Rate (APR) on all
+              personal loans. We do not charge upfront fees, application fees,
+              or origination fees. Your cost of capital is transparent and fixed
+              for the life of the loan.
             </p>
           </div>
         </div>
@@ -275,8 +281,8 @@ export default function RatesAndFeesPage() {
             See Your Personalized Rate
           </h2>
           <p className="mt-4 text-white/80 text-lg">
-            Your actual rate depends on your credit profile. Check your rate
-            now — it won&apos;t affect your credit score.
+            Your actual rate depends on your credit profile. Check your rate now
+            — it won&apos;t affect your credit score.
           </p>
           <Link
             href="/apply"

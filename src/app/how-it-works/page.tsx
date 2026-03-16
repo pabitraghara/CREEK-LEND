@@ -3,9 +3,9 @@ import Link from "next/link";
 import { BreadcrumbSchema } from "@/components/ui/JsonLd";
 
 export const metadata: Metadata = {
-  title: "How It Works — Simple 3-Step Loan Process | Flat 10% Fee",
+  title: "How It Works — Simple 3-Step Loan Process | Fixed 10% Rate",
   description:
-    "Get a personal loan in 3 simple steps: check your rate with no credit impact, choose your terms with a flat 10% fee, and get funded in 24 hours. Built in California.",
+    "Get a personal loan in 3 simple steps: check your rate with no credit impact, choose your terms with a Fixed 10% Rate, and get funded in 24 hours. Built in California.",
   alternates: { canonical: "/how-it-works" },
 };
 
@@ -27,7 +27,7 @@ export default function HowItWorksPage() {
           </h1>
           <p className="mt-4 text-lg text-white/80 max-w-2xl mx-auto">
             Getting a loan shouldn&apos;t feel like a math test. We&apos;ve
-            replaced complex interest with a flat 10% fee and flexible 24–60
+            replaced complex interest with a Fixed 10% Rate and flexible 24–60
             month terms. Here is our 3-step PST-speed process.
           </p>
         </div>
@@ -58,10 +58,22 @@ export default function HowItWorksPage() {
                 </p>
                 <ul className="space-y-3">
                   {[
-                    <><strong>Zero Impact</strong> on your credit score for the initial offer</>,
-                    <><strong>$0 Upfront Fees</strong>&mdash;No application or processing costs</>,
-                    <><strong>PST Speed:</strong> Our California team reviews applications in real-time</>,
-                    <><strong>100% Online</strong>&mdash;No paperwork, no faxing, no hassle</>,
+                    <>
+                      <strong>Zero Impact</strong> on your credit score for the
+                      initial offer
+                    </>,
+                    <>
+                      <strong>$0 Upfront Fees</strong>&mdash;No application or
+                      processing costs
+                    </>,
+                    <>
+                      <strong>PST Speed:</strong> Our California team reviews
+                      applications in real-time
+                    </>,
+                    <>
+                      <strong>100% Online</strong>&mdash;No paperwork, no
+                      faxing, no hassle
+                    </>,
                   ].map((item, i) => (
                     <li
                       key={i}
@@ -121,17 +133,28 @@ export default function HowItWorksPage() {
                   Choose Your Terms
                 </h2>
                 <p className="text-text-secondary leading-relaxed mb-6">
-                  Once approved, we don&apos;t give you a
-                  &ldquo;range.&rdquo; We give you a flat 10% fee. You decide
-                  how long you need to pay it back&mdash;anywhere from 24 to 60
-                  months.
+                  Once approved, we don&apos;t give you a &ldquo;range.&rdquo;
+                  We give you a Fixed 10% Rate. You decide how long you need to
+                  pay it back&mdash;anywhere from 24 to 60 months.
                 </p>
                 <ul className="space-y-3">
                   {[
-                    <><strong>The Flat 10% Rule:</strong> Borrow $5,000, pay back $5,500. Total.</>,
-                    <><strong>Flexible Repayment:</strong> Choose a term from 24 to 60 months to fit your budget</>,
-                    <><strong>No Compound Interest:</strong> Your total repayment amount never grows</>,
-                    <><strong>$0 Origination Fees:</strong> The amount you&rsquo;re approved for is the amount you get</>,
+                    <>
+                      <strong>Fixed Rate Guarantee:</strong> Borrow $5,000, pay
+                      back $5,500. Total.
+                    </>,
+                    <>
+                      <strong>Flexible Repayment:</strong> Choose a term from 24
+                      to 60 months to fit your budget
+                    </>,
+                    <>
+                      <strong>No Hidden Fees or Balloon Payments:</strong> Your
+                      total repayment amount never grows
+                    </>,
+                    <>
+                      <strong>$0 Origination Fees:</strong> The amount
+                      you&rsquo;re approved for is the amount you get
+                    </>,
                   ].map((item, i) => (
                     <li
                       key={i}
@@ -191,16 +214,28 @@ export default function HowItWorksPage() {
                   Funded in 24 Hours
                 </h2>
                 <p className="text-text-secondary leading-relaxed mb-6">
-                  Accept your offer and the funds are dispatched directly to your
-                  US bank account. We move at California speed to get you the
-                  relief you need.
+                  Accept your offer and the funds are dispatched directly to
+                  your US bank account. We move at California speed to get you
+                  the relief you need.
                 </p>
                 <ul className="space-y-3">
                   {[
-                    <><strong>Direct Deposit</strong> to any US-based bank account</>,
-                    <><strong>Next-Day Funding:</strong> Finalize by 2 PM PST to receive funds the next business day</>,
-                    <><strong>No Prepayment Penalty:</strong> Pay it back early at any time and save</>,
-                    <><strong>Local Support:</strong> Our California-based team is here to help during PST hours</>,
+                    <>
+                      <strong>Direct Deposit</strong> to any US-based bank
+                      account
+                    </>,
+                    <>
+                      <strong>Next-Day Funding:</strong> Finalize by 2 PM PST to
+                      receive funds the next business day
+                    </>,
+                    <>
+                      <strong>No Prepayment Penalty:</strong> Pay it back early
+                      at any time and save
+                    </>,
+                    <>
+                      <strong>Local Support:</strong> Our California-based team
+                      is here to help during PST hours
+                    </>,
                   ].map((item, i) => (
                     <li
                       key={i}

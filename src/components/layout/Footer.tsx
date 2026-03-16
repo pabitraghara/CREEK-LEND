@@ -130,6 +130,28 @@ export default function Footer() {
                 </svg>
                 <span>Mon&ndash;Fri: 8 AM &ndash; 5 PM PST</span>
               </li>
+              <li className="flex items-start space-x-2">
+                <svg
+                  className="w-5 h-5 mt-0.5 text-secondary flex-shrink-0"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
+                  />
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
+                  />
+                </svg>
+                <span>Los Angeles, California</span>
+              </li>
             </ul>
           </div>
         </div>
@@ -137,13 +159,12 @@ export default function Footer() {
         {/* APR Disclosure */}
         <div className="mt-8 pt-8 border-t border-white/10">
           <p className="text-xs text-white/50 leading-relaxed">
-            <strong>APR Disclosure:</strong> Creek Lend offers a fixed 10% APR
-            on all personal loans. Loan amounts range from $
-            {LOAN_LIMITS.minAmount.toLocaleString()} to $
+            Creek Lend offers a fixed 10% APR on all personal loans. Loan
+            amounts range from ${LOAN_LIMITS.minAmount.toLocaleString()} to $
             {LOAN_LIMITS.maxAmount.toLocaleString()} with terms from{" "}
             {LOAN_LIMITS.minTerm} to {LOAN_LIMITS.maxTerm} months. Creek Lend is
             a California-based direct lender. All loans are subject to credit
-            profile and income verification.
+            profile and account verification.
           </p>
         </div>
 
@@ -204,8 +225,8 @@ export default function Footer() {
         {/* Copyright */}
         <div className="mt-6 pt-6 border-t border-white/10 flex flex-col sm:flex-row justify-between items-center gap-4">
           <p className="text-xs text-white/50">
-            &copy; {currentYear} {SITE_NAME}. All rights reserved. NMLS#
-            XXXXXXXX
+            &copy; {currentYear} {SITE_NAME}. All rights reserved. Creek
+            Lend is a California-based Direct Lender.
           </p>
           <p className="text-xs text-white/50">Creek Lend | Direct Lender</p>
         </div>

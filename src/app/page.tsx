@@ -13,13 +13,13 @@ export default function HomePage() {
               <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold leading-tight">
                 $2,000 to $10,000.
                 <span className="block text-secondary mt-2">
-                  10% Flat Rate. Funded Tomorrow.
+                  Fixed 10% Rate. Funded Tomorrow.
                 </span>
               </h1>
               <p className="mt-6 text-lg sm:text-xl text-white/80 leading-relaxed max-w-lg">
-                No compound interest. No upfront fees. No credit score barriers.
-                Experience the relief of a California-based lender that speaks
-                your language.
+                No hidden fees or balloon payments. No upfront fees. No credit
+                score barriers. Experience the relief of a California-based
+                lender that speaks your language.
               </p>
               <div className="mt-8 flex flex-col sm:flex-row gap-4">
                 <Link
@@ -102,7 +102,7 @@ export default function HomePage() {
             </div>
             <div>
               <p className="text-3xl font-bold text-primary">10%</p>
-              <h3 className="text-sm text-text-secondary mt-1">Flat Rate</h3>
+              <h3 className="text-sm text-text-secondary mt-1">Fixed Rate</h3>
             </div>
             <div>
               <p className="text-3xl font-bold text-primary">24–60</p>
@@ -154,7 +154,7 @@ export default function HomePage() {
                 ),
                 title: "Radical Clarity",
                 description:
-                  "Forget APR ranges. We charge a one-time 10% fee. Borrow $5k, pay back $5.5k. No compounding debt traps.",
+                  "Transparent Rates: Borrow $2,000, pay back just $92.29 per month. No hidden fees or balloon payments.",
               },
               {
                 icon: (
@@ -234,7 +234,7 @@ export default function HomePage() {
               {
                 title: "Debt Consolidation",
                 description:
-                  "Combine multiple debts into one manageable monthly payment with a simple flat fee.",
+                  "Combine multiple debts into one manageable monthly payment with a fixed rate.",
                 href: "/apply?purpose=debt-consolidation&term=60",
               },
               {
@@ -321,9 +321,9 @@ export default function HomePage() {
               },
               {
                 step: "2",
-                title: "Review Your Offer",
+                title: "Verify Your Account",
                 description:
-                  "Receive a personalized loan offer with clear terms, your flat fee, and monthly payment details.",
+                  "Receive a personalized loan offer with clear terms, your interest rate, and monthly payment details.",
               },
               {
                 step: "3",
