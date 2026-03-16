@@ -4,6 +4,8 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useAdminAuth, useAdminApi } from "@/lib/admin-auth";
+import Image from "next/image";
+import { SITE_NAME } from "@/lib/constants";
 
 interface Stats {
   total: number;
@@ -98,7 +100,13 @@ export default function AdminDashboard() {
       <nav className="bg-white border-b border-gray-200 px-6 py-3 flex items-center justify-between sticky top-0 z-10">
         <div className="flex items-center gap-6">
           <Link href="/admin" className="text-xl font-bold text-primary">
-            Creek Lend
+            <Image
+              src="/logo-dark.png"
+              alt={SITE_NAME}
+              width={160}
+              height={40}
+              priority
+            />
           </Link>
           <div className="hidden sm:flex items-center gap-4 text-sm">
             <Link href="/admin" className="text-primary font-medium">

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import {
   SITE_NAME,
   BUSINESS_EMAIL,
@@ -17,11 +18,13 @@ export default function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           {/* Company Info */}
           <div>
-            <div className="flex items-center space-x-2 mb-4">
-              <div className="w-10 h-10 bg-white/10 rounded-lg flex items-center justify-center">
-                <span className="text-secondary font-bold text-lg">CL</span>
-              </div>
-              <span className="text-xl font-bold">{SITE_NAME}</span>
+            <div className="mb-4">
+              <Image
+                src="/logo-white.png"
+                alt={SITE_NAME}
+                width={160}
+                height={40}
+              />
             </div>
             <p className="text-white/70 text-sm leading-relaxed">
               Creek Lend is a direct lender providing personal loans to

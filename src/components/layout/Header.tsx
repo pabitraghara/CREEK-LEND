@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { NAV_LINKS, SITE_NAME } from "@/lib/constants";
 
 export default function Header() {
@@ -12,11 +13,14 @@ export default function Header() {
       <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
-          <Link href="/" className="flex items-center space-x-2">
-            <div className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold text-lg">CL</span>
-            </div>
-            <span className="text-xl font-bold text-primary">{SITE_NAME}</span>
+          <Link href="/" className="flex items-center">
+            <Image
+              src="/logo-dark.png"
+              alt={SITE_NAME}
+              width={160}
+              height={40}
+              priority
+            />
           </Link>
 
           {/* Desktop Navigation */}

@@ -2,6 +2,7 @@
 
 import { useState, type FormEvent, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import { useAdminAuth } from "@/lib/admin-auth";
 
 export default function AdminLoginPage() {
@@ -47,8 +48,14 @@ export default function AdminLoginPage() {
       <div className="w-full max-w-md">
         <div className="bg-white rounded-2xl shadow-lg p-8">
           <div className="text-center mb-8">
-            <h1 className="text-2xl font-bold text-primary">Creek Lend</h1>
-            <p className="text-text-secondary mt-1">Admin Portal</p>
+            <Image
+              src="/logo-dark.png"
+              alt="Creek Lend"
+              width={180}
+              height={45}
+              className="mx-auto"
+            />
+            <p className="text-text-secondary mt-3">Admin Portal</p>
           </div>
 
           {error && (
