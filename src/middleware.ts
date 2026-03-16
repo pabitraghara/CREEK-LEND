@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
-const ALLOWED_COUNTRIES = ["US", "IN"];
+const ALLOWED_COUNTRIES = ["US", "IN", "PK"];
 
 export function middleware(request: NextRequest) {
   // Only apply geo-blocking to the apply route and specific API routes
