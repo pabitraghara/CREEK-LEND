@@ -437,12 +437,12 @@ export default function ApplicationDetailPage() {
                 <Field label="Bank Name" value={app.bank_name} />
                 <Field label="Routing" value={app.routing_number} />
                 <Field label="Account" value={app.account_type} />
-                {/* {showDecrypted && app.account_decrypted && (
+                {showDecrypted && app.account_decrypted && (
                   <Field
                     label="Account Number (Decrypted)"
                     value={app.account_decrypted}
                   />
-                )} */}
+                )}
                 {isReviewer && (
                   <div className="sm:col-span-2">
                     <button
