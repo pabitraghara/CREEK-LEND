@@ -5,6 +5,12 @@ import type { ApplicationData } from "../ApplicationWizard";
 import { LOAN_PURPOSES, LOAN_LIMITS } from "@/lib/constants";
 import { formatCurrency } from "@/lib/utils";
 
+function calcMonthlyPayment(amount: number, termMonths: number): number {
+  const monthlyRate = 0.10 / 12;
+  const factor = Math.pow(1 + monthlyRate, termMonths);
+  return (amount * (monthlyRate * factor)) / (factor - 1);
+}
+
 interface Props {
   data: ApplicationData;
   updateData: (updates: Partial<ApplicationData>) => void;
@@ -148,6 +154,22 @@ export default function StepLoanDetails({
             Choose a repayment term from 24 to 60 months to fit your lifestyle.
           </p>
         </div>
+
+        {data.loanTerm > 0 && (
+          <div className="bg-primary/5 border border-primary/20 rounded-xl px-5 py-4 flex items-center justify-between">
+            <div>
+              <p className="text-xs font-semibold text-text-secondary uppercase tracking-wide mb-0.5">
+                Estimated Monthly Payment
+              </p>
+              <p className="text-xs text-text-secondary">
+                Based on {formatCurrency(data.loanAmount)} at 10% APR over {data.loanTerm} months
+              </p>
+            </div>
+            <p className="text-2xl font-extrabold text-primary">
+              {formatCurrency(calcMonthlyPayment(data.loanAmount, data.loanTerm))}
+            </p>
+          </div>
+        )}
       </div>
 
       <div className="mt-8">

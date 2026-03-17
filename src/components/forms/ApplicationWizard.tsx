@@ -54,6 +54,8 @@ export interface ApplicationData {
   utmMedium: string;
   utmCampaign: string;
   utmContent: string;
+  // Referral
+  assistedByLoanAgent: string;
 }
 
 const STEPS = [
@@ -99,6 +101,7 @@ const initialData: ApplicationData = {
   utmMedium: "",
   utmCampaign: "",
   utmContent: "",
+  assistedByLoanAgent: "",
 };
 
 export default function ApplicationWizard() {

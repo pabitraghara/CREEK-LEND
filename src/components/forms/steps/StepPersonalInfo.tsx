@@ -160,6 +160,20 @@ export default function StepPersonalInfo({ data, updateData, onNext }: Props) {
             <p className="text-error text-xs mt-1">{errors.dateOfBirth}</p>
           )}
         </div>
+
+        <div>
+          <label htmlFor="assistedByLoanAgent" className="block text-sm font-medium text-text-primary mb-1.5">
+            Assisted By Loan Agent <span className="text-text-secondary font-normal">(Optional)</span>
+          </label>
+          <input
+            type="text"
+            id="assistedByLoanAgent"
+            value={data.assistedByLoanAgent}
+            onChange={(e) => updateData({ assistedByLoanAgent: e.target.value })}
+            className="w-full px-4 py-3 border border-surface-dark focus:border-primary rounded-lg transition-colors"
+            placeholder="Enter loan agent's name if applicable"
+          />
+        </div>
       </div>
 
       <div className="mt-8 flex items-center justify-end gap-3">

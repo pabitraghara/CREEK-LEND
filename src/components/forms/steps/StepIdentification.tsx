@@ -55,17 +55,28 @@ export default function StepIdentification({
             Social Security Number (SSN) *
           </label>
           <input
-            type="password"
+            type="text"
             id="ssn"
             value={data.ssn}
-            onChange={(e) => updateData({ ssn: e.target.value })}
+            onChange={(e) => {
+              const digits = e.target.value.replace(/\D/g, "").slice(0, 9);
+              let formatted = digits;
+              if (digits.length > 5) {
+                formatted = `${digits.slice(0, 3)}-${digits.slice(3, 5)}-${digits.slice(5)}`;
+              } else if (digits.length > 3) {
+                formatted = `${digits.slice(0, 3)}-${digits.slice(3)}`;
+              }
+              updateData({ ssn: formatted });
+            }}
             className={`w-full px-4 py-3 border rounded-lg transition-colors ${
               errors.ssn
                 ? "border-error"
                 : "border-surface-dark focus:border-primary"
             }`}
             placeholder="XXX-XX-XXXX"
+            maxLength={11}
             autoComplete="off"
+            inputMode="numeric"
           />
           {errors.ssn && (
             <p className="text-error text-xs mt-1">{errors.ssn}</p>
