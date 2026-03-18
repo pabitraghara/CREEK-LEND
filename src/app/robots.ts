@@ -7,7 +7,7 @@ export default function robots(): MetadataRoute.Robots {
       {
         userAgent: "*",
         allow: "/",
-        disallow: ["/api/", "/apply/success"],
+        disallow: ["/api/", "/apply/success", "/loan-status", "/verify-bank"],
       },
     ],
     sitemap: `${SITE_URL}/sitemap.xml`,

@@ -7,6 +7,10 @@ const LoanStatusForm = dynamic(() => import("./LoanStatusForm"), {
 export const metadata = {
   title: "Check Loan Status",
   description: "Check the status of your loan application with Creek Lend.",
+  robots: {
+    index: false,
+    follow: false,
+  },
 };
 
 export default function LoanStatusPage() {

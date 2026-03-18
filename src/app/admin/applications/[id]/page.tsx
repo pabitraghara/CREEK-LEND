@@ -212,7 +212,9 @@ export default function ApplicationDetailPage() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error);
 
-      setSuccess(`Status updated to ${newStatus}`);
+      setSuccess(
+        `Status updated to ${newStatus.replace(/_/g, " ").replace(/\b\w/g, (l) => l.toUpperCase())}`,
+      );
       setApp((prev) => (prev ? { ...prev, status: newStatus } : prev));
 
       // Refresh audit log
@@ -317,7 +319,7 @@ export default function ApplicationDetailPage() {
                 <span
                   className={`px-4 py-2 rounded-full text-sm font-semibold border ${STATUS_COLORS[app.status] || ""}`}
                 >
-                  {app.status.toUpperCase()}
+                  {app.status.replace(/_/g, " ").toUpperCase()}
                 </span>
               </div>
 
@@ -334,13 +336,24 @@ export default function ApplicationDetailPage() {
               )}
 
               {/* Status Actions */}
-              {/* {isReviewer && (
+              {isReviewer && (
                 <div className="bg-white rounded-xl border border-gray-200 p-6">
                   <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-3">
                     Update Status
                   </h3>
                   <div className="flex flex-wrap gap-2">
-                    {ALL_STATUSES.filter((s) => s !== app.status).map((s) => (
+                    {ALL_STATUSES.filter((s) => {
+                      // If reviewer → only allow 2 statuses
+                      if (isReviewer) {
+                        return [
+                          "bank_verification_pending",
+                          "declined",
+                        ].includes(s);
+                      }
+
+                      // Otherwise → show all except current
+                      return s !== app.status;
+                    }).map((s) => (
                       <button
                         key={s}
                         onClick={() => handleStatusUpdate(s)}
@@ -349,12 +362,12 @@ export default function ApplicationDetailPage() {
                       >
                         {statusUpdating
                           ? "..."
-                          : s.charAt(0).toUpperCase() + s.slice(1)}
+                          : s.replace(/_/g, " ").replace(/\b\w/g, (l) => l.toUpperCase())}
                       </button>
                     ))}
                   </div>
                 </div>
-              )} */}
+              )}
 
               {/* Personal Info */}
               <Section title="Personal Information">
@@ -670,11 +683,11 @@ export default function ApplicationDetailPage() {
                   {app.email} &middot; {app.phone}
                 </p>
               </div>
-              <span
-                className={`px-4 py-2 rounded-full text-sm font-semibold border ${STATUS_COLORS[app.status] || ""}`}
-              >
-                {app.status.toUpperCase()}
-              </span>
+                <span
+                  className={`px-4 py-2 rounded-full text-sm font-semibold border ${STATUS_COLORS[app.status] || ""}`}
+                >
+                  {app.status.replace(/_/g, " ").toUpperCase()}
+                </span>
             </div>
 
             {/* Messages */}
@@ -705,7 +718,7 @@ export default function ApplicationDetailPage() {
                     >
                       {statusUpdating
                         ? "..."
-                        : s.charAt(0).toUpperCase() + s.slice(1)}
+                        : s.replace(/_/g, " ").replace(/\b\w/g, (l) => l.toUpperCase())}
                     </button>
                   ))}
                 </div>
