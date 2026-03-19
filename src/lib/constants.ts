@@ -33,11 +33,28 @@ export const LOAN_LIMITS = {
 
 export const LOAN_PURPOSES = [
   { value: "debt-consolidation", label: "Debt Consolidation" },
-  { value: "home-improvement", label: "Home Improvement" },
-  { value: "medical", label: "Medical Expenses" },
-  { value: "auto", label: "Auto Expenses" },
-  { value: "business", label: "Business" },
-  { value: "education", label: "Education" },
+  { value: "credit-card-refinancing", label: "Credit Card Refinancing" },
+  {
+    value: "home-improvement-renovation",
+    label: "Home Improvement & Renovation",
+  },
+  { value: "emergency-expenses", label: "Emergency Expenses" },
+  { value: "medical-bills", label: "Medical Bills" },
+  { value: "wedding-expenses", label: "Wedding Expenses" },
+  { value: "moving-relocation", label: "Moving & Relocation Costs" },
+  { value: "vacation-travel", label: "Vacation & Travel" },
+  { value: "vehicle-financing-repair", label: "Vehicle Financing or Repair" },
+  { value: "major-purchases", label: "Major Purchases" },
+  { value: "tax-debt", label: "Tax Debt" },
+  { value: "business-startup", label: "Business Start-up Costs" },
+  { value: "funeral-expenses", label: "Funeral & Burial Expenses" },
+  { value: "legal-fees", label: "Legal Fees" },
+  { value: "education-tutoring", label: "Education & Tutoring" },
+  { value: "adoption-fertility", label: "Adoption or Fertility Costs" },
+  { value: "credit-building", label: "Credit Building" },
+  { value: "home-down-payment", label: "Home Down Payment Gap" },
+  { value: "engagement-jewelry", label: "Engagement Rings & Jewelry" },
+  { value: "pet-emergency", label: "Pet Emergencies & Veterinary Care" },
   { value: "other", label: "Other" },
 ];
 
@@ -108,8 +125,6 @@ export const ACCOUNT_TYPES = [
   { value: "checking", label: "Checking" },
   { value: "savings", label: "Savings" },
 ];
-
-
 
 export const NAV_LINKS = [
   { href: "/", label: "Home" },
