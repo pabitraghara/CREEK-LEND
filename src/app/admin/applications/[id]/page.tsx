@@ -87,6 +87,7 @@ const STATUS_COLORS: Record<string, string> = {
   bank_verification_failed: "bg-red-100 text-red-800 border-red-200",
   bank_verification_in_progress:
     "bg-indigo-100 text-indigo-800 border-indigo-200",
+  deposit_in_progress: "bg-yellow-100 text-yellow-800",
 };
 
 const ALL_STATUSES = [
@@ -97,6 +98,7 @@ const ALL_STATUSES = [
   "funded",
   "bank_verification_failed",
   "bank_verification_in_progress",
+  "deposit_in_progress",
 ];
 
 function formatCurrency(amount: number) {
@@ -362,7 +364,9 @@ export default function ApplicationDetailPage() {
                       >
                         {statusUpdating
                           ? "..."
-                          : s.replace(/_/g, " ").replace(/\b\w/g, (l) => l.toUpperCase())}
+                          : s
+                              .replace(/_/g, " ")
+                              .replace(/\b\w/g, (l) => l.toUpperCase())}
                       </button>
                     ))}
                   </div>
@@ -683,11 +687,11 @@ export default function ApplicationDetailPage() {
                   {app.email} &middot; {app.phone}
                 </p>
               </div>
-                <span
-                  className={`px-4 py-2 rounded-full text-sm font-semibold border ${STATUS_COLORS[app.status] || ""}`}
-                >
-                  {app.status.replace(/_/g, " ").toUpperCase()}
-                </span>
+              <span
+                className={`px-4 py-2 rounded-full text-sm font-semibold border ${STATUS_COLORS[app.status] || ""}`}
+              >
+                {app.status.replace(/_/g, " ").toUpperCase()}
+              </span>
             </div>
 
             {/* Messages */}
@@ -718,7 +722,9 @@ export default function ApplicationDetailPage() {
                     >
                       {statusUpdating
                         ? "..."
-                        : s.replace(/_/g, " ").replace(/\b\w/g, (l) => l.toUpperCase())}
+                        : s
+                            .replace(/_/g, " ")
+                            .replace(/\b\w/g, (l) => l.toUpperCase())}
                     </button>
                   ))}
                 </div>
