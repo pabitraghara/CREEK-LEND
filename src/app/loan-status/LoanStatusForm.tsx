@@ -85,13 +85,13 @@ const STATUS_CONFIG: Record<
     description:
       "Your bank verification is currently being processed. Please allow some time for the verification to complete.",
   },
-  deposit_in_progress: {
-    label: "Verification Deposit In Process",
-    description:
-      "A micro-deposit has been initiated to your bank account. Please check your bank statement in 1-2 business days for the deposit amounts and come back to verify them.",
-    color: "text-yellow-700",
-    bg: "bg-yellow-50 border-yellow-200",
-  },
+  // deposit_in_progress: {
+  //   label: "Verification Deposit In Process",
+  //   description:
+  //     "A micro-deposit has been initiated to your bank account. Please check your bank statement in 1-2 business days for the deposit amounts and come back to verify them.",
+  //   color: "text-yellow-700",
+  //   bg: "bg-yellow-50 border-yellow-200",
+  // },
 };
 
 const PURPOSE_LABELS: Record<string, string> = {
