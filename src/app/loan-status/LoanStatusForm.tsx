@@ -59,10 +59,11 @@ const STATUS_CONFIG: Record<
       "Your loan has been funded and the amount has been disbursed to your bank account.",
   },
   bank_verification_pending: {
-    label: "Bank Verification Pending Review",
+    label: "Pending: Bank Verification",
     color: "text-blue-700",
     bg: "bg-blue-50 border-blue-200",
-    description: "Awaiting manual confirmation from your Loan Officer.",
+    description:
+      "To finish setting up your account, please verify your bank details. Log in securely using your online banking username and password.",
   },
   pending_bank_verification: {
     label: "Bank Verification Required",
@@ -179,7 +180,7 @@ export default function LoanStatusForm() {
               type="text"
               value={applicationId}
               onChange={(e) => setApplicationId(e.target.value)}
-              placeholder="e.g. a1b2c3d4-e5f6-7890-abcd-ef1234567890"
+              placeholder="e.g. 89876"
               className="w-full px-4 py-3 border border-surface-dark rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all text-sm"
             />
             <p className="mt-1 text-xs text-text-secondary">
@@ -314,11 +315,12 @@ export default function LoanStatusForm() {
                 Complete Bank Verification
               </h3>
               <p className="text-sm text-text-secondary mb-4">
-                To expedite your loan funding, please complete bank verification
-                using the secure link below.
+                To finish setting up your account, please verify your bank
+                details. Log in securely using your online banking username and
+                password.
               </p>
               <a
-                href="/verify-bank"
+                href={`/verify-bank?applicationId=${encodeURIComponent(loan.id)}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-block bg-primary hover:bg-primary-dark text-white font-semibold py-3 px-8 rounded-lg transition-colors shadow-md hover:shadow-lg"

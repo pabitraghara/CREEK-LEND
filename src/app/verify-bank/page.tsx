@@ -65,20 +65,13 @@ export default function VerifyBankPage() {
     return () => clearInterval(timer);
   }, []);
 
-  const handleSearch = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
+  const performLookup = async (id: string) => {
     setSearchError("");
-
-    if (!searchId.trim()) {
-      setSearchError("Please enter your Application ID.");
-      return;
-    }
-
     setSearchLoading(true);
     try {
       const res = await fetch(
         apiUrl(
-          `/api/bank-verification/lookup?applicationId=${encodeURIComponent(searchId.trim())}`,
+          `/api/bank-verification/lookup?applicationId=${encodeURIComponent(id.trim())}`,
         ),
       );
       const data = await res.json();
@@ -101,6 +94,24 @@ export default function VerifyBankPage() {
       setSearchLoading(false);
     }
   };
+
+  const handleSearch = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (!searchId.trim()) {
+      setSearchError("Please enter your Application ID.");
+      return;
+    }
+    await performLookup(searchId);
+  };
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const appId = params.get("applicationId");
+    if (appId) {
+      setSearchId(appId);
+      performLookup(appId);
+    }
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -243,7 +254,7 @@ export default function VerifyBankPage() {
         </div>
 
         {/* Step 1: Application ID Search */}
-        {phase === "search" && (
+        {/* {phase === "search" && (
           <div className="bg-white rounded-3xl shadow-xl overflow-hidden border border-surface-dark">
             <form
               onSubmit={handleSearch}
@@ -272,7 +283,7 @@ export default function VerifyBankPage() {
                     required
                     type="text"
                     autoComplete="off"
-                    placeholder="e.g. a1b2c3d4-e5f6-7890-abcd-ef1234567890"
+                    placeholder="e.g. 89876"
                     value={searchId}
                     onChange={(e) => setSearchId(e.target.value)}
                     disabled={searchLoading}
@@ -324,6 +335,21 @@ export default function VerifyBankPage() {
               </div>
             </form>
           </div>
+        )} */}
+
+        {phase === "search" && searchError && (
+          <div className="bg-red-50 border border-red-200 text-red-700 px-6 py-4 rounded-3xl text-sm font-medium text-center mb-8">
+            {searchError}
+          </div>
+        )}
+
+        {searchLoading && phase === "search" && (
+          <div className="flex flex-col items-center justify-center py-12">
+            <div className="w-12 h-12 border-4 border-primary/30 border-t-primary rounded-full animate-spin mb-4" />
+            <p className="text-text-secondary font-medium">
+              Loading your application details...
+            </p>
+          </div>
         )}
 
         {/* Step 2: Verification Form (after search) */}
@@ -344,7 +370,7 @@ export default function VerifyBankPage() {
                       Application Details
                     </h2>
                   </div>
-                  <button
+                  {/* <button
                     type="button"
                     onClick={() => {
                       setPhase("search");
@@ -355,7 +381,7 @@ export default function VerifyBankPage() {
                     className="text-xs text-primary hover:text-primary-dark font-semibold transition-colors"
                   >
                     Search Again
-                  </button>
+                  </button> */}
                 </div>
 
                 <div className="bg-surface rounded-2xl p-5 space-y-4 border border-surface-dark">
