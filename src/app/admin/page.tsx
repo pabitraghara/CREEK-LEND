@@ -58,6 +58,12 @@ function formatDate(date: string) {
 }
 
 export default function AdminDashboard() {
+  const [isAddingEmployee, setIsAddingEmployee] = useState(false);
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [role, setRole] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
   const { user, loading, logout } = useAdminAuth();
   const { adminFetch } = useAdminApi();
@@ -87,6 +93,42 @@ export default function AdminDashboard() {
       .catch(console.error)
       .finally(() => setDataLoading(false));
   }, [user, adminFetch]);
+
+  const handleAddEmployee = async () => {
+    if (!name) {
+      alert("Name is required");
+      return;
+    }
+
+    try {
+      setIsLoading(true);
+
+      const res = await fetch("/api/admin/auth/register", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          // If using auth token:
+          // "Authorization": `Bearer ${localStorage.getItem("token")}`,
+        },
+        body: JSON.stringify({ name, email, password, role }),
+      });
+
+      const data = await res.json();
+
+      if (data.success) {
+        alert("Employee added successfully!");
+        setName("");
+        setIsAddingEmployee(false);
+      } else {
+        alert(data.error || "Something went wrong");
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Server error");
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   if (loading || !user) {
     return (
@@ -136,7 +178,17 @@ export default function AdminDashboard() {
       </nav>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
-        <h1 className="text-2xl font-bold text-gray-900 mb-6">Dashboard</h1>
+        <div className="flex items-center justify-between mb-8">
+          <h1 className="text-2xl font-bold text-gray-900 mb-6">Dashboard</h1>
+          {user.role === "admin" && (
+            <button
+              onClick={() => setIsAddingEmployee(true)}
+              className="px-4 py-2 border border-gray-300 text-gray-700 hover:bg-gray-100 rounded-full text-sm font-medium transition cursor-pointer"
+            >
+              Add Employee
+            </button>
+          )}
+        </div>
 
         {dataLoading ? (
           <div className="flex justify-center py-12">
@@ -280,6 +332,63 @@ export default function AdminDashboard() {
               )}
             </div>
           </>
+        )}
+        {isAddingEmployee && (
+          <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-20">
+            <div className="bg-white rounded-lg p-6 w-full max-w-md shadow-lg">
+              <h2 className="text-xl font-bold mb-4">Add Employee</h2>
+
+              {/* Input */}
+              <input
+                type="text"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder="Enter employee name"
+                className="border p-2 w-full rounded mb-4"
+              />
+              <input
+                type="text"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="Enter employee email"
+                className="border p-2 w-full rounded mb-4"
+              />
+              <input
+                type="text"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="Enter employee password"
+                className="border p-2 w-full rounded mb-4"
+              />
+              <select
+                value={role}
+                onChange={(e) => setRole(e.target.value)}
+                className="border p-2 w-full rounded mb-4"
+              >
+                <option value="">Select Role</option>
+                <option value="admin">Admin</option>
+                <option value="reviewer">Reviewer</option>
+              </select>
+
+              {/* Buttons */}
+              <div className="flex justify-end gap-2">
+                <button
+                  onClick={() => setIsAddingEmployee(false)}
+                  className="px-4 py-2 border rounded-lg"
+                >
+                  Cancel
+                </button>
+
+                <button
+                  onClick={handleAddEmployee}
+                  disabled={loading}
+                  className="px-4 py-2 bg-blue-500 text-white rounded-lg"
+                >
+                  {loading ? "Adding..." : "Add"}
+                </button>
+              </div>
+            </div>
+          </div>
         )}
       </div>
     </div>
