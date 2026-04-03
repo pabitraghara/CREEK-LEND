@@ -1,9 +1,10 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import Link from "next/link";
 import { useAdminAuth, useAdminApi } from "@/lib/admin-auth";
+import { LuRefreshCcw } from "react-icons/lu";
 
 interface Application {
   id: string;
@@ -66,23 +67,79 @@ function formatDate(date: string) {
 
 export default function ApplicationsListPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const pathname = usePathname();
   const { user, loading, logout } = useAdminAuth();
   const { adminFetch } = useAdminApi();
 
   const [applications, setApplications] = useState<Application[]>([]);
   const [total, setTotal] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
-  const [page, setPage] = useState(1);
-  const [status, setStatus] = useState("all");
-  const [country, setCountry] = useState("all");
-  const [search, setSearch] = useState("");
-  const [searchInput, setSearchInput] = useState("");
-  const [filterDate, setFilterDate] = useState(
-    new Date().toISOString().split("T")[0],
+  const [page, setPage] = useState(Number(searchParams.get("page")) || 1);
+  const [status, setStatus] = useState(searchParams.get("status") || "all");
+  const [country, setCountry] = useState(searchParams.get("country") || "all");
+  const [search, setSearch] = useState(searchParams.get("search") || "");
+  const [searchInput, setSearchInput] = useState(
+    searchParams.get("search") || "",
   );
-  const [sortBy, setSortBy] = useState("created_at");
-  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
+  const [filterDate, setFilterDate] = useState(
+    searchParams.get("date") || new Date().toISOString().split("T")[0],
+  );
+  const [sortBy, setSortBy] = useState(
+    searchParams.get("sortBy") || "created_at",
+  );
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc">(
+    (searchParams.get("sortOrder") as "asc" | "desc") || "desc",
+  );
   const [dataLoading, setDataLoading] = useState(true);
+
+  const [resateUrl, setResateUrl] = useState(false);
+
+  // Sync URL with state
+  useEffect(() => {
+    const params = new URLSearchParams();
+    if (page > 1) params.set("page", String(page));
+    if (status !== "all") params.set("status", status);
+    if (country !== "all") params.set("country", country);
+    if (search) params.set("search", search);
+    if (filterDate) {
+      params.set("date", filterDate);
+    }
+    if (sortBy !== "created_at") params.set("sortBy", sortBy);
+    if (sortOrder !== "desc") params.set("sortOrder", sortOrder);
+
+    const query = params.toString();
+    const url = query ? `${pathname}?${query}` : pathname;
+    router.replace(url, { scroll: false });
+  }, [
+    page,
+    status,
+    country,
+    search,
+    filterDate,
+    sortBy,
+    sortOrder,
+    pathname,
+    router,
+  ]);
+
+  const handleReset = () => {
+    setResateUrl(true);
+    try {
+      setPage(1);
+      setStatus("all");
+      setCountry("all");
+      setSearch("");
+      setSearchInput("");
+      setFilterDate(new Date().toISOString().split("T")[0]);
+      setSortBy("created_at");
+      setSortOrder("desc");
+    } catch (error) {
+      console.error("Failed to reset filters:", error);
+    } finally {
+      setResateUrl(false);
+    }
+  };
 
   useEffect(() => {
     if (!loading && !user) router.replace("/admin/login");
@@ -210,21 +267,34 @@ export default function ApplicationsListPage() {
           </h1>
 
           {/* Search */}
-          <form onSubmit={handleSearch} className="flex gap-2">
-            <input
-              type="text"
-              placeholder="Search by name, email, or ID"
-              value={searchInput}
-              onChange={(e) => setSearchInput(e.target.value)}
-              className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary focus:border-primary outline-none w-64"
-            />
-            <button
-              type="submit"
-              className="px-4 py-2 bg-primary text-white rounded-lg text-sm hover:bg-primary-dark transition cursor-pointer"
-            >
-              Search
-            </button>
-          </form>
+          <div className="flex items-center gap-2 flex-wrap">
+            <form onSubmit={handleSearch} className="flex gap-2">
+              <input
+                type="text"
+                placeholder="Search by name, email, or ID"
+                value={searchInput}
+                onChange={(e) => setSearchInput(e.target.value)}
+                className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary focus:border-primary outline-none w-64"
+              />
+              <button
+                type="submit"
+                className="px-4 py-2 bg-primary text-white rounded-lg text-sm hover:bg-primary-dark transition cursor-pointer"
+              >
+                Search
+              </button>
+            </form>
+            <div>
+              <button
+                onClick={handleReset}
+                className="px-4 py-2 text-primary border border-primary rounded-lg text-sm  transition cursor-pointer "
+              >
+                <LuRefreshCcw
+                  size={20}
+                  className={`${resateUrl ? "animate-spin" : ""}`}
+                />
+              </button>
+            </div>
+          </div>
         </div>
 
         {/* Filters */}

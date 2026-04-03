@@ -293,12 +293,12 @@ export default function ApplicationDetailPage() {
 
         <div className="max-w-5xl mx-auto px-4 sm:px-6 py-8">
           {/* Back link */}
-          <Link
-            href="/admin/applications"
-            className="text-sm text-primary hover:underline mb-4 inline-block"
+          <button
+            onClick={() => router.back()}
+            className="text-sm text-primary hover:underline mb-4 inline-block cursor-pointer"
           >
             &larr; Back to Applications
-          </Link>
+          </button>
 
           {dataLoading ? (
             <div className="flex justify-center py-12">
@@ -662,12 +662,12 @@ export default function ApplicationDetailPage() {
 
       <div className="max-w-5xl mx-auto px-4 sm:px-6 py-8">
         {/* Back link */}
-        <Link
-          href="/admin/applications"
-          className="text-sm text-primary hover:underline mb-4 inline-block"
+        <button
+          onClick={() => router.back()}
+          className="text-sm text-primary hover:underline mb-4 inline-block cursor-pointer"
         >
           &larr; Back to Applications
-        </Link>
+        </button>
 
         {dataLoading ? (
           <div className="flex justify-center py-12">
