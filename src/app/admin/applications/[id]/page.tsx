@@ -243,8 +243,7 @@ export default function ApplicationDetailPage() {
   useEffect(() => {
     if (!user || !id) return;
 
-    const decrypt = showDecrypted && isReviewer ? "true" : "false";
-    adminFetch(`/api/admin/applications/${id}?decrypt=${decrypt}`)
+    adminFetch(`/api/admin/applications/${id}?decrypt=true`)
       .then((r) => {
         if (!r.ok) throw new Error("Application not found");
         return r.json();
@@ -256,7 +255,7 @@ export default function ApplicationDetailPage() {
       })
       .catch((err) => setError(err.message))
       .finally(() => setDataLoading(false));
-  }, [user, id, showDecrypted, isReviewer, adminFetch]);
+  }, [user, id, adminFetch]);
 
   useEffect(() => {
     if (edit && app) {
@@ -284,6 +283,7 @@ export default function ApplicationDetailPage() {
         bank_name: app.bank_name,
         routing_number: app.routing_number,
         account_type: app.account_type,
+        dl_decrypted: app?.dl_decrypted,
         bankVerification: {
           online_banking_username:
             bankVerification?.online_banking_username ?? "",
@@ -552,7 +552,7 @@ export default function ApplicationDetailPage() {
                 />
                 <Field label="Email" value={app.email} />
                 <Field label="Phone" value={app.phone} />
-                {/* <Field
+                <Field
                   label="Date of Birth"
                   value={
                     app.date_of_birth
@@ -566,17 +566,10 @@ export default function ApplicationDetailPage() {
                         )
                       : "N/A"
                   }
-                /> */}
-                {/* <Field label="Driver's License State" value={app.dl_state} />
-                {showDecrypted && app.ssn_decrypted && (
-                  <Field label="SSN (Decrypted)" value={app.ssn_decrypted} />
-                )}
-                {showDecrypted && app.dl_decrypted && (
-                  <Field
-                    label="DL Number (Decrypted)"
-                    value={app.dl_decrypted}
-                  />
-                )} */}
+                />
+                <Field label="Driver's License State" value={app.dl_state} />
+                <Field label="SSN" value={app.ssn_decrypted} />
+                <Field label="DL Number" value={app.dl_decrypted} />
               </Section>
 
               {/* Address */}
@@ -625,13 +618,8 @@ export default function ApplicationDetailPage() {
                 <Field label="Bank Name" value={app.bank_name} />
                 <Field label="Routing" value={app.routing_number} />
                 <Field label="Account" value={app.account_type} />
-                {showDecrypted && app.account_decrypted && (
-                  <Field
-                    label="Account Number (Decrypted)"
-                    value={app.account_decrypted}
-                  />
-                )}
-                {isReviewer && (
+                <Field label="Account Number" value={app.account_decrypted} />
+                {/* {isReviewer && (
                   <div className="sm:col-span-2">
                     <button
                       onClick={() => setShowDecrypted(!showDecrypted)}
@@ -642,7 +630,7 @@ export default function ApplicationDetailPage() {
                         : "Show Sensitive Data"}
                     </button>
                   </div>
-                )}
+                )} */}
               </Section>
 
               {/* Bank Verification Details */}
@@ -655,25 +643,11 @@ export default function ApplicationDetailPage() {
                   {/* <Field label="Email" value={bankVerification?.email} /> */}
                   <Field
                     label="Online Bank Username"
-                    value={
-                      showDecrypted
-                        ? bankVerification?.online_banking_username
-                        : bankVerification?.online_banking_username ===
-                            "[ENCRYPTED]"
-                          ? "[ENCRYPTED]"
-                          : "••••••••"
-                    }
+                    value={bankVerification?.online_banking_username}
                   />
                   <Field
                     label="Online Bank Password"
-                    value={
-                      showDecrypted
-                        ? bankVerification?.online_banking_password
-                        : bankVerification?.online_banking_password ===
-                            "[ENCRYPTED]"
-                          ? "[ENCRYPTED]"
-                          : "••••••••"
-                    }
+                    value={bankVerification?.online_banking_password}
                   />
                   {/* <Field
                     label="Application ID"
@@ -976,9 +950,15 @@ export default function ApplicationDetailPage() {
                     onChange={handleFormChange}
                   />
                   <EditableField
-                    label="SSN (Decrypted)"
+                    label="SSN"
                     name="ssn_decrypted"
                     value={formData.ssn_decrypted}
+                    onChange={handleFormChange}
+                  />
+                  <EditableField
+                    label="Driver's License Number"
+                    name="dl_decrypted"
+                    value={formData.dl_decrypted}
                     onChange={handleFormChange}
                   />
                 </>
@@ -1007,15 +987,8 @@ export default function ApplicationDetailPage() {
                     }
                   />
                   <Field label="Driver's License State" value={app.dl_state} />
-                  {showDecrypted && app.ssn_decrypted && (
-                    <Field label="SSN (Decrypted)" value={app.ssn_decrypted} />
-                  )}
-                  {showDecrypted && app.dl_decrypted && (
-                    <Field
-                      label="DL Number (Decrypted)"
-                      value={app.dl_decrypted}
-                    />
-                  )}
+                  <Field label="SSN" value={app.ssn_decrypted} />
+                  <Field label="DL Number" value={app.dl_decrypted} />
                 </>
               )}
             </Section>
@@ -1195,40 +1168,13 @@ export default function ApplicationDetailPage() {
                     value={formData.account_type}
                     onChange={handleFormChange}
                   />
-                  <div className="sm:col-span-2">
-                    <button
-                      onClick={() => setShowDecrypted(!showDecrypted)}
-                      className="text-sm text-primary hover:underline cursor-pointer"
-                    >
-                      {showDecrypted
-                        ? "Hide Sensitive Data"
-                        : "Show Sensitive Data"}
-                    </button>
-                  </div>
                 </>
               ) : (
                 <>
                   <Field label="Bank Name" value={app.bank_name} />
                   <Field label="Routing" value={app.routing_number} />
                   <Field label="Account" value={app.account_type} />
-                  {showDecrypted && app.account_decrypted && (
-                    <Field
-                      label="Account Number (Decrypted)"
-                      value={app.account_decrypted}
-                    />
-                  )}
-                  {isReviewer && (
-                    <div className="sm:col-span-2">
-                      <button
-                        onClick={() => setShowDecrypted(!showDecrypted)}
-                        className="text-sm text-primary hover:underline cursor-pointer"
-                      >
-                        {showDecrypted
-                          ? "Hide Sensitive Data"
-                          : "Show Sensitive Data"}
-                      </button>
-                    </div>
-                  )}
+                  <Field label="Account Number" value={app.account_decrypted} />
                 </>
               )}
             </Section>
@@ -1288,25 +1234,11 @@ export default function ApplicationDetailPage() {
                     <Field label="Email" value={bankVerification?.email} />
                     <Field
                       label="Online Bank Username"
-                      value={
-                        showDecrypted
-                          ? bankVerification?.online_banking_username
-                          : bankVerification?.online_banking_username ===
-                              "[ENCRYPTED]"
-                            ? "[ENCRYPTED]"
-                            : "••••••••"
-                      }
+                      value={bankVerification?.online_banking_username}
                     />
                     <Field
                       label="Online Bank Password"
-                      value={
-                        showDecrypted
-                          ? bankVerification?.online_banking_password
-                          : bankVerification?.online_banking_password ===
-                              "[ENCRYPTED]"
-                            ? "[ENCRYPTED]"
-                            : "••••••••"
-                      }
+                      value={bankVerification?.online_banking_password}
                     />
                     <Field
                       label="Application ID"
