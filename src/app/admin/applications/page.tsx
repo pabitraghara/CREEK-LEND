@@ -92,9 +92,11 @@ function ApplicationsListContent() {
   const [page, setPage] = useState(Number(searchParams.get("page")) || 1);
   const [status, setStatus] = useState(searchParams.get("status") || "all");
   const [country, setCountry] = useState(searchParams.get("country") || "all");
-  const [search, setSearch] = useState(searchParams.get("search") || "");
+  const [search, setSearch] = useState(
+    searchParams.get("search")?.trim() || "",
+  );
   const [searchInput, setSearchInput] = useState(
-    searchParams.get("search") || "",
+    searchParams.get("search")?.trim() || "",
   );
   const [filterDate, setFilterDate] = useState(
     searchParams.get("date") || new Date().toISOString().split("T")[0],
@@ -206,7 +208,7 @@ function ApplicationsListContent() {
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     setPage(1);
-    setSearch(searchInput);
+    setSearch(searchInput.trim());
   };
 
   const toggleSort = (field: string) => {
