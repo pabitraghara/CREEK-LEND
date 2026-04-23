@@ -49,11 +49,14 @@ function formatCurrency(amount: number) {
   }).format(amount);
 }
 
-function formatDate(date: string) {
-  return new Date(date).toLocaleDateString("en-US", {
+function formatDate(date: string | null) {
+  if (!date) return "N/A";
+  return new Date(date).toLocaleString("en-US", {
     month: "short",
     day: "numeric",
     year: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
   });
 }
 
