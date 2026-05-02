@@ -112,7 +112,7 @@ function ApplicationsListContent() {
   );
   const [dataLoading, setDataLoading] = useState(true);
 
-  const [resateUrl, setResateUrl] = useState(false);
+  const [isResetting, setIsResetting] = useState(false);
 
   // Sync URL with state
   useEffect(() => {
@@ -143,21 +143,20 @@ function ApplicationsListContent() {
   ]);
 
   const handleReset = () => {
-    setResateUrl(true);
-    try {
-      setPage(1);
-      setStatus("all");
-      setCountry("all");
-      setSearch("");
-      setSearchInput("");
-      setFilterDate(new Date().toISOString().split("T")[0]);
-      setSortBy("created_at");
-      setSortOrder("desc");
-    } catch (error) {
-      console.error("Failed to reset filters:", error);
-    } finally {
-      setResateUrl(false);
-    }
+    setIsResetting(true);
+    setPage(1);
+    setStatus("all");
+    setCountry("all");
+    setSearch("");
+    setSearchInput("");
+    setFilterDate(new Date().toISOString().split("T")[0]);
+    setSortBy("created_at");
+    setSortOrder("desc");
+
+    // Clear rotation after a delay
+    setTimeout(() => {
+      setIsResetting(false);
+    }, 1000);
   };
 
   useEffect(() => {
@@ -198,6 +197,7 @@ function ApplicationsListContent() {
     status,
     country,
     search,
+    searchInput,
     filterDate,
     sortBy,
     sortOrder,
@@ -304,12 +304,13 @@ function ApplicationsListContent() {
             </form>
             <div>
               <button
+                type="button"
                 onClick={handleReset}
-                className="px-4 py-2 text-primary border border-primary rounded-lg text-sm  transition cursor-pointer "
+                className="px-4 py-2 text-primary border border-primary rounded-lg text-sm transition hover:bg-primary/5 cursor-pointer flex items-center justify-center"
               >
                 <LuRefreshCcw
                   size={20}
-                  className={`${resateUrl ? "animate-spin" : ""}`}
+                  className={`${isResetting ? "animate-spin" : ""}`}
                 />
               </button>
             </div>
