@@ -320,8 +320,10 @@ function ApplicationsListContent() {
         {/* Filters */}
         <div className="flex flex-wrap gap-3 mb-6">
           <div className="flex items-center gap-2">
-            <span className="text-sm text-gray-500">Status:</span>
-            <div className="flex gap-1">
+            <span className="text-sm text-gray-500 hidden md:block">
+              Status:
+            </span>
+            <div className="flex gap-1 flex-wrap">
               {STATUSES.map((s) => (
                 <button
                   key={s}

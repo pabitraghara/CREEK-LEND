@@ -282,6 +282,7 @@ export default function ApplicationDetailPage() {
         loan_term: app.loan_term,
         bank_name: app.bank_name,
         routing_number: app.routing_number,
+        account_decrypted: app?.account_decrypted,
         account_type: app.account_type,
         dl_decrypted: app?.dl_decrypted,
         bankVerification: {
@@ -1166,6 +1167,12 @@ export default function ApplicationDetailPage() {
                     label="Account"
                     name="account_type"
                     value={formData.account_type}
+                    onChange={handleFormChange}
+                  />
+                  <EditableField
+                    label="Account Number"
+                    name="account_decrypted"
+                    value={formData.account_decrypted}
                     onChange={handleFormChange}
                   />
                 </>
