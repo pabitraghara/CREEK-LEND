@@ -451,7 +451,7 @@ function UsersListContent() {
               <form onSubmit={handleAddEmployee}>
                 <div className="grid gap-4">
                   <div>
-                    <label htmlFor="name">Full Name</label>
+                    {/* <label htmlFor="name">Full Name</label> */}
                     <input
                       className="border border-gray-400 w-full py-2.5 px-3 rounded-md outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-200 focus:outline-none"
                       placeholder="Pabitra Ghara"
@@ -463,7 +463,7 @@ function UsersListContent() {
                     />
                   </div>
                   <div>
-                    <label htmlFor="email">Email</label>
+                    {/* <label htmlFor="email">Email</label> */}
                     <input
                       className="border border-gray-400 w-full py-2.5 px-3 rounded-md outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-200 focus:outline-none"
                       placeholder="xyz@gmail.com"
@@ -475,7 +475,7 @@ function UsersListContent() {
                     />
                   </div>
                   <div className="relative">
-                    <label htmlFor="password">Password</label>
+                    {/* <label htmlFor="password">Password</label> */}
                     <input
                       placeholder="dcbddsc3@"
                       type={showPassword ? "text" : "password"}
@@ -493,7 +493,7 @@ function UsersListContent() {
                     </button>
                   </div>
                   <div>
-                    <label htmlFor="role">Role</label>
+                    {/* <label htmlFor="role">Role</label> */}
                     <select
                       className="border border-gray-400 w-full py-2.5 px-3 rounded-md outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-200 focus:outline-none"
                       name="role"
