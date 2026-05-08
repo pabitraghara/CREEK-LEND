@@ -284,7 +284,7 @@ function MessagesListContent() {
                           {m.subject}
                         </span>
                       </td>
-                      <td className="px-6 py-4 text-sm text-gray-600 max-w-xs truncate">
+                      <td className="px-6 py-4 text-sm text-gray-600 max-w-xs word-break break-words word-wrap">
                         {m.message}
                       </td>
                       {/* <td className="px-6 py-4">
