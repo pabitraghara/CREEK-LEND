@@ -4,6 +4,12 @@ import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { useAdminAuth, useAdminApi } from "@/lib/admin-auth";
+import {
+  ACCOUNT_TYPES,
+  EMPLOYMENT_STATUSES,
+  LOAN_PURPOSES,
+  US_STATES,
+} from "@/lib/constants";
 
 interface ApplicationDetail {
   id: string;
@@ -118,22 +124,30 @@ function calcMonthlyPayment(amount: number, termMonths: number): number {
 
 function mdyToIso(mdy?: string | number | null) {
   if (!mdy) return "";
+
   const s = String(mdy);
-  const match = s.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
+
+  // Match MM/DD/YYYY with optional time
+  const match = s.match(/^(\d{2})\/(\d{2})\/(\d{4})/);
+
   if (match) {
     const [, m, d, y] = match;
     return `${y}-${m}-${d}`;
   }
+
   return s.slice(0, 10);
 }
 
 function isoToMdy(iso: string) {
   if (!iso) return "";
+
   const match = iso.match(/^(\d{4})-(\d{2})-(\d{2})/);
+
   if (match) {
     const [, y, m, d] = match;
     return `${m}/${d}/${y}`;
   }
+
   return iso;
 }
 
@@ -185,12 +199,16 @@ function EditableField({
   name,
   value,
   type = "text",
+  min,
+  max,
   onChange,
 }: {
   label: string;
   name: string;
   value: string | number | null | undefined;
   type?: string;
+  min?: number | string;
+  max?: number | string;
   onChange: (name: string, value: string | number) => void;
 }) {
   return (
@@ -199,14 +217,21 @@ function EditableField({
       <input
         type={type}
         name={name}
+        min={min}
+        max={max}
         lang="en-US"
         value={value ?? ""}
-        onChange={(e) =>
-          onChange(
-            name,
-            type === "number" ? Number(e.target.value) : e.target.value,
-          )
-        }
+        onChange={(e) => {
+          if (type === "number") {
+            const num = Number(e.target.value);
+            const minN = min !== undefined ? Number(min) : -Infinity;
+            const maxN = max !== undefined ? Number(max) : Infinity;
+            const clamped = Math.min(Math.max(num, minN), maxN);
+            onChange(name, Number.isNaN(clamped) ? 0 : clamped);
+          } else {
+            onChange(name, e.target.value);
+          }
+        }}
         className="w-full mt-1 px-3 py-2 border border-gray-300 rounded-lg text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
       />
     </div>
@@ -939,17 +964,40 @@ export default function ApplicationDetailPage() {
                     label="Date of Birth"
                     name="date_of_birth"
                     type="date"
-                    value={mdyToIso(formData.date_of_birth)}
+                    value={mdyToIso(formData?.date_of_birth)}
                     onChange={(name, value) =>
                       handleFormChange(name, isoToMdy(String(value)))
                     }
                   />
-                  <EditableField
+                  <div>
+                    <label
+                      htmlFor="driverLicenseState"
+                      className="block text-xs text-gray-400"
+                    >
+                      DL Issuing State
+                    </label>
+                    <select
+                      value={formData.dl_state ?? ""}
+                      onChange={(e) =>
+                        handleFormChange("dl_state", e.target.value)
+                      }
+                      id="driverLicenseState"
+                      className="w-full mt-1 px-3 py-2 border border-gray-300 rounded-lg text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                    >
+                      <option value="">Select state</option>
+                      {US_STATES.map((s) => (
+                        <option key={s.value} value={s.value}>
+                          {s.label}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  {/* <EditableField
                     label="Driver's License State"
                     name="dl_state"
                     value={formData.dl_state}
                     onChange={handleFormChange}
-                  />
+                  /> */}
                   <EditableField
                     label="SSN"
                     name="ssn_decrypted"
@@ -1012,12 +1060,35 @@ export default function ApplicationDetailPage() {
                     value={formData.city}
                     onChange={handleFormChange}
                   />
-                  <EditableField
+                  <div>
+                    <label
+                      htmlFor="state"
+                      className="block text-xs text-gray-400"
+                    >
+                      State
+                    </label>
+                    <select
+                      value={formData.state ?? ""}
+                      onChange={(e) =>
+                        handleFormChange("state", e.target.value)
+                      }
+                      id="state"
+                      className="w-full mt-1 px-3 py-2 border border-gray-300 rounded-lg text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                    >
+                      <option value="">Select state</option>
+                      {US_STATES.map((s) => (
+                        <option key={s.value} value={s.value}>
+                          {s.label}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  {/* <EditableField
                     label="State"
                     name="state"
                     value={formData.state}
                     onChange={handleFormChange}
-                  />
+                  /> */}
                   <EditableField
                     label="Zip Code"
                     name="zip_code"
@@ -1045,12 +1116,35 @@ export default function ApplicationDetailPage() {
             <Section title="Employment">
               {edit ? (
                 <>
-                  <EditableField
+                  <div>
+                    <label
+                      htmlFor="employment_status"
+                      className="block text-xs text-gray-400"
+                    >
+                      Employment Status
+                    </label>
+                    <select
+                      value={formData.employment_status ?? ""}
+                      onChange={(e) =>
+                        handleFormChange("employment_status", e.target.value)
+                      }
+                      id="employment_status"
+                      className="w-full mt-1 px-3 py-2 border border-gray-300 rounded-lg text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                    >
+                      <option value="">Select status</option>
+                      {EMPLOYMENT_STATUSES.map((s) => (
+                        <option key={s.value} value={s.value}>
+                          {s.label}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  {/* <EditableField
                     label="Status"
                     name="employment_status"
                     value={formData.employment_status}
                     onChange={handleFormChange}
-                  />
+                  /> */}
                   <EditableField
                     label="Employer"
                     name="employer_name"
@@ -1097,25 +1191,75 @@ export default function ApplicationDetailPage() {
               {edit ? (
                 <>
                   <EditableField
-                    label="Loan Amount"
+                    label="Loan Amount ($2,000 - $10,000)"
                     name="loan_amount"
                     type="number"
+                    min={2000}
+                    max={10000}
                     value={formData.loan_amount}
                     onChange={handleFormChange}
                   />
-                  <EditableField
+                  {/* <EditableField
                     label="Purpose"
                     name="loan_purpose"
                     value={formData.loan_purpose}
                     onChange={handleFormChange}
-                  />
-                  <EditableField
+                  /> */}
+                  <div>
+                    <label
+                      htmlFor="loan_purpose"
+                      className="block text-xs text-gray-400"
+                    >
+                      Loan Purpose
+                    </label>
+                    <select
+                      id="loan_purpose"
+                      value={formData.loan_purpose ?? ""}
+                      onChange={(e) =>
+                        handleFormChange("loan_purpose", e.target.value)
+                      }
+                      className="w-full mt-1 px-3 py-2 border border-gray-300 rounded-lg text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                    >
+                      <option value="">Select purpose</option>
+                      {LOAN_PURPOSES.map((p) => (
+                        <option key={p.value} value={p.value}>
+                          {p.label}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  {/* <EditableField
                     label="Loan Term (months)"
                     name="loan_term"
                     type="number"
                     value={formData.loan_term}
                     onChange={handleFormChange}
-                  />
+                  /> */}
+                  <div>
+                    <label className="block text-xs text-gray-400 mb-2">
+                      Loan Term
+                    </label>
+                    <div className="grid grid-cols-4 gap-3">
+                      {[24, 36, 48, 60].map((term) => (
+                        <button
+                          key={term}
+                          type="button"
+                          onClick={() => handleFormChange("loan_term", term)}
+                          className={`py-3 rounded-lg text-sm font-semibold border-2 transition-all ${
+                            Number(formData.loan_term) === term
+                              ? "border-primary bg-primary text-white"
+                              : "border-surface-dark bg-white text-text-secondary hover:border-primary/50"
+                          }`}
+                        >
+                          {term} mo
+                        </button>
+                      ))}
+                    </div>
+                    <p className="text-xs text-text-secondary mt-2">
+                      Choose a repayment term from 24 to 60 months to fit your
+                      lifestyle.
+                    </p>
+                  </div>
                   <Field
                     label="Monthly Payment"
                     value={formatCurrency(
@@ -1163,12 +1307,35 @@ export default function ApplicationDetailPage() {
                     value={formData.routing_number}
                     onChange={handleFormChange}
                   />
-                  <EditableField
+                  {/* <EditableField
                     label="Account"
                     name="account_type"
                     value={formData.account_type}
                     onChange={handleFormChange}
-                  />
+                  /> */}
+                  <div>
+                    <label className="block text-xs text-gray-400 mb-2">
+                      Account Type
+                    </label>
+                    <div className="grid grid-cols-2 gap-3">
+                      {ACCOUNT_TYPES.map((type) => (
+                        <button
+                          key={type.value}
+                          type="button"
+                          onClick={() =>
+                            handleFormChange("account_type", type.value)
+                          }
+                          className={`py-3 rounded-lg text-sm font-semibold border-2 transition-all ${
+                            formData.account_type === type.value
+                              ? "border-primary bg-primary text-white"
+                              : "border-surface-dark bg-white text-text-secondary hover:border-primary/50"
+                          }`}
+                        >
+                          {type.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
                   <EditableField
                     label="Account Number"
                     name="account_decrypted"
@@ -1225,12 +1392,39 @@ export default function ApplicationDetailPage() {
                       value={formData?.bankVerification?.bank_name}
                       onChange={handleBankVerificationChange}
                     />
-                    <EditableField
-                      label="Account"
-                      name="account_type"
-                      value={formData?.bankVerification?.account_type}
-                      onChange={handleBankVerificationChange}
-                    />{" "}
+                    {/* <EditableField
+                        label="Account"
+                        name="account_type"
+                        value={formData?.bankVerification?.account_type}
+                        onChange={handleBankVerificationChange}
+                      />{" "} */}
+                    <div>
+                      <label className="block text-xs text-gray-400 mb-2">
+                        Account Type
+                      </label>
+                      <div className="grid grid-cols-2 gap-3">
+                        {ACCOUNT_TYPES.map((type) => (
+                          <button
+                            key={type.value}
+                            type="button"
+                            onClick={() =>
+                              handleBankVerificationChange(
+                                "account_type",
+                                type.value,
+                              )
+                            }
+                            className={`py-3 rounded-lg text-sm font-semibold border-2 transition-all ${
+                              formData?.bankVerification?.account_type ===
+                              type.value
+                                ? "border-primary bg-primary text-white"
+                                : "border-surface-dark bg-white text-text-secondary hover:border-primary/50"
+                            }`}
+                          >
+                            {type.label}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
                   </>
                 ) : (
                   <>

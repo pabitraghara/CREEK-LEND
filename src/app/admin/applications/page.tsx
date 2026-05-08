@@ -263,6 +263,18 @@ function ApplicationsListContent() {
             >
               Applications
             </Link>
+            <Link
+              href="/admin/message"
+              className="text-gray-600 hover:text-primary transition"
+            >
+              Message
+            </Link>
+            <Link
+              href="/admin/user"
+              className="text-gray-600 hover:text-primary transition"
+            >
+              User
+            </Link>
           </div>
         </div>
         <div className="flex items-center gap-4">

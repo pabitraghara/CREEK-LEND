@@ -6,7 +6,7 @@ import { LOAN_PURPOSES, LOAN_LIMITS } from "@/lib/constants";
 import { formatCurrency } from "@/lib/utils";
 
 function calcMonthlyPayment(amount: number, termMonths: number): number {
-  const monthlyRate = 0.10 / 12;
+  const monthlyRate = 0.1 / 12;
   const factor = Math.pow(1 + monthlyRate, termMonths);
   return (amount * (monthlyRate * factor)) / (factor - 1);
 }
@@ -162,11 +162,14 @@ export default function StepLoanDetails({
                 Estimated Monthly Payment
               </p>
               <p className="text-xs text-text-secondary">
-                Based on {formatCurrency(data.loanAmount)} at 10% APR over {data.loanTerm} months
+                Based on {formatCurrency(data.loanAmount)} at 10% APR over{" "}
+                {data.loanTerm} months
               </p>
             </div>
             <p className="text-2xl font-extrabold text-primary">
-              {formatCurrency(calcMonthlyPayment(data.loanAmount, data.loanTerm))}
+              {formatCurrency(
+                calcMonthlyPayment(data.loanAmount, data.loanTerm),
+              )}
             </p>
           </div>
         )}
