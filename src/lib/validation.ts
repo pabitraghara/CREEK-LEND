@@ -17,7 +17,7 @@ export const personalInfoSchema = z.object({
     .min(10, "Please enter a valid phone number")
     .regex(
       /^\(?\d{3}\)?\s?\d{3}[-.\s]?\d{4}$/,
-      "Please enter a valid phone number"
+      "Please enter a valid phone number",
     ),
   dateOfBirth: z
     .string()
@@ -26,14 +26,18 @@ export const personalInfoSchema = z.object({
       (dob) => {
         const [month, day, year] = dob.split("/").map(Number);
         const date = new Date(year, month - 1, day);
-        if (date.getMonth() !== month - 1 || date.getDate() !== day) return false;
+        if (date.getMonth() !== month - 1 || date.getDate() !== day)
+          return false;
         const now = new Date();
         const age = now.getFullYear() - date.getFullYear();
         const monthDiff = now.getMonth() - date.getMonth();
-        const actualAge = monthDiff < 0 || (monthDiff === 0 && now.getDate() < date.getDate()) ? age - 1 : age;
+        const actualAge =
+          monthDiff < 0 || (monthDiff === 0 && now.getDate() < date.getDate())
+            ? age - 1
+            : age;
         return actualAge >= 18 && actualAge <= 100;
       },
-      { message: "You must be at least 18 years old" }
+      { message: "You must be at least 18 years old" },
     ),
 });
 
@@ -45,7 +49,7 @@ export const identificationSchema = z.object({
       (val) =>
         // US SSN: XXX-XX-XXXX
         /^\d{3}-?\d{2}-?\d{4}$/.test(val),
-      { message: "Please enter a valid identification number" }
+      { message: "Please enter a valid identification number" },
     ),
   driverLicenseNumber: z
     .string()
@@ -66,20 +70,12 @@ export const addressSchema = z.object({
   state: z.string().min(2, "Please select a state/province"),
   zipCode: z
     .string()
-    .regex(
-      /^\d{5}(-\d{4})?$/,
-      "Please enter a valid ZIP code"
-    ),
+    .regex(/^\d{5}(-\d{4})?$/, "Please enter a valid ZIP code"),
   country: z.enum(["US"]),
 });
 
 export const employmentSchema = z.object({
-  employmentStatus: z.enum([
-    "employed",
-    "self-employed",
-    "retired",
-    "other",
-  ]),
+  employmentStatus: z.enum(["employed", "self-employed", "retired", "other"]),
   employerName: z
     .string()
     .min(2, "Please enter your employer's name")
@@ -123,7 +119,7 @@ export const bankingSchema = z.object({
     .min(1, "This field is required")
     .refine(
       (val) => /^\d{9}$/.test(val) || /^[A-Z]{4}0[A-Z0-9]{6}$/i.test(val),
-      { message: "Enter a valid 9-digit routing number or 11-character IFSC code" }
+      { message: "Enter a valid 9-digit routing number" },
     ),
   accountNumber: z
     .string()
