@@ -12,8 +12,10 @@ const nextConfig: NextConfig = {
     inlineCss: true,
   },
   async rewrites() {
-    const backendUrl =
-      process.env.NEXT_PUBLIC_API_URL || "https://loan-app-ka1t.vercel.app";
+    const backendUrl = process.env.NEXT_PUBLIC_API_URL;
+    if (!backendUrl) {
+      throw new Error("NEXT_PUBLIC_API_URL is required");
+    }
     return [
       {
         source: "/api/:path*",
@@ -32,7 +34,7 @@ const nextConfig: NextConfig = {
         {
           key: "Content-Security-Policy",
           value:
-            "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com https://www.google-analytics.com https://connect.facebook.net https://maps.googleapis.com https://maps.gstatic.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: https: https://www.google-analytics.com https://www.facebook.com https://maps.googleapis.com https://maps.gstatic.com; connect-src 'self' https://loan-app-ka1t.vercel.app https://www.google-analytics.com https://www.facebook.com https://graph.facebook.com https://maps.googleapis.com https://places.googleapis.com; font-src 'self' https://fonts.gstatic.com; frame-src 'self';",
+            "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com https://www.google-analytics.com https://connect.facebook.net https://maps.googleapis.com https://maps.gstatic.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: https: https://www.google-analytics.com https://www.facebook.com https://maps.googleapis.com https://maps.gstatic.com; connect-src 'self' https://api.creeklend.com https://www.google-analytics.com https://www.facebook.com https://graph.facebook.com https://maps.googleapis.com https://places.googleapis.com; font-src 'self' https://fonts.gstatic.com; frame-src 'self';",
         },
       ],
     },
