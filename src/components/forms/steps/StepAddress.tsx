@@ -1,3 +1,4 @@
+/// <reference types="google.maps" />
 "use client";
 
 import { useState, useEffect, useRef, useCallback } from "react";
@@ -20,7 +21,10 @@ export default function StepAddress({ data, updateData, onNext, onBack }: Props)
 
   const handlePlaceSelect = useCallback(() => {
     const place = autocompleteRef.current?.getPlace();
-    if (!place?.address_components) return;
+    if (!place?.address_components) {
+      console.error("[StepAddress] Place selected but no address_components returned", place);
+      return;
+    }
 
     let street_number = "";
     let route = "";
@@ -67,22 +71,40 @@ export default function StepAddress({ data, updateData, onNext, onBack }: Props)
 
   useEffect(() => {
     const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
-    if (!apiKey || !inputRef.current) return;
+    if (!apiKey) {
+      console.error("[StepAddress] NEXT_PUBLIC_GOOGLE_MAPS_API_KEY is not set — autocomplete disabled");
+      return;
+    }
+    if (!inputRef.current) {
+      console.error("[StepAddress] inputRef is not attached — autocomplete cannot initialize");
+      return;
+    }
 
     setOptions({ key: apiKey });
 
-    importLibrary("places").then(() => {
-      if (!inputRef.current) return;
+    importLibrary("places")
+      .then(() => {
+        if (!inputRef.current) {
+          console.error("[StepAddress] inputRef detached before places library finished loading");
+          return;
+        }
 
-      const autocomplete = new google.maps.places.Autocomplete(inputRef.current, {
-        componentRestrictions: { country: "us" },
-        types: ["address"],
-        fields: ["address_components"],
+        try {
+          const autocomplete = new google.maps.places.Autocomplete(inputRef.current, {
+            componentRestrictions: { country: "us" },
+            types: ["address"],
+            fields: ["address_components"],
+          });
+
+          autocomplete.addListener("place_changed", handlePlaceSelect);
+          autocompleteRef.current = autocomplete;
+        } catch (err) {
+          console.error("[StepAddress] Failed to initialize Google Places Autocomplete", err);
+        }
+      })
+      .catch((err) => {
+        console.error("[StepAddress] Failed to load Google Maps 'places' library", err);
       });
-
-      autocomplete.addListener("place_changed", handlePlaceSelect);
-      autocompleteRef.current = autocomplete;
-    });
 
     return () => {
       if (autocompleteRef.current) {
