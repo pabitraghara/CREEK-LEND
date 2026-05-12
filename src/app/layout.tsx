@@ -1,7 +1,11 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import ConditionalLayout from "@/components/layout/ConditionalLayout";
-import { GoogleAnalytics, GoogleTagManager, GTMNoScript } from "@/components/analytics/GoogleAnalytics";
+import {
+  GoogleAnalytics,
+  GoogleTagManager,
+  GTMNoScript,
+} from "@/components/analytics/GoogleAnalytics";
 import { MetaPixel } from "@/components/analytics/MetaPixel";
 import { FinancialServiceSchema } from "@/components/ui/JsonLd";
 import { SITE_NAME, SITE_URL, SITE_DESCRIPTION } from "@/lib/constants";
@@ -69,8 +73,16 @@ export default function RootLayout({
   return (
     <html lang="en" className={inter.variable}>
       <head>
-        <link rel="preconnect" href="https://loan-app-ka1t.vercel.app" crossOrigin="anonymous" />
-        <link rel="preconnect" href="https://www.googletagmanager.com" crossOrigin="anonymous" />
+        <link
+          rel="preconnect"
+          href="https://api.creeklend.com"
+          crossOrigin="anonymous"
+        />
+        <link
+          rel="preconnect"
+          href="https://www.googletagmanager.com"
+          crossOrigin="anonymous"
+        />
         <link rel="dns-prefetch" href="https://www.google-analytics.com" />
         <link rel="dns-prefetch" href="https://connect.facebook.net" />
         <FinancialServiceSchema />
