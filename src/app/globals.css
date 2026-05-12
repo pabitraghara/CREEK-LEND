@@ -1,21 +1,21 @@
 @import "tailwindcss";
 
 @theme {
-  --color-primary: #1B4D3E;
-  --color-primary-light: #2D7A5F;
-  --color-primary-dark: #0F3329;
-  --color-secondary: #D4A843;
-  --color-secondary-light: #E8C96E;
-  --color-accent: #3B82F6;
-  --color-surface: #F8FAF9;
-  --color-surface-dark: #E8EEEB;
-  --color-text-primary: #1A1A2E;
-  --color-text-secondary: #4A5568;
-  --color-success: #10B981;
-  --color-error: #EF4444;
-  --color-warning: #F59E0B;
-  --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
-  --font-heading: 'Inter', system-ui, -apple-system, sans-serif;
+  --color-primary: #1b4d3e;
+  --color-primary-light: #2d7a5f;
+  --color-primary-dark: #0f3329;
+  --color-secondary: #d4a843;
+  --color-secondary-light: #e8c96e;
+  --color-accent: #3b82f6;
+  --color-surface: #f8faf9;
+  --color-surface-dark: #e8eeeb;
+  --color-text-primary: #1a1a2e;
+  --color-text-secondary: #4a5568;
+  --color-success: #10b981;
+  --color-error: #ef4444;
+  --color-warning: #f59e0b;
+  --font-sans: "Inter", system-ui, -apple-system, sans-serif;
+  --font-heading: "Inter", system-ui, -apple-system, sans-serif;
 }
 
 html {
@@ -86,40 +86,5 @@ input[type="range"]::-webkit-slider-thumb {
 
 .step-pending {
   background-color: var(--color-surface-dark);
-  color: var(--color-text-secondary);
-}
-
-/* Google Places PlaceAutocompleteElement (new web component) */
-.gmp-place-autocomplete-wrapper {
-  display: block;
-  width: 100%;
-  background-color: #fff;
-  overflow: hidden;
-}
-
-gmp-place-autocomplete {
-  display: block;
-  width: 100%;
-  font-family: var(--font-sans);
-  --gmpx-color-surface: #fff;
-  --gmpx-color-on-surface: var(--color-text-primary);
-  --gmpx-color-on-surface-variant: var(--color-text-secondary);
-  --gmpx-color-primary: var(--color-primary);
-  --gmpx-font-family-base: var(--font-sans);
-  --gmpx-font-family-headings: var(--font-sans);
-  --gmpx-font-size-base: 1rem;
-}
-
-gmp-place-autocomplete input {
-  width: 100%;
-  padding: 0.75rem 1rem;
-  border: none;
-  outline: none;
-  font-size: 1rem;
-  color: var(--color-text-primary);
-  background-color: transparent;
-}
-
-gmp-place-autocomplete input::placeholder {
   color: var(--color-text-secondary);
 }

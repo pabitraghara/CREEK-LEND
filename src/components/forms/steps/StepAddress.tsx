@@ -1,4 +1,3 @@
-/// <reference types="google.maps" />
 "use client";
 
 import { useState, useEffect, useRef, useCallback } from "react";
@@ -14,21 +13,6 @@ interface Props {
   onBack: () => void;
 }
 
-type AddressComponent = {
-  longText: string | null;
-  shortText: string | null;
-  types: string[];
-};
-
-type GmpSelectEvent = Event & {
-  placePrediction: {
-    toPlace: () => {
-      fetchFields: (opts: { fields: string[] }) => Promise<unknown>;
-      addressComponents?: AddressComponent[];
-    };
-  };
-};
-
 export default function StepAddress({
   data,
   updateData,
@@ -36,49 +20,46 @@ export default function StepAddress({
   onBack,
 }: Props) {
   const [errors, setErrors] = useState<Record<string, string>>({});
-  const containerRef = useRef<HTMLDivElement>(null);
-  const elementRef = useRef<HTMLElement | null>(null);
-  const updateDataRef = useRef(updateData);
-  const placeSelectedRef = useRef(false);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const autocompleteRef = useRef<google.maps.places.Autocomplete | null>(null);
 
-  useEffect(() => {
-    updateDataRef.current = updateData;
-  }, [updateData]);
+  const handlePlaceSelect = useCallback(() => {
+    const place = autocompleteRef.current?.getPlace();
+    if (!place?.address_components) return;
 
-  const applyPlace = useCallback((components: AddressComponent[]) => {
     let street_number = "";
     let route = "";
     let city = "";
     let state = "";
     let zipCode = "";
 
-    for (const component of components) {
+    for (const component of place.address_components) {
       const type = component.types[0];
       switch (type) {
         case "street_number":
-          street_number = component.longText || "";
+          street_number = component.long_name;
           break;
         case "route":
-          route = component.longText || "";
+          route = component.long_name;
           break;
         case "locality":
-          city = component.longText || "";
+          city = component.long_name;
           break;
         case "sublocality_level_1":
-          if (!city) city = component.longText || "";
+          if (!city) city = component.long_name;
           break;
         case "administrative_area_level_1":
-          state = component.shortText || "";
+          state = component.short_name;
           break;
         case "postal_code":
-          zipCode = component.longText || "";
+          zipCode = component.long_name;
           break;
       }
     }
 
     const streetAddress = street_number ? `${street_number} ${route}` : route;
 
-    updateDataRef.current({
+    updateData({
       streetAddress,
       city,
       state,
@@ -87,120 +68,36 @@ export default function StepAddress({
     });
 
     setErrors({});
-  }, []);
+  }, [updateData]);
 
   useEffect(() => {
     const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
-    if (!apiKey) {
-      console.error(
-        "[StepAddress] NEXT_PUBLIC_GOOGLE_MAPS_API_KEY is not set — autocomplete disabled",
+    if (!apiKey || !inputRef.current) return;
+
+    setOptions({ key: apiKey });
+
+    importLibrary("places").then(() => {
+      if (!inputRef.current) return;
+
+      const autocomplete = new google.maps.places.Autocomplete(
+        inputRef.current,
+        {
+          componentRestrictions: { country: "us" },
+          types: ["address"],
+          fields: ["address_components"],
+        },
       );
-      return;
-    }
-    const container = containerRef.current;
-    if (!container) {
-      console.error(
-        "[StepAddress] containerRef is not attached — autocomplete cannot initialize",
-      );
-      return;
-    }
 
-    setOptions({ key: apiKey, v: "weekly" });
-
-    let cancelled = false;
-
-    importLibrary("places")
-      .then((places) => {
-        if (cancelled || !containerRef.current) return;
-
-        const PlaceAutocompleteElement = (
-          places as unknown as {
-            PlaceAutocompleteElement?: new (
-              opts: Record<string, unknown>,
-            ) => HTMLElement;
-          }
-        ).PlaceAutocompleteElement;
-
-        if (!PlaceAutocompleteElement) {
-          console.error(
-            "[StepAddress] PlaceAutocompleteElement is not available in the loaded places library",
-          );
-          return;
-        }
-
-        try {
-          const placeAutocomplete = new PlaceAutocompleteElement({
-            includedRegionCodes: ["us"],
-            includedPrimaryTypes: ["street_address", "premise", "subpremise"],
-          });
-
-          placeAutocomplete.id = "streetAddress";
-          placeAutocomplete.classList.add("gmp-place-autocomplete");
-          placeAutocomplete.setAttribute(
-            "placeholder",
-            "Start typing your address...",
-          );
-
-          const applyPlaceholderToInnerInput = () => {
-            const innerInput = placeAutocomplete.querySelector("input");
-            if (innerInput) {
-              innerInput.placeholder = "Start typing your address...";
-            }
-          };
-          applyPlaceholderToInnerInput();
-          requestAnimationFrame(applyPlaceholderToInnerInput);
-
-          placeAutocomplete.addEventListener("input", (event: Event) => {
-            if (placeSelectedRef.current) {
-              placeSelectedRef.current = false;
-              return;
-            }
-            const target = event.target as HTMLInputElement | null;
-            const value = target?.value ?? "";
-            updateDataRef.current({ streetAddress: value });
-          });
-
-          placeAutocomplete.addEventListener(
-            "gmp-select",
-            async (event: Event) => {
-              const e = event as GmpSelectEvent;
-              placeSelectedRef.current = true;
-              try {
-                const place = e.placePrediction.toPlace();
-                await place.fetchFields({ fields: ["addressComponents"] });
-                const components = place.addressComponents || [];
-                applyPlace(components);
-              } catch (err) {
-                console.error(
-                  "[StepAddress] Failed to fetch place details",
-                  err,
-                );
-              }
-            },
-          );
-
-          container.replaceChildren(placeAutocomplete);
-          elementRef.current = placeAutocomplete;
-        } catch (err) {
-          console.error(
-            "[StepAddress] Failed to initialize PlaceAutocompleteElement",
-            err,
-          );
-        }
-      })
-      .catch((err) => {
-        console.error(
-          "[StepAddress] Failed to load Google Maps 'places' library",
-          err,
-        );
-      });
+      autocomplete.addListener("place_changed", handlePlaceSelect);
+      autocompleteRef.current = autocomplete;
+    });
 
     return () => {
-      cancelled = true;
-      if (container) container.replaceChildren();
-      elementRef.current = null;
+      if (autocompleteRef.current) {
+        google.maps.event.clearInstanceListeners(autocompleteRef.current);
+      }
     };
-  }, [applyPlace]);
+  }, [handlePlaceSelect]);
 
   const handleNext = () => {
     const result = addressSchema.safeParse({
@@ -237,22 +134,20 @@ export default function StepAddress({
           >
             Street Address *
           </label>
-          <div
-            ref={containerRef}
-            className={`gmp-place-autocomplete-wrapper rounded-lg border transition-colors ${
+          <input
+            ref={inputRef}
+            type="text"
+            id="streetAddress"
+            value={data.streetAddress}
+            onChange={(e) => updateData({ streetAddress: e.target.value })}
+            className={`w-full px-4 py-3 border rounded-lg transition-colors ${
               errors.streetAddress
                 ? "border-error"
-                : "border-surface-dark focus-within:border-primary"
+                : "border-surface-dark focus:border-primary"
             }`}
+            placeholder="Start typing your address..."
+            autoComplete="off"
           />
-          {data.streetAddress && (
-            <p className="text-xs text-text-secondary mt-1">
-              Selected:{" "}
-              <span className="text-text-primary font-medium">
-                {data.streetAddress}
-              </span>
-            </p>
-          )}
           {errors.streetAddress && (
             <p className="text-error text-xs mt-1">{errors.streetAddress}</p>
           )}
