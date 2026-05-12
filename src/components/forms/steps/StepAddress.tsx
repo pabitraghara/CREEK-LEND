@@ -20,8 +20,13 @@ export default function StepAddress({
   onBack,
 }: Props) {
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [isGoogleApiLoaded, setIsGoogleApiLoaded] = useState(false);
+  const [apiError, setApiError] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const autocompleteRef = useRef<google.maps.places.Autocomplete | null>(null);
+  const updateDataRef = useRef(updateData);
+  updateDataRef.current = updateData;
+  const authFailedRef = useRef(false);
 
   const handlePlaceSelect = useCallback(() => {
     const place = autocompleteRef.current?.getPlace();
@@ -59,7 +64,7 @@ export default function StepAddress({
 
     const streetAddress = street_number ? `${street_number} ${route}` : route;
 
-    updateData({
+    updateDataRef.current({
       streetAddress,
       city,
       state,
@@ -68,34 +73,88 @@ export default function StepAddress({
     });
 
     setErrors({});
-  }, [updateData]);
+  }, []);
 
   useEffect(() => {
     const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
-    if (!apiKey || !inputRef.current) return;
+    const inputEl = inputRef.current;
+    if (!apiKey || !inputEl) {
+      setIsGoogleApiLoaded(false);
+      return;
+    }
+
+    let listener: { remove: () => void } | null = null;
+
+    const teardownAutocomplete = () => {
+      listener?.remove();
+      listener = null;
+      // Strip Google's internal DOM listeners off the autocomplete and the
+      // input element itself — otherwise keystrokes keep hitting the failed
+      // Places request and the Next.js dev overlay catches the errors.
+      const gMaps = (
+        window as unknown as {
+          google?: {
+            maps?: {
+              event?: { clearInstanceListeners: (instance: unknown) => void };
+            };
+          };
+        }
+      ).google?.maps?.event;
+      if (gMaps) {
+        if (autocompleteRef.current)
+          gMaps.clearInstanceListeners(autocompleteRef.current);
+        gMaps.clearInstanceListeners(inputEl);
+      }
+      autocompleteRef.current = null;
+      document.querySelectorAll(".pac-container").forEach((el) => el.remove());
+    };
+
+    // Fires on RefererNotAllowedMapError, InvalidKeyMapError, etc. — these
+    // happen at runtime after the script has already loaded, so importLibrary
+    // resolves successfully and .catch() never sees them. Setting the handler
+    // before importLibrary ensures we catch failures that fire during init.
+    (window as unknown as { gm_authFailure: () => void }).gm_authFailure =
+      () => {
+        authFailedRef.current = true;
+        setApiError(
+          "Google address autocomplete is unavailable. Please enter your address manually.",
+        );
+        setIsGoogleApiLoaded(false);
+        teardownAutocomplete();
+      };
 
     setOptions({ key: apiKey });
 
-    importLibrary("places").then(() => {
-      if (!inputRef.current) return;
+    importLibrary("places")
+      .then((places) => {
+        // Auth already failed while the library was loading — don't attach.
+        if (authFailedRef.current || !inputRef.current) return;
 
-      const autocomplete = new google.maps.places.Autocomplete(
-        inputRef.current,
-        {
+        const autocomplete = new places.Autocomplete(inputRef.current, {
           componentRestrictions: { country: "us" },
           types: ["address"],
           fields: ["address_components"],
-        },
-      );
+        });
 
-      autocomplete.addListener("place_changed", handlePlaceSelect);
-      autocompleteRef.current = autocomplete;
-    });
+        listener = autocomplete.addListener("place_changed", handlePlaceSelect);
+        autocompleteRef.current = autocomplete;
+        setIsGoogleApiLoaded(true);
+      })
+      .catch((error) => {
+        console.warn(
+          "Google Maps API failed to load:",
+          error?.message || error,
+        );
+        const errorMsg = error?.message || "Failed to load Google Maps API";
+        setApiError(errorMsg);
+        setIsGoogleApiLoaded(false);
+        autocompleteRef.current = null;
+      });
 
     return () => {
-      if (autocompleteRef.current) {
-        google.maps.event.clearInstanceListeners(autocompleteRef.current);
-      }
+      teardownAutocomplete();
+      delete (window as unknown as { gm_authFailure?: () => void })
+        .gm_authFailure;
     };
   }, [handlePlaceSelect]);
 
@@ -127,14 +186,32 @@ export default function StepAddress({
       </p>
 
       <div className="space-y-5">
+        {/* {apiError && (
+          <div className="bg-warning/10 border border-warning rounded-lg p-3 text-xs text-text-secondary">
+            {apiError}
+          </div>
+        )} */}
         <div>
-          <label
-            htmlFor="streetAddress"
-            className="block text-sm font-medium text-text-primary mb-1.5"
-          >
-            Street Address *
-          </label>
+          <div className="flex items-center gap-2 mb-1.5">
+            <label
+              htmlFor="streetAddress"
+              className="block text-sm font-medium text-text-primary"
+            >
+              Street Address *
+            </label>
+            {/* {isGoogleApiLoaded && (
+              <span className="text-xs bg-success/10 text-success px-2 py-1 rounded">
+                Auto-complete enabled
+              </span>
+            )}
+            {!isGoogleApiLoaded && (
+              <span className="text-xs bg-warning/10 text-warning px-2 py-1 rounded">
+                Manual entry
+              </span>
+            )} */}
+          </div>
           <input
+            key={apiError ? "manual" : "google"}
             ref={inputRef}
             type="text"
             id="streetAddress"
@@ -145,11 +222,20 @@ export default function StepAddress({
                 ? "border-error"
                 : "border-surface-dark focus:border-primary"
             }`}
-            placeholder="Start typing your address..."
+            placeholder={
+              isGoogleApiLoaded
+                ? "Start typing your address..."
+                : "Enter street address (e.g., 123 Main St)"
+            }
             autoComplete="off"
           />
           {errors.streetAddress && (
             <p className="text-error text-xs mt-1">{errors.streetAddress}</p>
+          )}
+          {!isGoogleApiLoaded && (
+            <p className="text-text-secondary text-xs mt-1">
+              Please enter your address manually
+            </p>
           )}
         </div>
 
