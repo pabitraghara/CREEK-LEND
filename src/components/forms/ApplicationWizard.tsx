@@ -113,7 +113,7 @@ export default function ApplicationWizard() {
     message: string;
     applicationId?: string;
   } | null>(null);
-  const [geoAllowed, setGeoAllowed] = useState<boolean | null>(null);
+  const [geoBlocked, setGeoBlocked] = useState(false);
 
   useEffect(() => {
     const utm = getUTMParams();
@@ -125,9 +125,9 @@ export default function ApplicationWizard() {
       try {
         const res = await fetch(apiUrl("/api/geo-check"));
         const data = await res.json();
-        setGeoAllowed(data.allowed);
+        if (data.allowed === false) setGeoBlocked(true);
       } catch {
-        setGeoAllowed(true);
+        // network/parse error — leave form open
       }
     }
     checkGeo();
@@ -184,7 +184,7 @@ export default function ApplicationWizard() {
   };
 
   // Geo-blocked
-  if (geoAllowed === false) {
+  if (geoBlocked) {
     return (
       <div className="bg-white rounded-2xl shadow-lg p-8 text-center">
         <div className="w-16 h-16 bg-error/10 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -257,16 +257,6 @@ export default function ApplicationWizard() {
         >
           Check Loan Status
         </a>
-      </div>
-    );
-  }
-
-  // Loading geo
-  if (geoAllowed === null) {
-    return (
-      <div className="bg-white rounded-2xl shadow-lg p-8 text-center">
-        <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full mx-auto mb-4" />
-        <p className="text-text-secondary">Verifying your location...</p>
       </div>
     );
   }
