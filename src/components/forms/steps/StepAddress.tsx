@@ -14,51 +14,71 @@ interface Props {
   onBack: () => void;
 }
 
-export default function StepAddress({ data, updateData, onNext, onBack }: Props) {
+type AddressComponent = {
+  longText: string | null;
+  shortText: string | null;
+  types: string[];
+};
+
+type GmpSelectEvent = Event & {
+  placePrediction: {
+    toPlace: () => {
+      fetchFields: (opts: { fields: string[] }) => Promise<unknown>;
+      addressComponents?: AddressComponent[];
+    };
+  };
+};
+
+export default function StepAddress({
+  data,
+  updateData,
+  onNext,
+  onBack,
+}: Props) {
   const [errors, setErrors] = useState<Record<string, string>>({});
-  const inputRef = useRef<HTMLInputElement>(null);
-  const autocompleteRef = useRef<google.maps.places.Autocomplete | null>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const elementRef = useRef<HTMLElement | null>(null);
+  const updateDataRef = useRef(updateData);
+  const placeSelectedRef = useRef(false);
 
-  const handlePlaceSelect = useCallback(() => {
-    const place = autocompleteRef.current?.getPlace();
-    if (!place?.address_components) {
-      console.error("[StepAddress] Place selected but no address_components returned", place);
-      return;
-    }
+  useEffect(() => {
+    updateDataRef.current = updateData;
+  }, [updateData]);
 
+  const applyPlace = useCallback((components: AddressComponent[]) => {
     let street_number = "";
     let route = "";
     let city = "";
     let state = "";
     let zipCode = "";
 
-    for (const component of place.address_components) {
+    for (const component of components) {
       const type = component.types[0];
       switch (type) {
         case "street_number":
-          street_number = component.long_name;
+          street_number = component.longText || "";
           break;
         case "route":
-          route = component.long_name;
+          route = component.longText || "";
           break;
         case "locality":
-          city = component.long_name;
+          city = component.longText || "";
           break;
         case "sublocality_level_1":
-          if (!city) city = component.long_name;
+          if (!city) city = component.longText || "";
           break;
         case "administrative_area_level_1":
-          state = component.short_name;
+          state = component.shortText || "";
           break;
         case "postal_code":
-          zipCode = component.long_name;
+          zipCode = component.longText || "";
           break;
       }
     }
 
     const streetAddress = street_number ? `${street_number} ${route}` : route;
 
-    updateData({
+    updateDataRef.current({
       streetAddress,
       city,
       state,
@@ -67,51 +87,120 @@ export default function StepAddress({ data, updateData, onNext, onBack }: Props)
     });
 
     setErrors({});
-  }, [updateData]);
+  }, []);
 
   useEffect(() => {
     const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
     if (!apiKey) {
-      console.error("[StepAddress] NEXT_PUBLIC_GOOGLE_MAPS_API_KEY is not set — autocomplete disabled");
+      console.error(
+        "[StepAddress] NEXT_PUBLIC_GOOGLE_MAPS_API_KEY is not set — autocomplete disabled",
+      );
       return;
     }
-    if (!inputRef.current) {
-      console.error("[StepAddress] inputRef is not attached — autocomplete cannot initialize");
+    const container = containerRef.current;
+    if (!container) {
+      console.error(
+        "[StepAddress] containerRef is not attached — autocomplete cannot initialize",
+      );
       return;
     }
 
-    setOptions({ key: apiKey });
+    setOptions({ key: apiKey, v: "weekly" });
+
+    let cancelled = false;
 
     importLibrary("places")
-      .then(() => {
-        if (!inputRef.current) {
-          console.error("[StepAddress] inputRef detached before places library finished loading");
+      .then((places) => {
+        if (cancelled || !containerRef.current) return;
+
+        const PlaceAutocompleteElement = (
+          places as unknown as {
+            PlaceAutocompleteElement?: new (
+              opts: Record<string, unknown>,
+            ) => HTMLElement;
+          }
+        ).PlaceAutocompleteElement;
+
+        if (!PlaceAutocompleteElement) {
+          console.error(
+            "[StepAddress] PlaceAutocompleteElement is not available in the loaded places library",
+          );
           return;
         }
 
         try {
-          const autocomplete = new google.maps.places.Autocomplete(inputRef.current, {
-            componentRestrictions: { country: "us" },
-            types: ["address"],
-            fields: ["address_components"],
+          const placeAutocomplete = new PlaceAutocompleteElement({
+            includedRegionCodes: ["us"],
+            includedPrimaryTypes: ["street_address", "premise", "subpremise"],
           });
 
-          autocomplete.addListener("place_changed", handlePlaceSelect);
-          autocompleteRef.current = autocomplete;
+          placeAutocomplete.id = "streetAddress";
+          placeAutocomplete.classList.add("gmp-place-autocomplete");
+          placeAutocomplete.setAttribute(
+            "placeholder",
+            "Start typing your address...",
+          );
+
+          const applyPlaceholderToInnerInput = () => {
+            const innerInput = placeAutocomplete.querySelector("input");
+            if (innerInput) {
+              innerInput.placeholder = "Start typing your address...";
+            }
+          };
+          applyPlaceholderToInnerInput();
+          requestAnimationFrame(applyPlaceholderToInnerInput);
+
+          placeAutocomplete.addEventListener("input", (event: Event) => {
+            if (placeSelectedRef.current) {
+              placeSelectedRef.current = false;
+              return;
+            }
+            const target = event.target as HTMLInputElement | null;
+            const value = target?.value ?? "";
+            updateDataRef.current({ streetAddress: value });
+          });
+
+          placeAutocomplete.addEventListener(
+            "gmp-select",
+            async (event: Event) => {
+              const e = event as GmpSelectEvent;
+              placeSelectedRef.current = true;
+              try {
+                const place = e.placePrediction.toPlace();
+                await place.fetchFields({ fields: ["addressComponents"] });
+                const components = place.addressComponents || [];
+                applyPlace(components);
+              } catch (err) {
+                console.error(
+                  "[StepAddress] Failed to fetch place details",
+                  err,
+                );
+              }
+            },
+          );
+
+          container.replaceChildren(placeAutocomplete);
+          elementRef.current = placeAutocomplete;
         } catch (err) {
-          console.error("[StepAddress] Failed to initialize Google Places Autocomplete", err);
+          console.error(
+            "[StepAddress] Failed to initialize PlaceAutocompleteElement",
+            err,
+          );
         }
       })
       .catch((err) => {
-        console.error("[StepAddress] Failed to load Google Maps 'places' library", err);
+        console.error(
+          "[StepAddress] Failed to load Google Maps 'places' library",
+          err,
+        );
       });
 
     return () => {
-      if (autocompleteRef.current) {
-        google.maps.event.clearInstanceListeners(autocompleteRef.current);
-      }
+      cancelled = true;
+      if (container) container.replaceChildren();
+      elementRef.current = null;
     };
-  }, [handlePlaceSelect]);
+  }, [applyPlace]);
 
   const handleNext = () => {
     const result = addressSchema.safeParse({
@@ -142,21 +231,28 @@ export default function StepAddress({ data, updateData, onNext, onBack }: Props)
 
       <div className="space-y-5">
         <div>
-          <label htmlFor="streetAddress" className="block text-sm font-medium text-text-primary mb-1.5">
+          <label
+            htmlFor="streetAddress"
+            className="block text-sm font-medium text-text-primary mb-1.5"
+          >
             Street Address *
           </label>
-          <input
-            ref={inputRef}
-            type="text"
-            id="streetAddress"
-            value={data.streetAddress}
-            onChange={(e) => updateData({ streetAddress: e.target.value })}
-            className={`w-full px-4 py-3 border rounded-lg transition-colors ${
-              errors.streetAddress ? "border-error" : "border-surface-dark focus:border-primary"
+          <div
+            ref={containerRef}
+            className={`gmp-place-autocomplete-wrapper rounded-lg border transition-colors ${
+              errors.streetAddress
+                ? "border-error"
+                : "border-surface-dark focus-within:border-primary"
             }`}
-            placeholder="Start typing your address..."
-            autoComplete="off"
           />
+          {data.streetAddress && (
+            <p className="text-xs text-text-secondary mt-1">
+              Selected:{" "}
+              <span className="text-text-primary font-medium">
+                {data.streetAddress}
+              </span>
+            </p>
+          )}
           {errors.streetAddress && (
             <p className="text-error text-xs mt-1">{errors.streetAddress}</p>
           )}
@@ -164,7 +260,10 @@ export default function StepAddress({ data, updateData, onNext, onBack }: Props)
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
           <div>
-            <label htmlFor="city" className="block text-sm font-medium text-text-primary mb-1.5">
+            <label
+              htmlFor="city"
+              className="block text-sm font-medium text-text-primary mb-1.5"
+            >
               City *
             </label>
             <input
@@ -173,7 +272,9 @@ export default function StepAddress({ data, updateData, onNext, onBack }: Props)
               value={data.city}
               onChange={(e) => updateData({ city: e.target.value })}
               className={`w-full px-4 py-3 border rounded-lg transition-colors ${
-                errors.city ? "border-error" : "border-surface-dark focus:border-primary"
+                errors.city
+                  ? "border-error"
+                  : "border-surface-dark focus:border-primary"
               }`}
               placeholder="New York"
             />
@@ -182,7 +283,10 @@ export default function StepAddress({ data, updateData, onNext, onBack }: Props)
             )}
           </div>
           <div>
-            <label htmlFor="state" className="block text-sm font-medium text-text-primary mb-1.5">
+            <label
+              htmlFor="state"
+              className="block text-sm font-medium text-text-primary mb-1.5"
+            >
               State *
             </label>
             <select
@@ -190,7 +294,9 @@ export default function StepAddress({ data, updateData, onNext, onBack }: Props)
               value={data.state}
               onChange={(e) => updateData({ state: e.target.value })}
               className={`w-full px-4 py-3 border rounded-lg transition-colors ${
-                errors.state ? "border-error" : "border-surface-dark focus:border-primary"
+                errors.state
+                  ? "border-error"
+                  : "border-surface-dark focus:border-primary"
               }`}
             >
               <option value="">Select state</option>
@@ -207,7 +313,10 @@ export default function StepAddress({ data, updateData, onNext, onBack }: Props)
         </div>
 
         <div className="sm:w-1/2">
-          <label htmlFor="zipCode" className="block text-sm font-medium text-text-primary mb-1.5">
+          <label
+            htmlFor="zipCode"
+            className="block text-sm font-medium text-text-primary mb-1.5"
+          >
             ZIP Code *
           </label>
           <input
@@ -216,7 +325,9 @@ export default function StepAddress({ data, updateData, onNext, onBack }: Props)
             value={data.zipCode}
             onChange={(e) => updateData({ zipCode: e.target.value })}
             className={`w-full px-4 py-3 border rounded-lg transition-colors ${
-              errors.zipCode ? "border-error" : "border-surface-dark focus:border-primary"
+              errors.zipCode
+                ? "border-error"
+                : "border-surface-dark focus:border-primary"
             }`}
             placeholder="10001"
           />
@@ -229,15 +340,33 @@ export default function StepAddress({ data, updateData, onNext, onBack }: Props)
       <div className="mt-8">
         <div className="flex items-center justify-end gap-3 mb-2">
           <span className="flex items-center gap-1 text-xs text-text-secondary">
-            <svg className="w-3.5 h-3.5 text-success" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" /></svg>
+            <svg
+              className="w-3.5 h-3.5 text-success"
+              fill="currentColor"
+              viewBox="0 0 20 20"
+            >
+              <path
+                fillRule="evenodd"
+                d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z"
+                clipRule="evenodd"
+              />
+            </svg>
             Your data is protected by bank-level security
           </span>
         </div>
         <div className="flex justify-between">
-          <button type="button" onClick={onBack} className="text-text-secondary hover:text-text-primary font-medium px-6 py-3 transition-colors">
+          <button
+            type="button"
+            onClick={onBack}
+            className="text-text-secondary hover:text-text-primary font-medium px-6 py-3 transition-colors"
+          >
             Back
           </button>
-          <button type="button" onClick={handleNext} className="bg-primary hover:bg-primary-dark text-white px-8 py-3 rounded-lg font-semibold transition-colors">
+          <button
+            type="button"
+            onClick={handleNext}
+            className="bg-primary hover:bg-primary-dark text-white px-8 py-3 rounded-lg font-semibold transition-colors"
+          >
             Continue
           </button>
         </div>
