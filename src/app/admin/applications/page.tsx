@@ -197,7 +197,6 @@ function ApplicationsListContent() {
     status,
     country,
     search,
-    searchInput,
     filterDate,
     sortBy,
     sortOrder,

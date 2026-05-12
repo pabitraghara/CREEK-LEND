@@ -59,14 +59,37 @@ export function AdminAuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const login = async (email: string, password: string) => {
-    const res = await fetch(apiUrl("/api/admin/auth"), {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, password }),
-    });
+    let res: Response;
+    try {
+      res = await fetch(apiUrl("/api/admin/auth"), {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
+    } catch {
+      throw new Error("Cannot reach server. Please try again.");
+    }
 
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error || "Login failed");
+    const text = await res.text();
+    let data: { user?: AdminUser; token?: string; error?: string } = {};
+    if (text) {
+      try {
+        data = JSON.parse(text);
+      } catch {
+        throw new Error(
+          res.ok
+            ? "Unexpected response from server."
+            : `Login failed (${res.status})`,
+        );
+      }
+    }
+
+    if (!res.ok) {
+      throw new Error(data.error || `Login failed (${res.status})`);
+    }
+    if (!data.user || !data.token) {
+      throw new Error("Invalid server response.");
+    }
 
     setUser(data.user);
     setToken(data.token);
