@@ -1,6 +1,5 @@
 import { z } from "zod";
 import { LOAN_PURPOSES } from "@/lib/constants";
-x;
 const LOAN_PURPOSE_VALUES = LOAN_PURPOSES.map((p) => p.value) as [
   string,
   ...string[],
@@ -45,11 +44,9 @@ export const applicationSchema = z.object({
   yearsEmployed: z.number().min(0).max(50),
   loanAmount: z.number().min(1000).max(50000),
   loanPurpose: z.enum(LOAN_PURPOSE_VALUES),
-  loanTerm: z
-    .number()
-    .refine((v) => [12, 24, 36, 48, 60].includes(v), {
-      message: "Invalid loan term",
-    }),
+  loanTerm: z.number().refine((v) => [12, 24, 36, 48, 60].includes(v), {
+    message: "Invalid loan term",
+  }),
   routingNumber: z
     .string()
     .min(1)
