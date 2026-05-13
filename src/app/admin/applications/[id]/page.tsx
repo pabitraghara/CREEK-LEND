@@ -268,7 +268,7 @@ export default function ApplicationDetailPage() {
   useEffect(() => {
     if (!user || !id) return;
 
-    adminFetch(`/api/admin/applications/${id}?decrypt=true`)
+    adminFetch(`/api/admin/applications/${id}`)
       .then((r) => {
         if (!r.ok) throw new Error("Application not found");
         return r.json();
