@@ -1,4 +1,10 @@
 import { z } from "zod";
+import { LOAN_PURPOSES } from "@/lib/constants";
+
+const LOAN_PURPOSE_VALUES = LOAN_PURPOSES.map((p) => p.value) as [
+  string,
+  ...string[],
+];
 
 export const personalInfoSchema = z.object({
   firstName: z
@@ -99,15 +105,7 @@ export const loanDetailsSchema = z.object({
     .number()
     .min(1000, "Minimum loan amount is $1,000")
     .max(50000, "Maximum loan amount is $50,000"),
-  loanPurpose: z.enum([
-    "debt-consolidation",
-    "home-improvement",
-    "medical",
-    "auto",
-    "business",
-    "education",
-    "other",
-  ]),
+  loanPurpose: z.enum(LOAN_PURPOSE_VALUES),
   loanTerm: z.number().refine((v) => [12, 24, 36, 48, 60].includes(v), {
     message: "Please select a valid loan term",
   }),
