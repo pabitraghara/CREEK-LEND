@@ -359,7 +359,7 @@ function ApplicationsListContent() {
                 />
               </button>
             </div>
-            <button
+            {/* <button
               onClick={() => setOpenExportModule(true)}
               className="flex items-center gap-2 px-4 py-2 border border-gray-400 rounded-lg text-sm text-gray-600 cursor-pointer"
             >
@@ -380,7 +380,7 @@ function ApplicationsListContent() {
                 <path d="m7 10 5 5 5-5" />
               </svg>
               Export
-            </button>
+            </button> */}
           </div>
         </div>
 

@@ -4,7 +4,7 @@ export const SITE_DESCRIPTION =
   "Creek Lend is a direct personal loan provider offering competitive rates for debt consolidation, home improvement, medical expenses, and more. Apply online in minutes.";
 export const BUSINESS_EMAIL = "support@creeklend.com";
 
-export const BUSINESS_PHONE = "(747) 200-5228";
+export const BUSINESS_PHONE = "(747) 206-1606";
 
 export const BUSINESS_ADDRESS = {
   street: "355 S Grand Ave, Office #2 W",
@@ -20,7 +20,7 @@ export const BUSINESS_HOURS = {
   sunday: "Closed",
 };
 
-export const BUSINESS_TOLL_FREE = "(747) 200-5228";
+export const BUSINESS_TOLL_FREE = "(747) 206-1606";
 
 export const LOAN_LIMITS = {
   minAmount: 2000,
