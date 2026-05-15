@@ -5,6 +5,8 @@ import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import Link from "next/link";
 import { useAdminAuth, useAdminApi } from "@/lib/admin-auth";
 import { LuRefreshCcw } from "react-icons/lu";
+import { FaArrowDownLong } from "react-icons/fa6";
+import toast from "react-hot-toast";
 
 interface Application {
   id: string;
@@ -113,6 +115,9 @@ function ApplicationsListContent() {
   const [dataLoading, setDataLoading] = useState(true);
 
   const [isResetting, setIsResetting] = useState(false);
+
+  const [openExportModule, setOpenExportModule] = useState(false);
+  const [isExport, setIsExport] = useState(false);
 
   // Sync URL with state
   useEffect(() => {
@@ -223,6 +228,35 @@ function ApplicationsListContent() {
     setPage(1);
   };
 
+  const handelExportLeadsData = async () => {
+    setIsExport(true);
+    try {
+      const response = await adminFetch(`/api/admin/export-applications`);
+
+      const data = await response.text(); // ✅ extract text first
+
+      const blob = new Blob([data], { type: "text/csv" });
+
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+
+      a.href = url;
+      a.download = "leads-applications.csv";
+      document.body.appendChild(a);
+      a.click();
+
+      a.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.log(error);
+      setIsExport(false);
+      toast.error("Export failed");
+    } finally {
+      setIsExport(false);
+      setOpenExportModule(false);
+    }
+  };
+
   const SortIcon = ({ field }: { field: string }) => {
     if (sortBy !== field)
       return <span className="text-gray-300 ml-1">&#8597;</span>;
@@ -325,6 +359,28 @@ function ApplicationsListContent() {
                 />
               </button>
             </div>
+            <button
+              onClick={() => setOpenExportModule(true)}
+              className="flex items-center gap-2 px-4 py-2 border border-gray-400 rounded-lg text-sm text-gray-600 cursor-pointer"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="18"
+                height="18"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="shrink-0 text-gray-600"
+              >
+                <path d="M12 15V3" />
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                <path d="m7 10 5 5 5-5" />
+              </svg>
+              Export
+            </button>
           </div>
         </div>
 
@@ -405,7 +461,7 @@ function ApplicationsListContent() {
             </div>
           ) : applications.length === 0 ? (
             <div className="p-12 text-center text-gray-400">
-              No applications found
+              No applications found for the selected filters.
             </div>
           ) : (
             <div className="overflow-x-auto">
@@ -518,6 +574,66 @@ function ApplicationsListContent() {
             </div>
           )}
         </div>
+        {openExportModule && (
+          <div
+            className={`fixed inset-0 flex items-center justify-center bg-black/40 z-50 transition-opacity duration-200 ${
+              openExportModule ? "opacity-100" : "opacity-0 pointer-events-none"
+            }`}
+          >
+            <div
+              className={`bg-white p-6 rounded-lg shadow-lg transition-all duration-200 w-full max-w-lg ${
+                openExportModule
+                  ? "scale-100 opacity-100"
+                  : "scale-95 opacity-0"
+              }`}
+            >
+              <h3 className="text-lg font-semibold text-maintext">
+                Export All Leads Applications
+              </h3>
+
+              <p className="mt-2 leading-6 text-lightgrey">
+                Export the complete list of lead applications to a CSV file for
+                download and analysis.
+              </p>
+              <div className="flex justify-end gap-2 mt-4">
+                <button
+                  onClick={() => setOpenExportModule(false)}
+                  className="px-3 py-1.5 bg-white text-maintext border border-bordergrey text-sm rounded-md hover:border-gray-500 disabled:opacity-50 transition-colors cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handelExportLeadsData}
+                  className="px-3 py-1.5 bg-primary text-white text-sm rounded-md hover:bg-primary/90 transition-colors cursor-pointer"
+                >
+                  {isExport ? (
+                    <span className="flex items-center gap-2">
+                      Exporting...
+                      <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24">
+                        <circle
+                          className="opacity-25"
+                          cx="12"
+                          cy="12"
+                          r="10"
+                          stroke="currentColor"
+                          strokeWidth="4"
+                          fill="none"
+                        />
+                        <path
+                          className="opacity-75"
+                          fill="currentColor"
+                          d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+                        />
+                      </svg>
+                    </span>
+                  ) : (
+                    "Export"
+                  )}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
