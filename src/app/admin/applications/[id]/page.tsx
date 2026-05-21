@@ -84,27 +84,48 @@ interface AuditEntry {
   created_at: string;
 }
 
+// const STATUS_COLORS: Record<string, string> = {
+//   bank_verification_pending: "bg-yellow-100 text-yellow-800 border-yellow-200",
+//   reviewing: "bg-blue-100 text-blue-800 border-blue-200",
+//   bank_verification_completed: "bg-green-100 text-green-800 border-green-200",
+//   declined: "bg-red-100 text-red-800 border-red-200",
+//   funded: "bg-purple-100 text-purple-800 border-purple-200",
+//   bank_verification_failed: "bg-red-100 text-red-800 border-red-200",
+//   bank_verification_in_progress:
+//     "bg-indigo-100 text-indigo-800 border-indigo-200",
+//   deposit_in_progress: "bg-yellow-100 text-yellow-800",
+// };
+
+// const ALL_STATUSES = [
+//   "bank_verification_pending",
+//   "reviewing",
+//   "bank_verification_completed",
+//   "declined",
+//   "funded",
+//   "bank_verification_failed",
+//   "bank_verification_in_progress",
+//   "deposit_in_progress",
+// ];
+
 const STATUS_COLORS: Record<string, string> = {
   bank_verification_pending: "bg-yellow-100 text-yellow-800 border-yellow-200",
-  reviewing: "bg-blue-100 text-blue-800 border-blue-200",
-  bank_verification_completed: "bg-green-100 text-green-800 border-green-200",
-  declined: "bg-red-100 text-red-800 border-red-200",
-  funded: "bg-purple-100 text-purple-800 border-purple-200",
   bank_verification_failed: "bg-red-100 text-red-800 border-red-200",
-  bank_verification_in_progress:
-    "bg-indigo-100 text-indigo-800 border-indigo-200",
-  deposit_in_progress: "bg-yellow-100 text-yellow-800",
+  verification_deposit_1: "bg-blue-100 text-blue-800 border-blue-200",
+  verification_deposit_2: "bg-blue-100 text-blue-800 border-blue-200",
+  funded: "bg-purple-100 text-purple-800 border-purple-200",
+  declined: "bg-red-100 text-red-800 border-red-200",
+  upfront_needed: "bg-orange-100 text-orange-800 border-orange-200",
+  bank_verification_completed: "bg-green-100 text-green-800 border-green-200",
 };
 
 const ALL_STATUSES = [
   "bank_verification_pending",
-  "reviewing",
-  "bank_verification_completed",
-  "declined",
-  "funded",
   "bank_verification_failed",
-  "bank_verification_in_progress",
-  "deposit_in_progress",
+  "verification_deposit_1",
+  "verification_deposit_2",
+  "funded",
+  "declined",
+  "upfront_needed",
 ];
 
 function formatCurrency(amount: number) {
@@ -1453,10 +1474,10 @@ export default function ApplicationDetailPage() {
                       label="Account"
                       value={bankVerification?.account_type}
                     />
-                    <Field
+                    {/* <Field
                       label="Verification Status"
                       value={bankVerification?.verification_status}
-                    />
+                    /> */}
                     <Field
                       label="Submitted At"
                       value={bankVerification?.created_at}

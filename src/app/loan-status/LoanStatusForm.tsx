@@ -38,7 +38,7 @@ const STATUS_CONFIG: Record<
       "Our team is currently reviewing your application. We will contact you if we need additional information.",
   },
   bank_verification_completed: {
-    label: " Bank Verification Approved",
+    label: " Bank Verification Completed",
     color: "text-green-700",
     bg: "bg-green-50 border-green-200",
     description:
@@ -88,6 +88,27 @@ const STATUS_CONFIG: Record<
   },
   deposit_in_progress: {
     label: "Verification Deposit In Process",
+    description:
+      "A micro-deposit has been initiated to your bank account. Please check your bank statement in 1-2 business days for the deposit amounts and come back to verify them.",
+    color: "text-yellow-700",
+    bg: "bg-yellow-50 border-yellow-200",
+  },
+  upfront_needed: {
+    label: "Upfront Payment Required",
+    description:
+      "An upfront payment is required to proceed with your loan application.",
+    color: "text-orange-700",
+    bg: "bg-orange-50 border-orange-200",
+  },
+  verification_deposit_1: {
+    label: "Verification Deposit 1",
+    description:
+      "A micro-deposit has been initiated to your bank account. Please check your bank statement in 1-2 business days for the deposit amounts and come back to verify them.",
+    color: "text-yellow-700",
+    bg: "bg-yellow-50 border-yellow-200",
+  },
+  verification_deposit_2: {
+    label: "Verification Deposit 2",
     description:
       "A micro-deposit has been initiated to your bank account. Please check your bank statement in 1-2 business days for the deposit amounts and come back to verify them.",
     color: "text-yellow-700",
