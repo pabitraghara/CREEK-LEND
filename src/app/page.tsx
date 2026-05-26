@@ -31,6 +31,7 @@ export default function HomePage() {
                 </Link>
                 <Link
                   href="/how-it-works"
+                  aria-label="Learn how Creek Lend personal loans work"
                   className="border-2 border-white/30 hover:border-white/60 text-white px-8 py-4 rounded-lg font-semibold text-lg text-center transition-all duration-200"
                 >
                   Learn More
