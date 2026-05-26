@@ -3,8 +3,27 @@ import type { NextRequest } from "next/server";
 
 const ALLOWED_COUNTRIES = ["US", "IN", "PK"];
 
+// Only the canonical host should serve content; the apex domain
+// (and any www-less variant) is permanently redirected to it so that
+// both creeklend.com and www.creeklend.com resolve to one indexable URL.
+const CANONICAL_HOST = "www.creeklend.com";
+const APEX_HOST = "creeklend.com";
+
 export function middleware(request: NextRequest) {
-  // Only apply geo-blocking to the apply route and specific API routes
+  const host = request.headers.get("host") ?? "";
+
+  // Redirect the bare apex domain to the canonical www host, preserving
+  // the path and query string. Preview (*.vercel.app) and localhost hosts
+  // are left untouched so they keep working independently.
+  if (host === APEX_HOST) {
+    const url = request.nextUrl.clone();
+    url.protocol = "https:";
+    url.host = CANONICAL_HOST;
+    url.port = "";
+    return NextResponse.redirect(url, 308);
+  }
+
+  // Apply geo-blocking to the apply route and specific API routes
   if (
     request.nextUrl.pathname.startsWith("/apply") ||
     request.nextUrl.pathname.startsWith("/api/bank-verification")
@@ -28,5 +47,8 @@ export function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/apply/:path*", "/api/bank-verification"],
+  // Run on every request except Next.js internals and static assets so the
+  // apex→www redirect covers all pages, while geo-blocking still applies to
+  // its specific routes.
+  matcher: ["/((?!_next/static|_next/image|favicon.ico|.*\\..*).*)"],
 };
