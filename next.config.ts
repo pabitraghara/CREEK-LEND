@@ -1,23 +1,6 @@
 import type { NextConfig } from "next";
-import { execSync } from "node:child_process";
-
-// Stable build ID shared by every running instance of a single deploy.
-// Prefer an explicitly-injected SHA (set at deploy time), then the git commit,
-// and only fall back to a timestamp if neither is available. A consistent
-// build ID across PM2 instances prevents "Failed to find Server Action /
-// older or newer deployment" errors and the silent RSC navigation failures
-// that make <Link> clicks (e.g. the admin nav) appear to do nothing.
-function resolveBuildId(): string {
-  if (process.env.NEXT_PUBLIC_BUILD_ID) return process.env.NEXT_PUBLIC_BUILD_ID;
-  try {
-    return execSync("git rev-parse HEAD").toString().trim();
-  } catch {
-    return `build-${Date.now()}`;
-  }
-}
 
 const nextConfig: NextConfig = {
-  generateBuildId: resolveBuildId,
   poweredByHeader: false,
   compress: true,
   compiler: {
