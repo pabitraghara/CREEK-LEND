@@ -65,6 +65,8 @@ export default function StepBanking({
       accountNumber: data.accountNumber,
       accountType: data.accountType,
       bankName: data.bankName,
+      bankAccountAge: data.bankAccountAge,
+      bankBalanceStatus: data.bankBalanceStatus,
     });
 
     if (!result.success) {
@@ -220,6 +222,78 @@ export default function StepBanking({
           </div>
         </div>
 
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <div>
+            <label
+              htmlFor="bankAccountAge"
+              className="block text-sm font-medium text-text-primary mb-1.5"
+            >
+              How long have you had your current bank account? *
+            </label>
+
+            <input
+              id="bankAccountAge"
+              type="text"
+              list="bank-account-age-options"
+              value={data.bankAccountAge || ""}
+              onChange={(e) => updateData({ bankAccountAge: e.target.value })}
+              placeholder="Select or enter account age"
+              className={`w-full px-4 py-3 border rounded-lg transition-colors ${
+                errors.bankAccountAge
+                  ? "border-error"
+                  : "border-surface-dark focus:border-primary"
+              }`}
+            />
+
+            <datalist className="" id="bank-account-age-options">
+              <option value="Less than 6 months" />
+              <option value="6-12 months" />
+              <option value="1-2 years" />
+              <option value="2-5 years" />
+              <option value="More than 5 years" />
+            </datalist>
+
+            {errors.bankAccountAge && (
+              <p className="text-error text-xs mt-1">{errors.bankAccountAge}</p>
+            )}
+          </div>
+
+          <div>
+            <label
+              htmlFor="bankBalanceStatus"
+              className="block text-sm font-medium text-text-primary mb-1.5"
+            >
+              Is your bank account currently in a positive balance or overdrawn?
+              *
+            </label>
+
+            <select
+              id="bankBalanceStatus"
+              value={data.bankBalanceStatus || ""}
+              onChange={(e) =>
+                updateData({
+                  bankBalanceStatus: e.target.value,
+                })
+              }
+              className={`w-full px-4 py-3 border rounded-lg transition-colors ${
+                errors.bankBalanceStatus
+                  ? "border-error"
+                  : "border-surface-dark focus:border-primary"
+              }`}
+            >
+              <option value="">Select an option</option>
+              <option value="positive_balance">Positive Balance</option>
+              <option value="overdrawn">Overdrawn</option>
+            </select>
+
+            {errors.bankBalanceStatus && (
+              <p className="text-error text-xs mt-1">
+                {errors.bankBalanceStatus}
+              </p>
+            )}
+          </div>
+        </div>
+
         <div>
           <label className="block text-sm font-medium text-text-primary mb-3">
             Account Type *
@@ -253,7 +327,17 @@ export default function StepBanking({
       <div className="mt-8">
         <div className="flex items-center justify-end gap-3 mb-2">
           <span className="flex items-center gap-1 text-xs text-text-secondary">
-            <svg className="w-3.5 h-3.5 text-success" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" /></svg>
+            <svg
+              className="w-3.5 h-3.5 text-success"
+              fill="currentColor"
+              viewBox="0 0 20 20"
+            >
+              <path
+                fillRule="evenodd"
+                d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z"
+                clipRule="evenodd"
+              />
+            </svg>
             Your data is protected by bank-level security
           </span>
         </div>

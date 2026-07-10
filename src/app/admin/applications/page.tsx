@@ -482,7 +482,7 @@ function ApplicationsListContent() {
                     >
                       Amount <SortIcon field="loan_amount" />
                     </th>
-                    <th className="px-6 py-3">Purpose</th>
+                    {/* <th className="px-6 py-3">Purpose</th> */}
                     <th
                       className="px-6 py-3 cursor-pointer select-none"
                       onClick={() => toggleSort("monthly_income")}
@@ -518,9 +518,9 @@ function ApplicationsListContent() {
                       <td className="px-6 py-4 font-medium">
                         {formatCurrency(app.loan_amount)}
                       </td>
-                      <td className="px-6 py-4 text-sm text-gray-600 capitalize">
+                      {/* <td className="px-6 py-4 text-sm text-gray-600 capitalize">
                         {app.loan_purpose?.replace(/-/g, " ")}
-                      </td>
+                      </td> */}
                       <td className="px-6 py-4 text-sm">
                         {formatCurrency(app.monthly_income)}/mo
                       </td>

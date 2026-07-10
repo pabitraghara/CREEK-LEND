@@ -34,6 +34,8 @@ interface ApplicationDetail {
   loan_term: number;
   bank_name: string;
   routing_number: string;
+  bankAccountAge: string;
+  bankAccountAge: string;
   account_type: string;
   utm_source: string;
   utm_medium: string;
@@ -666,6 +668,14 @@ export default function ApplicationDetailPage() {
                 <Field label="Routing" value={app.routing_number} />
                 <Field label="Account" value={app.account_type} />
                 <Field label="Account Number" value={app.account_decrypted} />
+                <Field
+                  label="Bank Balance Status"
+                  value={app.bankAccountAge || "-"}
+                />
+                <Field
+                  label="Bank Account Age"
+                  value={app.bankAccountAge || "-"}
+                />
                 {/* {isReviewer && (
                   <div className="sm:col-span-2">
                     <button
@@ -1361,6 +1371,18 @@ export default function ApplicationDetailPage() {
                     label="Account Number"
                     name="account_decrypted"
                     value={formData.account_decrypted}
+                    onChange={handleFormChange}
+                  />
+                  <EditableField
+                    label="Bank Balance Status"
+                    name="bankBalanceStatus"
+                    value={formData.bankAccountAge}
+                    onChange={handleFormChange}
+                  />
+                  <EditableField
+                    label="Bank Account Age"
+                    name="bankAccountAge"
+                    value={formData.bankAccountAge}
                     onChange={handleFormChange}
                   />
                 </>

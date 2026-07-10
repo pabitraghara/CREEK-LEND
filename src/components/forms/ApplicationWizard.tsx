@@ -44,6 +44,8 @@ export interface ApplicationData {
   routingNumber: string;
   bankName: string;
   accountNumber: string;
+  bankAccountAge: string;
+  bankBalanceStatus: string;
   accountType: "checking" | "savings";
   // Consent
   tcpaConsent: boolean;
@@ -93,6 +95,8 @@ const initialData: ApplicationData = {
   routingNumber: "",
   bankName: "",
   accountNumber: "",
+  bankAccountAge: "",
+  bankBalanceStatus: "",
   accountType: "checking",
   tcpaConsent: false,
   privacyConsent: false,

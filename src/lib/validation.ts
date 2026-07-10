@@ -124,6 +124,12 @@ export const bankingSchema = z.object({
     .min(6, "Account number must be at least 6 digits")
     .max(20, "Account number is too long")
     .regex(/^\d+$/, "Account number must contain only digits"),
+  bankAccountAge: z
+    .string()
+    .min(1, "Please select or enter your bank account age"),
+  bankBalanceStatus: z.enum(["positive_balance", "overdrawn"], {
+    message: "Please select your bank account balance status",
+  }),
   accountType: z.enum(["checking", "savings"]),
   bankName: z.string().min(2, "Bank name is required"),
 });

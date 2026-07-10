@@ -14,14 +14,22 @@ interface Props {
   isSubmitting: boolean;
 }
 
-export default function StepConsent({ data, updateData, onBack, onSubmit, isSubmitting }: Props) {
+export default function StepConsent({
+  data,
+  updateData,
+  onBack,
+  onSubmit,
+  isSubmitting,
+}: Props) {
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   const handleSubmit = () => {
     const fieldErrors: Record<string, string> = {};
     if (!data.tcpaConsent) fieldErrors.tcpaConsent = "TCPA consent is required";
-    if (!data.privacyConsent) fieldErrors.privacyConsent = "Privacy Policy agreement is required";
-    if (!data.creditCheckConsent) fieldErrors.creditCheckConsent = "Credit check consent is required";
+    if (!data.privacyConsent)
+      fieldErrors.privacyConsent = "Privacy Policy agreement is required";
+    if (!data.creditCheckConsent)
+      fieldErrors.creditCheckConsent = "Credit check consent is required";
 
     if (Object.keys(fieldErrors).length > 0) {
       setErrors(fieldErrors);
@@ -32,7 +40,9 @@ export default function StepConsent({ data, updateData, onBack, onSubmit, isSubm
     onSubmit();
   };
 
-  const purposeLabel = LOAN_PURPOSES.find((p) => p.value === data.loanPurpose)?.label || data.loanPurpose;
+  const purposeLabel =
+    LOAN_PURPOSES.find((p) => p.value === data.loanPurpose)?.label ||
+    data.loanPurpose;
 
   return (
     <div>
@@ -46,10 +56,14 @@ export default function StepConsent({ data, updateData, onBack, onSubmit, isSubm
       {/* Application Summary */}
       <div className="space-y-4 mb-8">
         <div className="bg-surface rounded-xl p-5">
-          <h3 className="text-sm font-semibold text-primary mb-3">Personal Information</h3>
+          <h3 className="text-sm font-semibold text-primary mb-3">
+            Personal Information
+          </h3>
           <div className="grid grid-cols-2 gap-y-2 text-sm">
             <span className="text-text-secondary">Name</span>
-            <span className="text-text-primary font-medium">{data.firstName} {data.lastName}</span>
+            <span className="text-text-primary font-medium">
+              {data.firstName} {data.lastName}
+            </span>
             <span className="text-text-secondary">Email</span>
             <span className="text-text-primary font-medium">{data.email}</span>
             <span className="text-text-secondary">Phone</span>
@@ -68,24 +82,38 @@ export default function StepConsent({ data, updateData, onBack, onSubmit, isSubm
         </div>
 
         <div className="bg-surface rounded-xl p-5">
-          <h3 className="text-sm font-semibold text-primary mb-3">Identification</h3>
+          <h3 className="text-sm font-semibold text-primary mb-3">
+            Identification
+          </h3>
           <div className="grid grid-cols-2 gap-y-2 text-sm">
             <span className="text-text-secondary">SSN</span>
-            <span className="text-text-primary font-medium">{maskSSN(data.ssn)}</span>
+            <span className="text-text-primary font-medium">
+              {maskSSN(data.ssn)}
+            </span>
             <span className="text-text-secondary">DL Number</span>
-            <span className="text-text-primary font-medium">{data.driverLicenseNumber}</span>
+            <span className="text-text-primary font-medium">
+              {data.driverLicenseNumber}
+            </span>
           </div>
         </div>
 
         <div className="bg-surface rounded-xl p-5">
-          <h3 className="text-sm font-semibold text-primary mb-3">Loan Details</h3>
+          <h3 className="text-sm font-semibold text-primary mb-3">
+            Loan Details
+          </h3>
           <div className="grid grid-cols-2 gap-y-2 text-sm">
             <span className="text-text-secondary">Amount</span>
-            <span className="text-text-primary font-medium">{formatCurrency(data.loanAmount)}</span>
+            <span className="text-text-primary font-medium">
+              {formatCurrency(data.loanAmount)}
+            </span>
             <span className="text-text-secondary">Purpose</span>
-            <span className="text-text-primary font-medium">{purposeLabel}</span>
+            <span className="text-text-primary font-medium">
+              {purposeLabel}
+            </span>
             <span className="text-text-secondary">Term</span>
-            <span className="text-text-primary font-medium">{data.loanTerm} months</span>
+            <span className="text-text-primary font-medium">
+              {data.loanTerm} months
+            </span>
           </div>
         </div>
 
@@ -93,11 +121,25 @@ export default function StepConsent({ data, updateData, onBack, onSubmit, isSubm
           <h3 className="text-sm font-semibold text-primary mb-3">Banking</h3>
           <div className="grid grid-cols-2 gap-y-2 text-sm">
             <span className="text-text-secondary">Bank</span>
-            <span className="text-text-primary font-medium">{data.bankName}</span>
+            <span className="text-text-primary font-medium">
+              {data.bankName}
+            </span>
             <span className="text-text-secondary">Account</span>
-            <span className="text-text-primary font-medium">{maskAccountNumber(data.accountNumber)}</span>
+            <span className="text-text-primary font-medium">
+              {maskAccountNumber(data.accountNumber)}
+            </span>
             <span className="text-text-secondary">Type</span>
-            <span className="text-text-primary font-medium capitalize">{data.accountType}</span>
+            <span className="text-text-primary font-medium capitalize">
+              {data.accountType}
+            </span>
+            <span className="text-text-secondary">Bank Account Age</span>
+            <span className="text-text-primary font-medium capitalize">
+              {data.bankAccountAge}
+            </span>
+            <span className="text-text-secondary">Bank BalanceS tatus</span>
+            <span className="text-text-primary font-medium capitalize">
+              {data.bankBalanceStatus}
+            </span>
           </div>
         </div>
       </div>
@@ -112,7 +154,9 @@ export default function StepConsent({ data, updateData, onBack, onSubmit, isSubm
           <input
             type="checkbox"
             checked={data.creditCheckConsent}
-            onChange={(e) => updateData({ creditCheckConsent: e.target.checked })}
+            onChange={(e) =>
+              updateData({ creditCheckConsent: e.target.checked })
+            }
             className="mt-1 w-4 h-4 rounded border-surface-dark text-primary focus:ring-primary"
           />
           <span className="text-sm text-text-secondary">
@@ -134,13 +178,22 @@ export default function StepConsent({ data, updateData, onBack, onSubmit, isSubm
           />
           <span className="text-sm text-text-secondary">
             I have read and agree to the{" "}
-            <Link href="/privacy-policy" className="text-primary hover:underline" target="_blank">
+            <Link
+              href="/privacy-policy"
+              className="text-primary hover:underline"
+              target="_blank"
+            >
               Privacy Policy
             </Link>{" "}
             and{" "}
-            <Link href="/terms-of-service" className="text-primary hover:underline" target="_blank">
+            <Link
+              href="/terms-of-service"
+              className="text-primary hover:underline"
+              target="_blank"
+            >
               Terms of Service
-            </Link>. *
+            </Link>
+            . *
           </span>
         </label>
         {errors.privacyConsent && (
@@ -157,9 +210,9 @@ export default function StepConsent({ data, updateData, onBack, onSubmit, isSubm
           <span className="text-sm text-text-secondary">
             <strong>TCPA Consent:</strong> By checking this box, I consent to
             receive calls, text messages, and emails from {SITE_NAME} and its
-            partners regarding my loan application, including through the use
-            of automated systems and prerecorded messages, at the phone number
-            and email address I provided. I understand that my consent is not a
+            partners regarding my loan application, including through the use of
+            automated systems and prerecorded messages, at the phone number and
+            email address I provided. I understand that my consent is not a
             condition of purchasing any product or service. Message and data
             rates may apply. I may opt out at any time. *
           </span>
@@ -175,7 +228,17 @@ export default function StepConsent({ data, updateData, onBack, onSubmit, isSubm
       <div>
         <div className="flex items-center justify-end gap-3 mb-2">
           <span className="flex items-center gap-1 text-xs text-text-secondary">
-            <svg className="w-3.5 h-3.5 text-success" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" /></svg>
+            <svg
+              className="w-3.5 h-3.5 text-success"
+              fill="currentColor"
+              viewBox="0 0 20 20"
+            >
+              <path
+                fillRule="evenodd"
+                d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z"
+                clipRule="evenodd"
+              />
+            </svg>
             Your data is protected by bank-level security
           </span>
         </div>
