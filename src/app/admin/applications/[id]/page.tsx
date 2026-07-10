@@ -34,8 +34,8 @@ interface ApplicationDetail {
   loan_term: number;
   bank_name: string;
   routing_number: string;
-  bankAccountAge: string;
-  bankAccountAge: string;
+  bank_account_age: string;
+  bank_balance_status: string;
   account_type: string;
   utm_source: string;
   utm_medium: string;
@@ -330,6 +330,8 @@ export default function ApplicationDetailPage() {
         loan_term: app.loan_term,
         bank_name: app.bank_name,
         routing_number: app.routing_number,
+        bank_balance_status: app?.bank_balance_status,
+        bank_account_age: app?.bank_account_age,
         account_decrypted: app?.account_decrypted,
         account_type: app.account_type,
         dl_decrypted: app?.dl_decrypted,
@@ -670,11 +672,11 @@ export default function ApplicationDetailPage() {
                 <Field label="Account Number" value={app.account_decrypted} />
                 <Field
                   label="Bank Balance Status"
-                  value={app.bankAccountAge || "-"}
+                  value={app.bank_balance_status || "-"}
                 />
                 <Field
                   label="Bank Account Age"
-                  value={app.bankAccountAge || "-"}
+                  value={app.bank_account_age || "-"}
                 />
                 {/* {isReviewer && (
                   <div className="sm:col-span-2">
@@ -1373,18 +1375,53 @@ export default function ApplicationDetailPage() {
                     value={formData.account_decrypted}
                     onChange={handleFormChange}
                   />
-                  <EditableField
+                  {/* <EditableField
                     label="Bank Balance Status"
                     name="bankBalanceStatus"
-                    value={formData.bankAccountAge}
+                    value={formData.bank_balance_status}
                     onChange={handleFormChange}
-                  />
-                  <EditableField
-                    label="Bank Account Age"
-                    name="bankAccountAge"
-                    value={formData.bankAccountAge}
-                    onChange={handleFormChange}
-                  />
+                  /> */}
+                  {/* <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Bank Balance Status
+                    </label>
+                    <select
+                      name="bankBalanceStatus"
+                      value={formData.bank_balance_status || ""}
+                      onChange={(e) =>
+                        handleFormChange("bank_balance_status", e.target.value)
+                      }
+                      className="w-full rounded-md border border-gray-300 px-3 py-2 focus:border-primary focus:outline-none"
+                    >
+                      <option value="">Select Status</option>
+                      <option value="positive_balance">Positive Balance</option>
+                      <option value="overdrawn">Overdrawn</option>
+                    </select>
+                  </div> */}
+                  {/* <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Bank Account Age
+                    </label>
+                    <select
+                      name="bankAccountAge"
+                      value={formData.bank_account_age || ""}
+                      onChange={(e) =>
+                        handleFormChange("bank_account_age", e.target.value)
+                      }
+                      className="w-full rounded-md border border-gray-300 px-3 py-2 focus:border-primary focus:outline-none"
+                    >
+                      <option value="">Select Account Age</option>
+                      <option value="Less than 6 months">
+                        Less than 6 months
+                      </option>
+                      <option value="6-12 months">6–12 months</option>
+                      <option value="1-2 years">1–2 years</option>
+                      <option value="2-5 years">2–5 years</option>
+                      <option value="More than 5 years">
+                        More than 5 years
+                      </option>
+                    </select>
+                  </div> */}
                 </>
               ) : (
                 <>
@@ -1392,6 +1429,14 @@ export default function ApplicationDetailPage() {
                   <Field label="Routing" value={app.routing_number} />
                   <Field label="Account" value={app.account_type} />
                   <Field label="Account Number" value={app.account_decrypted} />
+                  <Field
+                    label="Bank Balance Status"
+                    value={app.bank_balance_status || "-"}
+                  />
+                  <Field
+                    label="Bank Account Age"
+                    value={app.bank_account_age || "-"}
+                  />
                 </>
               )}
             </Section>
