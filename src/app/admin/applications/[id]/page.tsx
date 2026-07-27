@@ -10,6 +10,7 @@ import {
   LOAN_PURPOSES,
   US_STATES,
 } from "@/lib/constants";
+import { formatDateTime } from "@/lib/datetime";
 
 interface ApplicationDetail {
   id: string;
@@ -46,7 +47,7 @@ interface ApplicationDetail {
   user_agent: string;
   created_at: string;
   updated_at: string;
-  reviewed_at: string | null;
+  reviewed_at: string;
   funded_at: string | null;
   // Decrypted fields (optional)
   ssn_decrypted?: string;
@@ -778,7 +779,7 @@ export default function ApplicationDetailPage() {
                             )}
                         </div>
                         <span className="text-xs text-gray-400 whitespace-nowrap">
-                          {formatDate(entry.created_at)}
+                          {formatDateTime(entry.created_at)}
                         </span>
                       </div>
                     ))}
@@ -1547,7 +1548,7 @@ export default function ApplicationDetailPage() {
                     /> */}
                     <Field
                       label="Submitted At"
-                      value={bankVerification?.created_at}
+                      value={formatDateTime(bankVerification?.created_at)}
                     />
                   </>
                 )}
@@ -1566,10 +1567,22 @@ export default function ApplicationDetailPage() {
 
             {/* Timestamps */}
             <Section title="Timestamps">
-              <Field label="Created" value={formatDate(app.created_at)} />
-              <Field label="Updated" value={formatDate(app.updated_at)} />
-              <Field label="Reviewed" value={formatDate(app.reviewed_at)} />
-              <Field label="Funded" value={formatDate(app.funded_at)} />
+              <Field
+                label="Created"
+                value={app.created_at ? formatDateTime(app.created_at) : "—"}
+              />
+              <Field
+                label="Updated"
+                value={app.updated_at ? formatDateTime(app.updated_at) : "—"}
+              />
+              <Field
+                label="Reviewed"
+                value={app.reviewed_at ? formatDateTime(app.reviewed_at) : "—"}
+              />
+              <Field
+                label="Funded"
+                value={app.funded_at ? formatDateTime(app.funded_at) : "—"}
+              />
               <Field label="IP Address" value={app.ip_address} />
             </Section>
 
@@ -1601,7 +1614,7 @@ export default function ApplicationDetailPage() {
                           )}
                       </div>
                       <span className="text-xs text-gray-400 whitespace-nowrap">
-                        {formatDate(entry.created_at)}
+                        {formatDateTime(entry.created_at)}
                       </span>
                     </div>
                   ))}

@@ -156,7 +156,7 @@ export default function StepLoanDetails({
         </div>
 
         {data.loanTerm > 0 && (
-          <div className="bg-primary/5 border border-primary/20 rounded-xl px-5 py-4 flex items-center justify-between">
+          <div className="bg-primary/5 border border-primary/20 rounded-xl px-5 py-4 flex items-center justify-between gap-5">
             <div>
               <p className="text-xs font-semibold text-text-secondary uppercase tracking-wide mb-0.5">
                 Estimated Monthly Payment

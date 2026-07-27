@@ -9,6 +9,7 @@ import { CiCirclePlus } from "react-icons/ci";
 import { FaEyeSlash, FaRegEye } from "react-icons/fa";
 import { FaDeleteLeft } from "react-icons/fa6";
 import { FiDelete } from "react-icons/fi";
+import { formatDateTime } from "@/lib/datetime";
 
 interface User {
   id: string;
@@ -392,7 +393,7 @@ function UsersListContent() {
                         </span>
                       </td>
                       <td className="px-6 py-4 text-sm text-gray-500">
-                        {formatDate(u.created_at)}
+                        {formatDateTime(u.created_at)}
                       </td>
                       {user?.role === "admin" && (
                         <td className="px-6 py-4">

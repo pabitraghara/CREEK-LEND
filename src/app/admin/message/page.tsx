@@ -5,6 +5,7 @@ import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import Link from "next/link";
 import { useAdminAuth, useAdminApi } from "@/lib/admin-auth";
 import { LuRefreshCcw } from "react-icons/lu";
+import { formatDateTime } from "@/lib/datetime";
 
 interface Message {
   id: string;
@@ -295,7 +296,7 @@ function MessagesListContent() {
                         </span>
                       </td> */}
                       <td className="px-6 py-4 text-sm text-gray-500">
-                        {formatDate(m.created_at)}
+                        {formatDateTime(m.created_at)}
                       </td>
                     </tr>
                   ))}

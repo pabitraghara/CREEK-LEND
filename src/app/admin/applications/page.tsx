@@ -7,6 +7,7 @@ import { useAdminAuth, useAdminApi } from "@/lib/admin-auth";
 import { LuRefreshCcw } from "react-icons/lu";
 import { FaArrowDownLong } from "react-icons/fa6";
 import toast from "react-hot-toast";
+import { formatDateTime, todayStr } from "@/lib/datetime";
 
 interface Application {
   id: string;
@@ -104,7 +105,7 @@ function ApplicationsListContent() {
     searchParams.get("search")?.trim() || "",
   );
   const [filterDate, setFilterDate] = useState(
-    searchParams.get("date") || new Date().toISOString().split("T")[0],
+    searchParams.get("date") || todayStr(),
   );
   const [sortBy, setSortBy] = useState(
     searchParams.get("sortBy") || "created_at",
@@ -154,7 +155,7 @@ function ApplicationsListContent() {
     setCountry("all");
     setSearch("");
     setSearchInput("");
-    setFilterDate(new Date().toISOString().split("T")[0]);
+    setFilterDate(todayStr());
     setSortBy("created_at");
     setSortOrder("desc");
 
@@ -421,10 +422,10 @@ function ApplicationsListContent() {
               }}
               className="px-3 py-1.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary outline-none"
             />
-            {filterDate !== new Date().toISOString().split("T")[0] && (
+            {filterDate !== todayStr() && (
               <button
                 onClick={() => {
-                  setFilterDate(new Date().toISOString().split("T")[0]);
+                  setFilterDate(todayStr());
                   setPage(1);
                 }}
                 className="text-xs text-primary hover:underline cursor-pointer"
@@ -532,7 +533,7 @@ function ApplicationsListContent() {
                         </span>
                       </td>
                       <td className="px-6 py-4 text-sm text-gray-500">
-                        {formatDate(app.created_at)}
+                        {formatDateTime(app.created_at)}
                       </td>
                       <td className="px-6 py-4">
                         <Link

@@ -210,7 +210,7 @@ export default function StepAddress({
               </span>
             )} */}
           </div>
-          <input
+          {/* <input
             key={apiError ? "manual" : "google"}
             ref={inputRef}
             type="text"
@@ -228,15 +228,28 @@ export default function StepAddress({
                 : "Enter street address (e.g., 123 Main St)"
             }
             autoComplete="off"
+          /> */}
+          <input
+            type="text"
+            id="streetAddress"
+            value={data.streetAddress}
+            onChange={(e) => updateData({ streetAddress: e.target.value })}
+            className={`w-full px-4 py-3 border rounded-lg transition-colors ${
+              errors.streetAddress
+                ? "border-error"
+                : "border-surface-dark focus:border-primary"
+            }`}
+            placeholder="Enter street address (e.g., 123 Main St)"
+            autoComplete="street-address"
           />
           {errors.streetAddress && (
             <p className="text-error text-xs mt-1">{errors.streetAddress}</p>
           )}
-          {!isGoogleApiLoaded && (
+          {/* {!isGoogleApiLoaded && (
             <p className="text-text-secondary text-xs mt-1">
               Please enter your address manually
             </p>
-          )}
+          )} */}
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">

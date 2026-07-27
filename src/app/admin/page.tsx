@@ -6,6 +6,7 @@ import Link from "next/link";
 import { useAdminAuth, useAdminApi } from "@/lib/admin-auth";
 import Image from "next/image";
 import { SITE_NAME } from "@/lib/constants";
+import { formatDateTime } from "@/lib/datetime";
 
 interface Stats {
   total: number;
@@ -329,7 +330,7 @@ export default function AdminDashboard() {
                             </span>
                           </td>
                           <td className="px-6 py-4 text-sm text-gray-500">
-                            {formatDate(app.created_at)}
+                            {formatDateTime(app.created_at)}
                           </td>
                           <td className="px-6 py-4">
                             <Link
