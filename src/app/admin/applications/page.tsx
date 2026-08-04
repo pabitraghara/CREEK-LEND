@@ -30,25 +30,33 @@ interface Application {
 
 const STATUS_COLORS: Record<string, string> = {
   bank_verification_pending: "bg-yellow-100 text-yellow-800",
-  reviewing: "bg-blue-100 text-blue-800",
+  // reviewing: "bg-blue-100 text-blue-800",
   bank_verification_completed: "bg-green-100 text-green-800",
-  declined: "bg-red-100 text-red-800",
+  // declined: "bg-red-100 text-red-800",
+  declined_pb: "bg-red-100 text-red-800",
+  declined_hd: "bg-red-100 text-red-800",
   funded: "bg-purple-100 text-purple-800",
-  bank_verification_failed: "bg-red-100 text-red-800",
-  bank_verification_in_progress: "bg-indigo-100 text-indigo-800",
-  deposit_in_progress: "bg-yellow-100 text-yellow-800",
+  // bank_verification_failed: "bg-red-100 text-red-800",
+  // bank_verification_in_progress: "bg-indigo-100 text-indigo-800",
+  // deposit_in_progress: "bg-yellow-100 text-yellow-800",
+  bank_reverification: "bg-amber-100 text-amber-800",
+  request_a_call: "bg-indigo-100 text-indigo-800",
 };
 
 const STATUSES = [
   "all",
-  "bank_verification_pending",
-  "reviewing",
-  "bank_verification_completed",
-  "declined",
+  // "bank_verification_pending",
+  // "reviewing",
+  // "bank_verification_completed",
+  // "declined",
+  "declined_pb",
+  "declined_hd",
   "funded",
-  "bank_verification_failed",
-  "bank_verification_in_progress",
-  "deposit_in_progress",
+  // "bank_verification_failed",
+  // "bank_verification_in_progress",
+  // "deposit_in_progress",
+  "bank_reverification",
+  "request_a_call",
 ];
 const COUNTRIES = ["all", "US"];
 

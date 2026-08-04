@@ -112,25 +112,32 @@ interface AuditEntry {
 
 const STATUS_COLORS: Record<string, string> = {
   bank_verification_pending: "bg-yellow-100 text-yellow-800 border-yellow-200",
-  bank_verification_failed: "bg-red-100 text-red-800 border-red-200",
-  verification_deposit_1: "bg-blue-100 text-blue-800 border-blue-200",
-  verification_deposit_2: "bg-blue-100 text-blue-800 border-blue-200",
+  // bank_verification_failed: "bg-red-100 text-red-800 border-red-200",
+  // verification_deposit_1: "bg-blue-100 text-blue-800 border-blue-200",
+  // verification_deposit_2: "bg-blue-100 text-blue-800 border-blue-200",
   funded: "bg-purple-100 text-purple-800 border-purple-200",
-  declined: "bg-red-100 text-red-800 border-red-200",
-  upfront_needed: "bg-orange-100 text-orange-800 border-orange-200",
+  // declined: "bg-red-100 text-red-800 border-red-200",
+  declined_pb: "bg-red-100 text-red-800 border-red-200",
+  declined_hd: "bg-red-100 text-red-800 border-red-200",
+  bank_reverification: "bg-amber-100 text-amber-800 border-amber-200",
+  request_a_call: "bg-indigo-100 text-indigo-800 border-indigo-200",
+  // upfront_needed: "bg-orange-100 text-orange-800 border-orange-200",
   bank_verification_completed: "bg-green-100 text-green-800 border-green-200",
 };
 
 const ALL_STATUSES = [
-  "bank_verification_pending",
-  "bank_verification_failed",
-  "verification_deposit_1",
-  "verification_deposit_2",
+  // "bank_verification_pending",
+  // "bank_verification_failed",
+  // "verification_deposit_1",
+  // "verification_deposit_2",
   "funded",
-  "declined",
-  "upfront_needed",
+  // "declined",
+  "declined_pb",
+  "declined_hd",
+  "bank_reverification",
+  "request_a_call",
+  // "upfront_needed",
 ];
-
 function formatCurrency(amount: number) {
   return new Intl.NumberFormat("en-US", {
     style: "currency",
