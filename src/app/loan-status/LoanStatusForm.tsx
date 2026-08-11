@@ -56,7 +56,7 @@ const STATUS_CONFIG: Record<
     color: "text-indigo-700",
     bg: "bg-indigo-50 border-indigo-200",
     description:
-      "Urgent action is required. Please call our underwriting team at (747) 832-3181 to discuss your application and next steps.",
+      "Urgent action is required. Please call our underwriting team at (747) 208-3657 to discuss your application and next steps.",
   },
 
   declined_pb: {
@@ -64,7 +64,7 @@ const STATUS_CONFIG: Record<
     color: "text-red-700",
     bg: "bg-red-50 border-red-200",
     description:
-      "Your application was declined because the bank account provided is an online-only or prepaid account. Contact us at (747) 832-3181 if you have a traditional checking account you would like to add.",
+      "Your application was declined because the bank account provided is an online-only or prepaid account. Contact us at (747) 208-3657 if you have a traditional checking account you would like to add.",
   },
 
   declined_hd: {
