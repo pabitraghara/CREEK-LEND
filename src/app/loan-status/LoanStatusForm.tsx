@@ -56,21 +56,23 @@ const STATUS_CONFIG: Record<
     color: "text-indigo-700",
     bg: "bg-indigo-50 border-indigo-200",
     description:
-      "A member of our team will contact you shortly to discuss your application and next steps.",
+      "Urgent action is required. Please call our underwriting team at (747) 832-3181 to discuss your application and next steps.",
   },
+
   declined_pb: {
-    label: "Declined",
+    label: "Declined PB",
     color: "text-red-700",
     bg: "bg-red-50 border-red-200",
     description:
-      "Your application was declined. Please contact our support team if you have questions or want to reapply.",
+      "Your application was declined because the bank account provided is an online-only or prepaid account. Contact us at (747) 832-3181 if you have a traditional checking account you would like to add.",
   },
+
   declined_hd: {
-    label: "Declined",
+    label: "Declined HD",
     color: "text-red-700",
     bg: "bg-red-50 border-red-200",
     description:
-      "Your application was declined. Please contact our support team if you have questions or want to reapply.",
+      "Your application was declined after review due to an unstable repayment history and a high debt-to-income (DTI) ratio.",
   },
   bank_verification_completed: {
     label: "Bank Verification Completed",
