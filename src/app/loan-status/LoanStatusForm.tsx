@@ -37,19 +37,47 @@ const STATUS_CONFIG: Record<
     description:
       "Our team is currently reviewing your application. We will contact you if we need additional information.",
   },
-  bank_verification_completed: {
-    label: " Bank Verification Completed",
-    color: "text-green-700",
-    bg: "bg-green-50 border-green-200",
+  bank_verification_pending: {
+    label: "Bank Verification Pending",
+    color: "text-blue-700",
+    bg: "bg-blue-50 border-blue-200",
     description:
-      "Congratulations! Your loan application has been approved. Funds will be disbursed shortly.",
+      "Please complete your bank verification so we can move your application forward.",
   },
-  declined: {
+  bank_reverification: {
+    label: "Bank Reverification Required",
+    color: "text-amber-700",
+    bg: "bg-amber-50 border-amber-200",
+    description:
+      "Your bank verification needs to be completed again. Please update your bank details to continue.",
+  },
+  request_a_call: {
+    label: "Review Call Requested",
+    color: "text-indigo-700",
+    bg: "bg-indigo-50 border-indigo-200",
+    description:
+      "A member of our team will contact you shortly to discuss your application and next steps.",
+  },
+  declined_pb: {
     label: "Declined",
     color: "text-red-700",
     bg: "bg-red-50 border-red-200",
     description:
-      "Unfortunately, your application was not approved at this time. Please contact us for more details.",
+      "Your application was declined. Please contact our support team if you have questions or want to reapply.",
+  },
+  declined_hd: {
+    label: "Declined",
+    color: "text-red-700",
+    bg: "bg-red-50 border-red-200",
+    description:
+      "Your application was declined. Please contact our support team if you have questions or want to reapply.",
+  },
+  bank_verification_completed: {
+    label: "Bank Verification Completed",
+    color: "text-green-700",
+    bg: "bg-green-50 border-green-200",
+    description:
+      "Your bank verification is complete. We are finalizing the loan and will update you with next steps.",
   },
   funded: {
     label: "Funded",
@@ -57,13 +85,6 @@ const STATUS_CONFIG: Record<
     bg: "bg-emerald-50 border-emerald-200",
     description:
       "Your loan has been funded and the amount has been disbursed to your bank account.",
-  },
-  bank_verification_pending: {
-    label: "Pending: Bank Verification",
-    color: "text-blue-700",
-    bg: "bg-blue-50 border-blue-200",
-    description:
-      "To finish setting up your account, please verify your bank details. Log in securely using your online banking username and password.",
   },
   pending_bank_verification: {
     label: "Bank Verification Required",
@@ -330,7 +351,8 @@ export default function LoanStatusForm() {
           {(loan.status === "bank_verification_pending" ||
             loan.status === "pending_bank_verification" ||
             loan.status === "reviewing" ||
-            loan.status === "bank_verification_failed") && (
+            loan.status === "bank_verification_failed" ||
+            loan.status === "bank_reverification") && (
             <div className="bg-white rounded-2xl shadow-lg p-6 border border-surface-dark text-center">
               <h3 className="text-lg font-bold text-text-primary mb-2">
                 Complete Bank Verification
