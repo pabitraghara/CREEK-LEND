@@ -238,29 +238,79 @@ function ApplicationsListContent() {
     setPage(1);
   };
 
-  const handelExportLeadsData = async () => {
+  const handleExportLeadsData = async () => {
+    if (isExport) return;
+
     setIsExport(true);
+
     try {
-      const response = await adminFetch(`/api/admin/export-applications`);
+      const startResponse = await adminFetch(
+        "/api/admin/export-applications/start",
+        {
+          method: "POST",
+        },
+      );
 
-      const data = await response.text(); // ✅ extract text first
+      const startData = await startResponse.json();
 
-      const blob = new Blob([data], { type: "text/csv" });
+      if (!startResponse.ok) {
+        throw new Error(startData.error || "Failed to start export");
+      }
 
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement("a");
+      const jobId = startData.jobId;
 
-      a.href = url;
-      a.download = "leads-applications.csv";
-      document.body.appendChild(a);
-      a.click();
+      toast("CSV export is being generated...", {
+        icon: "ℹ️",
+      });
 
-      a.remove();
-      window.URL.revokeObjectURL(url);
+      while (true) {
+        await new Promise((resolve) => setTimeout(resolve, 2000));
+
+        const response = await adminFetch(
+          `/api/admin/export-applications/${jobId}/status`,
+        );
+
+        const status = await response.json();
+
+        console.log(`[CSV] ${status.progress}%`);
+
+        if (status.status === "failed") {
+          throw new Error(status.error_message || "CSV export failed.");
+        }
+
+        if (status.status === "completed") {
+          const download = await adminFetch(
+            `/api/admin/export-applications/${jobId}/download`,
+          );
+
+          if (!download.ok) {
+            throw new Error("CSV download failed.");
+          }
+
+          const blob = await download.blob();
+
+          const url = URL.createObjectURL(blob);
+
+          const link = document.createElement("a");
+
+          link.href = url;
+          link.download = "applications.csv";
+
+          document.body.appendChild(link);
+          link.click();
+          link.remove();
+
+          URL.revokeObjectURL(url);
+
+          toast.success("CSV downloaded successfully.");
+
+          break;
+        }
+      }
     } catch (error) {
-      console.log(error);
-      setIsExport(false);
-      toast.error("Export failed");
+      console.error("[CSV] Export error:", error);
+
+      toast.error(error instanceof Error ? error.message : "Export failed");
     } finally {
       setIsExport(false);
       setOpenExportModule(false);
@@ -369,28 +419,30 @@ function ApplicationsListContent() {
                 />
               </button>
             </div>
-            {/* <button
-              onClick={() => setOpenExportModule(true)}
-              className="flex items-center gap-2 px-4 py-2 border border-gray-400 rounded-lg text-sm text-gray-600 cursor-pointer"
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="18"
-                height="18"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                className="shrink-0 text-gray-600"
+            {user.name === "Pabitra" && (
+              <button
+                onClick={() => setOpenExportModule(true)}
+                className="flex items-center gap-2 px-4 py-2 border border-gray-400 rounded-lg text-sm text-gray-600 cursor-pointer"
               >
-                <path d="M12 15V3" />
-                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-                <path d="m7 10 5 5 5-5" />
-              </svg>
-              Export
-            </button> */}
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="18"
+                  height="18"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className="shrink-0 text-gray-600"
+                >
+                  <path d="M12 15V3" />
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                  <path d="m7 10 5 5 5-5" />
+                </svg>
+                Export
+              </button>
+            )}
           </div>
         </div>
 
@@ -613,32 +665,10 @@ function ApplicationsListContent() {
                   Cancel
                 </button>
                 <button
-                  onClick={handelExportLeadsData}
+                  onClick={handleExportLeadsData}
                   className="px-3 py-1.5 bg-primary text-white text-sm rounded-md hover:bg-primary/90 transition-colors cursor-pointer"
                 >
-                  {isExport ? (
-                    <span className="flex items-center gap-2">
-                      Exporting...
-                      <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24">
-                        <circle
-                          className="opacity-25"
-                          cx="12"
-                          cy="12"
-                          r="10"
-                          stroke="currentColor"
-                          strokeWidth="4"
-                          fill="none"
-                        />
-                        <path
-                          className="opacity-75"
-                          fill="currentColor"
-                          d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
-                        />
-                      </svg>
-                    </span>
-                  ) : (
-                    "Export"
-                  )}
+                  {isExport ? "Exporting..." : "Download All CSV"}
                 </button>
               </div>
             </div>
