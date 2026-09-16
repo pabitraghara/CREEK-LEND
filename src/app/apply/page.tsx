@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { BreadcrumbSchema } from "@/components/ui/JsonLd";
-import ApplicationWizard from "@/components/forms/ApplicationWizard";
+import ApplicationFlow from "@/components/forms/apply/ApplicationFlow";
 
 export const metadata: Metadata = {
   title: "Apply for a Personal Loan",
@@ -32,8 +32,8 @@ export default function ApplyPage() {
       </section>
 
       <section className="py-8 sm:py-12">
-        <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
-          <ApplicationWizard />
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+          <ApplicationFlow />
         </div>
       </section>
     </>

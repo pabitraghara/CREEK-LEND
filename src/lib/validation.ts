@@ -103,7 +103,7 @@ export const employmentSchema = z.object({
 export const loanDetailsSchema = z.object({
   loanAmount: z
     .number()
-    .min(1000, "Minimum loan amount is $1,000")
+    .min(2000, "Minimum loan amount is $2,000")
     .max(50000, "Maximum loan amount is $50,000"),
   loanPurpose: z.enum(LOAN_PURPOSE_VALUES),
   loanTerm: z.number().refine((v) => [12, 24, 36, 48, 60].includes(v), {

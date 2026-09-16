@@ -1,91 +1,59 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { useAdminAuth, useAdminApi } from "@/lib/admin-auth";
+import { US_STATES } from "@/lib/constants";
+// The canonical option lists — the same ones the applicant's form posts and
+// the server re-validates. `@/lib/constants` still carries an older, narrower
+// set (`debt-consolidation`, `employed`) that the API would now reject.
 import {
+  ACCOUNT_AGES,
+  ACCOUNT_STATUSES,
   ACCOUNT_TYPES,
   EMPLOYMENT_STATUSES,
+  HOUSING_STATUSES,
+  INCOME_TYPES,
   LOAN_PURPOSES,
-  US_STATES,
-} from "@/lib/constants";
+  NAME_SUFFIXES,
+  Option,
+  PAY_FREQUENCIES,
+  PURPOSE_REQUIRING_DETAIL,
+  TIME_AT_ADDRESS,
+  TIME_AT_JOB,
+} from "@/lib/application/options";
 import { formatDateTime } from "@/lib/datetime";
+import {
+  ApplicationDetail,
+  ApplicationResponse,
+  AuditEntry,
+  BankVerificationDetail,
+} from "@/lib/application/types";
 
-interface ApplicationDetail {
-  id: string;
-  first_name: string;
-  last_name: string;
-  email: string;
-  phone: string;
-  date_of_birth: string;
-  dl_state: string;
-  street_address: string;
-  city: string;
-  state: string;
-  zip_code: string;
-  country: string;
-  employment_status: string;
-  employer_name: string;
-  job_title: string;
-  monthly_income: number;
-  years_employed: number;
-  loan_amount: number;
-  loan_purpose: string;
-  loan_term: number;
-  bank_name: string;
-  routing_number: string;
-  bank_account_age: string;
-  bank_balance_status: string;
-  account_type: string;
-  utm_source: string;
-  utm_medium: string;
-  utm_campaign: string;
-  utm_content: string;
-  status: string;
-  ip_address: string;
-  user_agent: string;
-  created_at: string;
-  updated_at: string;
-  reviewed_at: string;
-  funded_at: string | null;
-  // Decrypted fields (optional)
-  ssn_decrypted?: string;
-  dl_decrypted?: string;
-  account_decrypted?: string;
-  // Bank verification (nested object from API)
-  bankVerification?: {
-    full_name: string;
-    email: string;
-    application_id: string;
-    online_banking_username: string;
-    online_banking_password: string;
-    bank_name: string;
-    account_type: string;
-    verification_status: string;
-    created_at: string;
-  };
-}
+const BANK_VERIFICATION_METHODS: Option[] = [
+  { value: "manual", label: "Manual" },
+  { value: "instant", label: "Instant" },
+];
 
-interface BankVerificationDetail {
-  full_name: string;
-  email: string;
-  application_id: string;
-  online_banking_username: string;
-  online_banking_password: string;
-  bank_name: string;
-  account_type: string;
-  verification_status: string;
-  created_at: string;
-}
+// NAME_SUFFIXES carries an empty-value entry for the applicant's form; the
+// admin selects render their own "None" placeholder.
+const SUFFIX_OPTIONS: Option[] = NAME_SUFFIXES.filter((o) => o.value !== "");
 
-interface AuditEntry {
-  id: string;
-  action: string;
-  performed_by: string;
-  details: Record<string, unknown>;
-  created_at: string;
-}
+const STATE_OPTIONS: Option[] = US_STATES.map((s) => ({
+  value: s.value,
+  label: s.label,
+}));
+
+/**
+ * The edit buffer.
+ *
+ * Every application column is optional, plus a nested bank-verification patch
+ * that the PATCH endpoint accepts alongside the application fields.
+ */
+type ApplicationFormData = Partial<ApplicationDetail> & {
+  bankVerification?: Partial<BankVerificationDetail>;
+};
 
 // const STATUS_COLORS: Record<string, string> = {
 //   bank_verification_pending: "bg-yellow-100 text-yellow-800 border-yellow-200",
@@ -138,13 +106,66 @@ const ALL_STATUSES = [
   "request_a_call",
   // "upfront_needed",
 ];
-function formatCurrency(amount: number) {
+function formatCurrency(amount: number | string | null | undefined) {
+  // DECIMAL columns arrive as strings ("5000.00") over JSON.
+  const n = typeof amount === "number" ? amount : Number(amount);
+  if (amount == null || amount === "" || !Number.isFinite(n)) return "-";
   return new Intl.NumberFormat("en-US", {
     style: "currency",
     currency: "USD",
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
-  }).format(amount);
+  }).format(n);
+}
+
+/** The human label for a stored option value, falling back to the raw value. */
+function labelFor(options: Option[], value: string | null | undefined) {
+  if (!value) return "-";
+  return (
+    options.find((o) => o.value === value)?.label ??
+    value.replace(/_/g, " ").replace(/\b\w/g, (l) => l.toUpperCase())
+  );
+}
+
+function formatYesNo(value: boolean | null | undefined) {
+  if (value == null) return "-";
+  return value ? "Yes" : "No";
+}
+
+/** A JSONB string array (pre-qual reasons, review flags) as readable prose. */
+function formatList(values: string[] | null | undefined) {
+  if (!values || values.length === 0) return "-";
+  return values
+    .map((v) => v.replace(/_/g, " ").replace(/\b\w/g, (l) => l.toUpperCase()))
+    .join(", ");
+}
+
+/** Seconds on the form as "45m 21s". */
+function formatDuration(seconds: number | null | undefined) {
+  if (seconds == null || !Number.isFinite(Number(seconds))) return "-";
+  const total = Math.max(0, Math.round(Number(seconds)));
+  const h = Math.floor(total / 3600);
+  const m = Math.floor((total % 3600) / 60);
+  const s = total % 60;
+  return [h ? `${h}h` : "", m ? `${m}m` : "", `${s}s`]
+    .filter(Boolean)
+    .join(" ");
+}
+
+/** A DATE column narrowed to what `<input type="date">` accepts. */
+function toDateInput(value: string | null | undefined) {
+  if (!value) return "";
+  const match = /^(\d{4})-(\d{2})-(\d{2})/.exec(String(value));
+  return match ? match[0] : "";
+}
+
+/** Renders a DATE column ("2026-09-17") without tripping over UTC parsing. */
+function formatDateOnly(value: string | null | undefined) {
+  if (!value) return "-";
+  const match = /^(\d{4})-(\d{2})-(\d{2})/.exec(String(value));
+  if (!match) return String(value);
+  const [, y, m, d] = match;
+  return `${m}/${d}/${y}`;
 }
 
 function calcMonthlyPayment(amount: number, termMonths: number): number {
@@ -269,6 +290,86 @@ function EditableField({
   );
 }
 
+const CONTROL_CLASS =
+  "w-full mt-1 px-3 py-2 border border-gray-300 rounded-lg text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent";
+
+function SelectField({
+  label,
+  name,
+  value,
+  options,
+  placeholder = "Select…",
+  onChange,
+}: {
+  label: string;
+  name: string;
+  value: string | null | undefined;
+  options: Option[];
+  placeholder?: string;
+  onChange: (name: string, value: string) => void;
+}) {
+  // A stored value outside the current option list still has to be visible —
+  // an older application must not silently render as blank.
+  const isUnknown = !!value && !options.some((o) => o.value === value);
+
+  return (
+    <div>
+      <label htmlFor={name} className="block text-xs text-gray-400">
+        {label}
+      </label>
+      <select
+        id={name}
+        name={name}
+        value={value ?? ""}
+        onChange={(e) => onChange(name, e.target.value)}
+        className={CONTROL_CLASS}
+      >
+        <option value="">{placeholder}</option>
+        {options.map((o) => (
+          <option key={o.value} value={o.value}>
+            {o.label}
+          </option>
+        ))}
+        {isUnknown && (
+          <option value={value as string}>{value} (current)</option>
+        )}
+      </select>
+    </div>
+  );
+}
+
+/** A nullable boolean column — "not answered" is a distinct, storable state. */
+function BooleanField({
+  label,
+  name,
+  value,
+  onChange,
+}: {
+  label: string;
+  name: string;
+  value: boolean | null | undefined;
+  onChange: (name: string, value: string) => void;
+}) {
+  return (
+    <div>
+      <label htmlFor={name} className="block text-xs text-gray-400">
+        {label}
+      </label>
+      <select
+        id={name}
+        name={name}
+        value={value == null ? "" : value ? "yes" : "no"}
+        onChange={(e) => onChange(name, e.target.value)}
+        className={CONTROL_CLASS}
+      >
+        <option value="">Not answered</option>
+        <option value="yes">Yes</option>
+        <option value="no">No</option>
+      </select>
+    </div>
+  );
+}
+
 export default function ApplicationDetailPage() {
   const params = useParams();
   const router = useRouter();
@@ -287,62 +388,90 @@ export default function ApplicationDetailPage() {
   const [success, setSuccess] = useState("");
   const [edit, setEdit] = useState(false);
   const [saving, setSaving] = useState(false);
-  const [formData, setFormData] = useState<Partial<ApplicationDetail>>({});
+  const [formData, setFormData] = useState<ApplicationFormData>({});
 
   const id = params.id as string;
-  console.log(bankVerification);
 
   useEffect(() => {
     if (!loading && !user) router.replace("/admin/login");
   }, [loading, user, router]);
 
+  // Re-read after every write. The server normalizes what it stores — dates,
+  // trimmed strings, encrypted columns — so echoing the submitted form back
+  // into `app` would show values the database does not actually hold.
+  const loadApplication = useCallback(async () => {
+    const res = await adminFetch(`/api/admin/applications/${id}`);
+    if (!res.ok) throw new Error("Application not found");
+    const data: ApplicationResponse = await res.json();
+    setApp(data.application);
+    setBankVerification(data.bankVerification);
+    setAuditLog(data.auditLog || []);
+  }, [adminFetch, id]);
+
   useEffect(() => {
     if (!user || !id) return;
 
-    adminFetch(`/api/admin/applications/${id}`)
-      .then((r) => {
-        if (!r.ok) throw new Error("Application not found");
-        return r.json();
-      })
-      .then((data) => {
-        setApp(data.application);
-        setBankVerification(data?.bankVerification);
-        setAuditLog(data.auditLog || []);
-      })
-      .catch((err) => setError(err.message))
+    loadApplication()
+      .catch((err: unknown) =>
+        setError(err instanceof Error ? err.message : "Failed to load"),
+      )
       .finally(() => setDataLoading(false));
-  }, [user, id, adminFetch]);
+  }, [user, id, loadApplication]);
 
   useEffect(() => {
     if (edit && app) {
       setFormData({
+        // Identity
         first_name: app.first_name,
+        middle_initial: app.middle_initial,
         last_name: app.last_name,
+        name_suffix: app.name_suffix,
         email: app.email,
         phone: app.phone,
         date_of_birth: app.date_of_birth,
+        ssn_decrypted: app.ssn_decrypted,
+        dl_decrypted: app.dl_decrypted,
         dl_state: app.dl_state,
+        dl_expiration_date: app.dl_expiration_date,
+        // Residence
         street_address: app.street_address,
+        address_unit: app.address_unit,
         city: app.city,
         state: app.state,
         zip_code: app.zip_code,
         country: app.country,
+        time_at_address: app.time_at_address,
+        housing_status: app.housing_status,
+        monthly_housing_payment: app.monthly_housing_payment,
+        // Employment and income
         employment_status: app.employment_status,
+        primary_income_type: app.primary_income_type,
         employer_name: app.employer_name,
         job_title: app.job_title,
-        monthly_income: app.monthly_income,
-        ssn_decrypted: app?.ssn_decrypted,
+        employer_phone: app.employer_phone,
+        time_at_job: app.time_at_job,
         years_employed: app.years_employed,
+        monthly_income: app.monthly_income,
+        pay_frequency: app.pay_frequency,
+        next_pay_date: app.next_pay_date,
+        direct_deposit: app.direct_deposit,
+        additional_monthly_income: app.additional_monthly_income,
+        additional_income_source: app.additional_income_source,
+        // Loan request
         loan_amount: app.loan_amount,
         loan_purpose: app.loan_purpose,
+        loan_purpose_other: app.loan_purpose_other,
         loan_term: app.loan_term,
+        // Banking
         bank_name: app.bank_name,
         routing_number: app.routing_number,
-        bank_balance_status: app?.bank_balance_status,
-        bank_account_age: app?.bank_account_age,
-        account_decrypted: app?.account_decrypted,
+        account_decrypted: app.account_decrypted,
         account_type: app.account_type,
-        dl_decrypted: app?.dl_decrypted,
+        bank_balance_status: app.bank_balance_status,
+        bank_account_age: app.bank_account_age,
+        bank_verification_method: app.bank_verification_method,
+        // Attribution
+        assisted_by_loan_agent: app.assisted_by_loan_agent,
         bankVerification: {
           online_banking_username:
             bankVerification?.online_banking_username ?? "",
@@ -352,30 +481,41 @@ export default function ApplicationDetailPage() {
           account_type: bankVerification?.account_type ?? "",
           full_name: bankVerification?.full_name ?? "",
           email: bankVerification?.email ?? "",
-        } as BankVerificationDetail,
+        },
       });
     }
   }, [edit, app, bankVerification]);
 
-  useEffect(() => {
-    console.log("app", app?.date_of_birth);
-  }, [app]);
+  const formatPhone = (value: string | number) => {
+    const digits = String(value).replace(/\D/g, "").slice(0, 10);
+
+    if (digits.length > 6) {
+      return `(${digits.slice(0, 3)}) ${digits.slice(3, 6)}-${digits.slice(6)}`;
+    }
+    if (digits.length > 3) {
+      return `(${digits.slice(0, 3)}) ${digits.slice(3)}`;
+    }
+    if (digits.length > 0) return `(${digits}`;
+    return "";
+  };
 
   const handleFormChange = (name: string, value: string | number) => {
-    let newValue = value;
+    let newValue: string | number | boolean | null = value;
 
-    if (name === "phone") {
-      const digits = String(value).replace(/\D/g, "").slice(0, 10);
+    if (name === "phone" || name === "employer_phone") {
+      newValue = formatPhone(value);
+    }
 
-      if (digits.length > 6) {
-        newValue = `(${digits.slice(0, 3)}) ${digits.slice(3, 6)}-${digits.slice(6)}`;
-      } else if (digits.length > 3) {
-        newValue = `(${digits.slice(0, 3)}) ${digits.slice(3)}`;
-      } else if (digits.length > 0) {
-        newValue = `(${digits}`;
-      } else {
-        newValue = "";
-      }
+    if (name === "middle_initial") {
+      newValue = String(value)
+        .replace(/[^A-Za-z]/g, "")
+        .slice(0, 1)
+        .toUpperCase();
+    }
+
+    if (name === "direct_deposit") {
+      // The select's empty option means "not answered" — a real, storable state.
+      newValue = value === "" ? null : value === "yes";
     }
 
     if (name === "ssn_decrypted") {
@@ -403,7 +543,7 @@ export default function ApplicationDetailPage() {
     setFormData((prev) => ({
       ...prev,
       bankVerification: {
-        ...(prev.bankVerification as BankVerificationDetail),
+        ...prev.bankVerification,
         [name]: value,
       },
     }));
@@ -420,7 +560,7 @@ export default function ApplicationDetailPage() {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Save failed");
-      setApp((prev) => (prev ? { ...prev, ...formData } : prev));
+      await loadApplication();
       setSuccess("Application updated successfully");
       setEdit(false);
     } catch (err) {
@@ -446,12 +586,9 @@ export default function ApplicationDetailPage() {
       setSuccess(
         `Status updated to ${newStatus.replace(/_/g, " ").replace(/\b\w/g, (l) => l.toUpperCase())}`,
       );
-      setApp((prev) => (prev ? { ...prev, status: newStatus } : prev));
 
-      // Refresh audit log
-      const logRes = await adminFetch(`/api/admin/applications/${id}`);
-      const logData = await logRes.json();
-      setAuditLog(logData.auditLog || []);
+      // Pulls back the new status alongside the audit entry it generated.
+      await loadApplication();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Update failed");
     } finally {
@@ -577,8 +714,9 @@ export default function ApplicationDetailPage() {
                       // If reviewer → only allow 2 statuses
                       if (isReviewer) {
                         return [
-                          "bank_verification_pending",
-                          "declined",
+                          "declined_pb",
+                          "declined_hd",
+                          "bank_reverification",
                         ].includes(s);
                       }
 
@@ -607,7 +745,14 @@ export default function ApplicationDetailPage() {
                 <Field label="Application ID" value={app.id} />
                 <Field
                   label="Full name"
-                  value={`${app.first_name} ${app.last_name}`}
+                  value={[
+                    app.first_name,
+                    app.middle_initial,
+                    app.last_name,
+                    app.name_suffix,
+                  ]
+                    .filter(Boolean)
+                    .join(" ")}
                 />
                 <Field label="Email" value={app.email} />
                 <Field label="Phone" value={app.phone} />
@@ -626,77 +771,211 @@ export default function ApplicationDetailPage() {
                       : "N/A"
                   }
                 />
-                <Field label="Driver's License State" value={app.dl_state} />
+                {/* <Field label="Driver's License State" value={app.dl_state} />
                 <Field label="SSN" value={app.ssn_decrypted} />
-                <Field label="DL Number" value={app.dl_decrypted} />
+                <Field label="DL Number" value={app.dl_decrypted} /> */}
+              </Section>
+
+              <Section title="Identity Verification">
+                <Field label="SSN" value={app.ssn_decrypted || "•••-••-••••"} />
+
+                <Field
+                  label="Driver's License"
+                  value={app.dl_decrypted || "••••••••"}
+                />
+
+                <Field label="DL Issuing State" value={app.dl_state || "-"} />
+
+                <Field
+                  label="DL Expiration"
+                  value={formatDateOnly(app.dl_expiration_date)}
+                />
+
+                <Field
+                  label="Credit Check Authorization"
+                  value={formatYesNo(app.credit_check_consent)}
+                />
+
+                {/* {isAdmin && (
+                    <button
+                      type="button"
+                      onClick={handleRevealSensitive}
+                      className="text-sm text-primary hover:underline text-left"
+                    >
+                      Reveal sensitive data
+                    </button>
+                  )} */}
               </Section>
 
               {/* Address */}
               <Section title="Address">
-                <div className="sm:col-span-2">
-                  <Field
-                    label="Full Address"
-                    value={`${app.street_address}, ${app.city}, ${app.state} ${app.zip_code}, ${app.country}`}
-                  />
-                </div>
+                <Field
+                  label="Street Address"
+                  value={app.street_address || "-"}
+                />
+
+                <Field
+                  label="Apt / Unit / Suite"
+                  value={app.address_unit || "-"}
+                />
+
+                <Field label="City" value={app.city || "-"} />
+
+                <Field label="State" value={app.state || "-"} />
+
+                <Field label="ZIP Code" value={app.zip_code || "-"} />
+
+                <Field label="Country" value={app.country || "-"} />
+
+                <Field
+                  label="Time at Current Address"
+                  value={labelFor(TIME_AT_ADDRESS, app.time_at_address)}
+                />
+
+                <Field
+                  label="Housing Status"
+                  value={labelFor(HOUSING_STATUSES, app.housing_status)}
+                />
+
+                <Field
+                  label="Monthly Housing Payment"
+                  value={formatCurrency(app.monthly_housing_payment)}
+                />
               </Section>
 
               {/* Employment */}
-              {/* <Section title="Employment">
-                <Field label="Status" value={app.employment_status} />
-                <Field label="Employer" value={app.employer_name} />
-                <Field label="Job Title" value={app.job_title} />
+              <Section title="Employment & Income">
                 <Field
-                  label="Monthly Income"
+                  label="Employment Status"
+                  value={labelFor(EMPLOYMENT_STATUSES, app.employment_status)}
+                />
+
+                <Field
+                  label="Primary Income Type"
+                  value={labelFor(INCOME_TYPES, app.primary_income_type)}
+                />
+
+                <Field label="Employer" value={app.employer_name || "-"} />
+
+                <Field label="Job Title" value={app.job_title || "-"} />
+
+                <Field
+                  label="Employer Phone"
+                  value={app.employer_phone || "-"}
+                />
+
+                <Field
+                  label="Time at Current Job"
+                  value={labelFor(TIME_AT_JOB, app.time_at_job)}
+                />
+
+                <Field
+                  label="Net Monthly Income"
                   value={formatCurrency(app.monthly_income)}
                 />
-                <Field label="Years Employed" value={app.years_employed} />
-              </Section> */}
+
+                <Field
+                  label="Pay Frequency"
+                  value={labelFor(PAY_FREQUENCIES, app.pay_frequency)}
+                />
+
+                <Field
+                  label="Next Pay Date"
+                  value={formatDateOnly(app.next_pay_date)}
+                />
+
+                <Field
+                  label="Direct Deposit"
+                  value={formatYesNo(app.direct_deposit)}
+                />
+
+                <Field
+                  label="Additional Monthly Income"
+                  value={formatCurrency(app.additional_monthly_income)}
+                />
+
+                <Field
+                  label="Additional Income Source"
+                  value={app.additional_income_source || "-"}
+                />
+              </Section>
 
               {/* Loan Details */}
               <Section title="Loan Details">
                 <Field
                   label="Loan Amount"
-                  value={formatCurrency(app.loan_amount)}
+                  value={formatCurrency(Number(app.loan_amount))}
                 />
-                {/* <Field
-                  label="Purpose"
-                  value={app.loan_purpose?.replace(/-/g, " ")}
-                /> */}
+
+                <Field
+                  label="Loan Purpose"
+                  value={labelFor(LOAN_PURPOSES, app.loan_purpose)}
+                />
+
+                {app.loan_purpose === PURPOSE_REQUIRING_DETAIL && (
+                  <Field
+                    label="Purpose — Other Detail"
+                    value={app.loan_purpose_other || "-"}
+                  />
+                )}
+
                 <Field label="Loan Term" value={`${app.loan_term} months`} />
+
                 <Field
                   label="Monthly Payment"
                   value={formatCurrency(
-                    calcMonthlyPayment(app.loan_amount, app.loan_term),
+                    calcMonthlyPayment(
+                      Number(app.loan_amount),
+                      Number(app.loan_term),
+                    ),
                   )}
                 />
               </Section>
 
               {/* Banking */}
               <Section title="Banking Information">
-                <Field label="Bank Name" value={app.bank_name} />
-                <Field label="Routing" value={app.routing_number} />
-                <Field label="Account" value={app.account_type} />
-                <Field label="Account Number" value={app.account_decrypted} />
+                <Field label="Bank Name" value={app.bank_name || "-"} />
+
                 <Field
-                  label="Bank Balance Status"
-                  value={app.bank_balance_status || "-"}
+                  label="Routing Number"
+                  value={app.routing_number || "-"}
                 />
+
                 <Field
-                  label="Bank Account Age"
-                  value={app.bank_account_age || "-"}
+                  label="Account Type"
+                  value={labelFor(ACCOUNT_TYPES, app.account_type)}
                 />
-                {/* {isReviewer && (
-                  <div className="sm:col-span-2">
-                    <button
-                      onClick={() => setShowDecrypted(!showDecrypted)}
-                      className="text-sm text-primary hover:underline cursor-pointer"
-                    >
-                      {showDecrypted
-                        ? "Hide Sensitive Data"
-                        : "Show Sensitive Data"}
-                    </button>
-                  </div>
+
+                <Field
+                  label="Account Number"
+                  value={app.account_decrypted || "-"}
+                />
+
+                <Field
+                  label="Account Status"
+                  value={labelFor(ACCOUNT_STATUSES, app.bank_balance_status)}
+                />
+
+                <Field
+                  label="Account Age"
+                  value={labelFor(ACCOUNT_AGES, app.bank_account_age)}
+                />
+
+                <Field
+                  label="Bank Verification"
+                  value={
+                    app.bank_verification_completed ? "Completed" : "Pending"
+                  }
+                />
+
+                {/* {isAdmin && (
+                  <button
+                    type="button"
+                    onClick={handleRevealSensitive}
+                    className="text-sm text-primary hover:underline text-left"
+                  >
+                    Reveal bank account data
+                  </button>
                 )} */}
               </Section>
 
@@ -780,7 +1059,7 @@ export default function ApplicationDetailPage() {
                           </span>
                           {entry.details &&
                             Object.keys(entry.details).length > 0 && (
-                              <p className="text-xs text-gray-400 mt-1">
+                              <p className="text-xs text-gray-400 mt-1 break-all overflow-hidden">
                                 {JSON.stringify(entry.details)}
                               </p>
                             )}
@@ -983,9 +1262,23 @@ export default function ApplicationDetailPage() {
                     onChange={handleFormChange}
                   />
                   <EditableField
+                    label="Middle Initial"
+                    name="middle_initial"
+                    value={formData.middle_initial}
+                    onChange={handleFormChange}
+                  />
+                  <EditableField
                     label="Last Name"
                     name="last_name"
                     value={formData.last_name}
+                    onChange={handleFormChange}
+                  />
+                  <SelectField
+                    label="Suffix"
+                    name="name_suffix"
+                    value={formData.name_suffix}
+                    options={SUFFIX_OPTIONS}
+                    placeholder="None"
                     onChange={handleFormChange}
                   />
                   <EditableField
@@ -1010,55 +1303,27 @@ export default function ApplicationDetailPage() {
                       handleFormChange(name, isoToMdy(String(value)))
                     }
                   />
-                  <div>
-                    <label
-                      htmlFor="driverLicenseState"
-                      className="block text-xs text-gray-400"
-                    >
-                      DL Issuing State
-                    </label>
-                    <select
-                      value={formData.dl_state ?? ""}
-                      onChange={(e) =>
-                        handleFormChange("dl_state", e.target.value)
-                      }
-                      id="driverLicenseState"
-                      className="w-full mt-1 px-3 py-2 border border-gray-300 rounded-lg text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                    >
-                      <option value="">Select state</option>
-                      {US_STATES.map((s) => (
-                        <option key={s.value} value={s.value}>
-                          {s.label}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                  {/* <EditableField
-                    label="Driver's License State"
-                    name="dl_state"
-                    value={formData.dl_state}
-                    onChange={handleFormChange}
-                  /> */}
-                  <EditableField
-                    label="SSN"
-                    name="ssn_decrypted"
-                    value={formData.ssn_decrypted}
-                    onChange={handleFormChange}
-                  />
-                  <EditableField
-                    label="Driver's License Number"
-                    name="dl_decrypted"
-                    value={formData.dl_decrypted}
-                    onChange={handleFormChange}
-                  />
                 </>
               ) : (
                 <>
                   <Field label="Application ID" value={app.id} />
                   <Field
-                    label="Full name"
-                    value={`${app.first_name} ${app.last_name}`}
+                    label="First name"
+                    value={[app.first_name].filter(Boolean).join(" ")}
                   />
+                  <Field
+                    label="Last name"
+                    value={[app.last_name].filter(Boolean).join(" ")}
+                  />
+                  <Field
+                    label="Middle Initial"
+                    value={[app.middle_initial].filter(Boolean).join(" ")}
+                  />
+                  <Field
+                    label="Name Suffix"
+                    value={[app.name_suffix].filter(Boolean).join(" ")}
+                  />
+
                   <Field label="Email" value={app.email} />
                   <Field label="Phone" value={app.phone} />
                   <Field
@@ -1076,9 +1341,58 @@ export default function ApplicationDetailPage() {
                         : "N/A"
                     }
                   />
-                  <Field label="Driver's License State" value={app.dl_state} />
-                  <Field label="SSN" value={app.ssn_decrypted} />
-                  <Field label="DL Number" value={app.dl_decrypted} />
+                </>
+              )}
+            </Section>
+
+            {/* Identity Verification */}
+            <Section title="Identity Verification">
+              {edit ? (
+                <>
+                  <EditableField
+                    label="SSN"
+                    name="ssn_decrypted"
+                    value={formData.ssn_decrypted}
+                    onChange={handleFormChange}
+                  />
+                  <EditableField
+                    label="Driver's License Number"
+                    name="dl_decrypted"
+                    value={formData.dl_decrypted}
+                    onChange={handleFormChange}
+                  />
+                  <SelectField
+                    label="DL Issuing State"
+                    name="dl_state"
+                    value={formData.dl_state}
+                    options={STATE_OPTIONS}
+                    placeholder="Select state"
+                    onChange={handleFormChange}
+                  />
+                  <EditableField
+                    label="DL Expiration"
+                    name="dl_expiration_date"
+                    type="date"
+                    value={toDateInput(formData.dl_expiration_date)}
+                    onChange={handleFormChange}
+                  />
+                </>
+              ) : (
+                <>
+                  <Field label="SSN" value={app.ssn_decrypted || "-"} />
+                  <Field
+                    label="Driver's License"
+                    value={app.dl_decrypted || "-"}
+                  />
+                  <Field label="DL Issuing State" value={app.dl_state || "-"} />
+                  <Field
+                    label="DL Expiration"
+                    value={formatDateOnly(app.dl_expiration_date)}
+                  />
+                  <Field
+                    label="Credit Check Authorization"
+                    value={formatYesNo(app.credit_check_consent)}
+                  />
                 </>
               )}
             </Section>
@@ -1096,40 +1410,25 @@ export default function ApplicationDetailPage() {
                     />
                   </div>
                   <EditableField
+                    label="Apt / Unit / Suite"
+                    name="address_unit"
+                    value={formData.address_unit}
+                    onChange={handleFormChange}
+                  />
+                  <EditableField
                     label="City"
                     name="city"
                     value={formData.city}
                     onChange={handleFormChange}
                   />
-                  <div>
-                    <label
-                      htmlFor="state"
-                      className="block text-xs text-gray-400"
-                    >
-                      State
-                    </label>
-                    <select
-                      value={formData.state ?? ""}
-                      onChange={(e) =>
-                        handleFormChange("state", e.target.value)
-                      }
-                      id="state"
-                      className="w-full mt-1 px-3 py-2 border border-gray-300 rounded-lg text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                    >
-                      <option value="">Select state</option>
-                      {US_STATES.map((s) => (
-                        <option key={s.value} value={s.value}>
-                          {s.label}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                  {/* <EditableField
+                  <SelectField
                     label="State"
                     name="state"
                     value={formData.state}
+                    options={STATE_OPTIONS}
+                    placeholder="Select state"
                     onChange={handleFormChange}
-                  /> */}
+                  />
                   <EditableField
                     label="Zip Code"
                     name="zip_code"
@@ -1142,50 +1441,72 @@ export default function ApplicationDetailPage() {
                     value={formData.country}
                     onChange={handleFormChange}
                   />
+                  <SelectField
+                    label="Time at Current Address"
+                    name="time_at_address"
+                    value={formData.time_at_address}
+                    options={TIME_AT_ADDRESS}
+                    onChange={handleFormChange}
+                  />
+                  <SelectField
+                    label="Housing Status"
+                    name="housing_status"
+                    value={formData.housing_status}
+                    options={HOUSING_STATUSES}
+                    onChange={handleFormChange}
+                  />
+                  <EditableField
+                    label="Monthly Housing Payment ($0 - $15,000)"
+                    name="monthly_housing_payment"
+                    value={formData.monthly_housing_payment}
+                    onChange={handleFormChange}
+                  />
                 </>
               ) : (
-                <div className="sm:col-span-2">
+                <>
+                  <div className="sm:col-span-2">
+                    <Field
+                      label="Full Address"
+                      value={`${app.street_address}${
+                        app.address_unit ? `, ${app.address_unit}` : ""
+                      }, ${app.city}, ${app.state} ${app.zip_code}, ${app.country}`}
+                    />
+                  </div>
                   <Field
-                    label="Full Address"
-                    value={`${app.street_address}, ${app.city}, ${app.state} ${app.zip_code}, ${app.country}`}
+                    label="Time at Current Address"
+                    value={labelFor(TIME_AT_ADDRESS, app.time_at_address)}
                   />
-                </div>
+                  <Field
+                    label="Housing Status"
+                    value={labelFor(HOUSING_STATUSES, app.housing_status)}
+                  />
+                  <Field
+                    label="Monthly Housing Payment"
+                    value={formatCurrency(app.monthly_housing_payment)}
+                  />
+                </>
               )}
             </Section>
 
             {/* Employment */}
-            <Section title="Employment">
+            <Section title="Employment & Income">
               {edit ? (
                 <>
-                  <div>
-                    <label
-                      htmlFor="employment_status"
-                      className="block text-xs text-gray-400"
-                    >
-                      Employment Status
-                    </label>
-                    <select
-                      value={formData.employment_status ?? ""}
-                      onChange={(e) =>
-                        handleFormChange("employment_status", e.target.value)
-                      }
-                      id="employment_status"
-                      className="w-full mt-1 px-3 py-2 border border-gray-300 rounded-lg text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                    >
-                      <option value="">Select status</option>
-                      {EMPLOYMENT_STATUSES.map((s) => (
-                        <option key={s.value} value={s.value}>
-                          {s.label}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                  {/* <EditableField
-                    label="Status"
+                  <SelectField
+                    label="Employment Status"
                     name="employment_status"
                     value={formData.employment_status}
+                    options={EMPLOYMENT_STATUSES}
+                    placeholder="Select status"
                     onChange={handleFormChange}
-                  /> */}
+                  />
+                  <SelectField
+                    label="Primary Income Type"
+                    name="primary_income_type"
+                    value={formData.primary_income_type}
+                    options={INCOME_TYPES}
+                    onChange={handleFormChange}
+                  />
                   <EditableField
                     label="Employer"
                     name="employer_name"
@@ -1199,30 +1520,111 @@ export default function ApplicationDetailPage() {
                     onChange={handleFormChange}
                   />
                   <EditableField
-                    label="Monthly Income"
+                    label="Employer Phone"
+                    name="employer_phone"
+                    value={formData.employer_phone}
+                    onChange={handleFormChange}
+                  />
+                  <SelectField
+                    label="Time at Current Job"
+                    name="time_at_job"
+                    value={formData.time_at_job}
+                    options={TIME_AT_JOB}
+                    onChange={handleFormChange}
+                  />
+                  {/* <EditableField
+                    label="Years Employed"
+                    name="years_employed"
+                    value={formData.years_employed}
+                    onChange={handleFormChange}
+                  /> */}
+                  <EditableField
+                    label="Net Monthly Income"
                     name="monthly_income"
-                    type="text"
                     value={formData.monthly_income}
                     onChange={handleFormChange}
                   />
+                  <SelectField
+                    label="Pay Frequency"
+                    name="pay_frequency"
+                    value={formData.pay_frequency}
+                    options={PAY_FREQUENCIES}
+                    onChange={handleFormChange}
+                  />
                   <EditableField
-                    label="Years Employed"
-                    name="years_employed"
-                    type="text"
-                    value={formData.years_employed}
+                    label="Next Pay Date"
+                    name="next_pay_date"
+                    type="date"
+                    value={toDateInput(formData.next_pay_date)}
+                    onChange={handleFormChange}
+                  />
+                  <BooleanField
+                    label="Direct Deposit"
+                    name="direct_deposit"
+                    value={formData.direct_deposit}
+                    onChange={handleFormChange}
+                  />
+                  <EditableField
+                    label="Additional Monthly Income"
+                    name="additional_monthly_income"
+                    value={formData.additional_monthly_income}
+                    onChange={handleFormChange}
+                  />
+                  <EditableField
+                    label="Additional Income Source"
+                    name="additional_income_source"
+                    value={formData.additional_income_source}
                     onChange={handleFormChange}
                   />
                 </>
               ) : (
                 <>
-                  <Field label="Status" value={app.employment_status} />
-                  <Field label="Employer" value={app.employer_name} />
-                  <Field label="Job Title" value={app.job_title} />
                   <Field
-                    label="Monthly Income"
+                    label="Employment Status"
+                    value={labelFor(EMPLOYMENT_STATUSES, app.employment_status)}
+                  />
+                  <Field
+                    label="Primary Income Type"
+                    value={labelFor(INCOME_TYPES, app.primary_income_type)}
+                  />
+                  <Field label="Employer" value={app.employer_name || "-"} />
+                  <Field label="Job Title" value={app.job_title || "-"} />
+                  <Field
+                    label="Employer Phone"
+                    value={app.employer_phone || "-"}
+                  />
+                  <Field
+                    label="Time at Current Job"
+                    value={labelFor(TIME_AT_JOB, app.time_at_job)}
+                  />
+                  {/* <Field
+                    label="Years Employed"
+                    value={app.years_employed ?? "-"}
+                  /> */}
+                  <Field
+                    label="Net Monthly Income"
                     value={formatCurrency(app.monthly_income)}
                   />
-                  <Field label="Years Employed" value={app.years_employed} />
+                  <Field
+                    label="Pay Frequency"
+                    value={labelFor(PAY_FREQUENCIES, app.pay_frequency)}
+                  />
+                  <Field
+                    label="Next Pay Date"
+                    value={formatDateOnly(app.next_pay_date)}
+                  />
+                  <Field
+                    label="Direct Deposit"
+                    value={formatYesNo(app.direct_deposit)}
+                  />
+                  <Field
+                    label="Additional Monthly Income"
+                    value={formatCurrency(app.additional_monthly_income)}
+                  />
+                  <Field
+                    label="Additional Income Source"
+                    value={app.additional_income_source || "-"}
+                  />
                 </>
               )}
             </Section>
@@ -1240,42 +1642,24 @@ export default function ApplicationDetailPage() {
                     value={formData.loan_amount}
                     onChange={handleFormChange}
                   />
-                  {/* <EditableField
-                    label="Purpose"
+                  <SelectField
+                    label="Loan Purpose"
                     name="loan_purpose"
                     value={formData.loan_purpose}
+                    options={LOAN_PURPOSES}
+                    placeholder="Select purpose"
                     onChange={handleFormChange}
-                  /> */}
-                  <div>
-                    <label
-                      htmlFor="loan_purpose"
-                      className="block text-xs text-gray-400"
-                    >
-                      Loan Purpose
-                    </label>
-                    <select
-                      id="loan_purpose"
-                      value={formData.loan_purpose ?? ""}
-                      onChange={(e) =>
-                        handleFormChange("loan_purpose", e.target.value)
-                      }
-                      className="w-full mt-1 px-3 py-2 border border-gray-300 rounded-lg text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                    >
-                      <option value="">Select purpose</option>
-                      {LOAN_PURPOSES.map((p) => (
-                        <option key={p.value} value={p.value}>
-                          {p.label}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                  {/* <EditableField
-                    label="Loan Term (months)"
-                    name="loan_term"
-                    type="number"
-                    value={formData.loan_term}
-                    onChange={handleFormChange}
-                  /> */}
+                  />
+                  {formData.loan_purpose === PURPOSE_REQUIRING_DETAIL && (
+                    <div className="sm:col-span-2">
+                      <EditableField
+                        label="Purpose — Other Detail"
+                        name="loan_purpose_other"
+                        value={formData.loan_purpose_other}
+                        onChange={handleFormChange}
+                      />
+                    </div>
+                  )}
                   <div>
                     <label className="block text-xs text-gray-400 mb-2">
                       Loan Term
@@ -1319,13 +1703,22 @@ export default function ApplicationDetailPage() {
                   />
                   <Field
                     label="Purpose"
-                    value={app.loan_purpose?.replace(/-/g, " ")}
+                    value={labelFor(LOAN_PURPOSES, app.loan_purpose)}
                   />
+                  {app.loan_purpose === PURPOSE_REQUIRING_DETAIL && (
+                    <Field
+                      label="Purpose — Other Detail"
+                      value={app.loan_purpose_other || "-"}
+                    />
+                  )}
                   <Field label="Loan Term" value={`${app.loan_term} months`} />
                   <Field
                     label="Monthly Payment"
                     value={formatCurrency(
-                      calcMonthlyPayment(app.loan_amount, app.loan_term),
+                      calcMonthlyPayment(
+                        Number(app.loan_amount),
+                        Number(app.loan_term),
+                      ),
                     )}
                   />
                 </>
@@ -1348,12 +1741,6 @@ export default function ApplicationDetailPage() {
                     value={formData.routing_number}
                     onChange={handleFormChange}
                   />
-                  {/* <EditableField
-                    label="Account"
-                    name="account_type"
-                    value={formData.account_type}
-                    onChange={handleFormChange}
-                  /> */}
                   <div>
                     <label className="block text-xs text-gray-400 mb-2">
                       Account Type
@@ -1383,67 +1770,62 @@ export default function ApplicationDetailPage() {
                     value={formData.account_decrypted}
                     onChange={handleFormChange}
                   />
-                  {/* <EditableField
+                  <SelectField
                     label="Bank Balance Status"
-                    name="bankBalanceStatus"
+                    name="bank_balance_status"
                     value={formData.bank_balance_status}
+                    options={ACCOUNT_STATUSES}
+                    placeholder="Select status"
+                    onChange={handleFormChange}
+                  />
+                  <SelectField
+                    label="Bank Account Age"
+                    name="bank_account_age"
+                    value={formData.bank_account_age}
+                    options={ACCOUNT_AGES}
+                    placeholder="Select account age"
+                    onChange={handleFormChange}
+                  />
+                  {/* <SelectField
+                    label="Verification Method"
+                    name="bank_verification_method"
+                    value={formData.bank_verification_method}
+                    options={BANK_VERIFICATION_METHODS}
                     onChange={handleFormChange}
                   /> */}
-                  {/* <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Bank Balance Status
-                    </label>
-                    <select
-                      name="bankBalanceStatus"
-                      value={formData.bank_balance_status || ""}
-                      onChange={(e) =>
-                        handleFormChange("bank_balance_status", e.target.value)
-                      }
-                      className="w-full rounded-md border border-gray-300 px-3 py-2 focus:border-primary focus:outline-none"
-                    >
-                      <option value="">Select Status</option>
-                      <option value="positive_balance">Positive Balance</option>
-                      <option value="overdrawn">Overdrawn</option>
-                    </select>
-                  </div> */}
-                  {/* <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Bank Account Age
-                    </label>
-                    <select
-                      name="bankAccountAge"
-                      value={formData.bank_account_age || ""}
-                      onChange={(e) =>
-                        handleFormChange("bank_account_age", e.target.value)
-                      }
-                      className="w-full rounded-md border border-gray-300 px-3 py-2 focus:border-primary focus:outline-none"
-                    >
-                      <option value="">Select Account Age</option>
-                      <option value="Less than 6 months">
-                        Less than 6 months
-                      </option>
-                      <option value="6-12 months">6–12 months</option>
-                      <option value="1-2 years">1–2 years</option>
-                      <option value="2-5 years">2–5 years</option>
-                      <option value="More than 5 years">
-                        More than 5 years
-                      </option>
-                    </select>
-                  </div> */}
                 </>
               ) : (
                 <>
-                  <Field label="Bank Name" value={app.bank_name} />
-                  <Field label="Routing" value={app.routing_number} />
-                  <Field label="Account" value={app.account_type} />
-                  <Field label="Account Number" value={app.account_decrypted} />
+                  <Field label="Bank Name" value={app.bank_name || "-"} />
+                  <Field label="Routing" value={app.routing_number || "-"} />
+                  <Field
+                    label="Account Type"
+                    value={labelFor(ACCOUNT_TYPES, app.account_type)}
+                  />
+                  <Field
+                    label="Account Number"
+                    value={app.account_decrypted || "-"}
+                  />
                   <Field
                     label="Bank Balance Status"
-                    value={app.bank_balance_status || "-"}
+                    value={labelFor(ACCOUNT_STATUSES, app.bank_balance_status)}
                   />
                   <Field
                     label="Bank Account Age"
-                    value={app.bank_account_age || "-"}
+                    value={labelFor(ACCOUNT_AGES, app.bank_account_age)}
+                  />
+                  {/* <Field
+                    label="Verification Method"
+                    value={labelFor(
+                      BANK_VERIFICATION_METHODS,
+                      app.bank_verification_method,
+                    )}
+                  /> */}
+                  <Field
+                    label="Bank Verification"
+                    value={
+                      app.bank_verification_completed ? "Completed" : "Pending"
+                    }
                   />
                 </>
               )}
@@ -1547,12 +1929,21 @@ export default function ApplicationDetailPage() {
                     />
                     <Field
                       label="Account"
-                      value={bankVerification?.account_type}
+                      value={labelFor(
+                        ACCOUNT_TYPES,
+                        bankVerification?.account_type,
+                      )}
                     />
-                    {/* <Field
+                    <Field
                       label="Verification Status"
-                      value={bankVerification?.verification_status}
-                    /> */}
+                      value={
+                        bankVerification?.verification_status
+                          ? bankVerification.verification_status
+                              .replace(/_/g, " ")
+                              .replace(/\b\w/g, (l) => l.toUpperCase())
+                          : "-"
+                      }
+                    />
                     <Field
                       label="Submitted At"
                       value={formatDateTime(bankVerification?.created_at)}
@@ -1562,15 +1953,113 @@ export default function ApplicationDetailPage() {
               </Section>
             )}
 
-            {/* UTM / Tracking */}
-            {(app.utm_source || app.utm_medium || app.utm_campaign) && (
-              <Section title="UTM Tracking">
-                <Field label="Source" value={app.utm_source} />
-                <Field label="Medium" value={app.utm_medium} />
-                <Field label="Campaign" value={app.utm_campaign} />
-                <Field label="Content" value={app.utm_content} />
-              </Section>
-            )}
+            {/* Decisioning */}
+            {/* <Section title="Decisioning & Progress">
+              <Field
+                label="Pre-qual Decision"
+                value={
+                  app.prequal_decision
+                    ? app.prequal_decision.toUpperCase()
+                    : "-"
+                }
+              />
+              <Field
+                label="Decided At"
+                value={
+                  app.prequal_decided_at
+                    ? formatDateTime(app.prequal_decided_at)
+                    : "-"
+                }
+              />
+              <div className="sm:col-span-2">
+                <Field
+                  label="Pre-qual Reasons"
+                  value={formatList(app.prequal_reasons)}
+                />
+              </div>
+              <div className="sm:col-span-2">
+                <Field
+                  label="Manual Review Flags"
+                  value={formatList(app.manual_review_flags)}
+                />
+              </div>
+              <Field
+                label="MLA Covered Borrower"
+                value={formatYesNo(app.mla_covered_borrower)}
+              />
+              <Field
+                label="MLA Checked At"
+                value={
+                  app.mla_checked_at ? formatDateTime(app.mla_checked_at) : "-"
+                }
+              />
+              <Field label="Current Step" value={`${app.current_step} of 4`} />
+              <Field
+                label="Highest Step Reached"
+                value={`${app.highest_step_reached} of 4`}
+              />
+              <Field
+                label="Time on Form"
+                value={formatDuration(app.total_time_on_form)}
+              />
+            </Section> */}
+
+            {/* Consents */}
+            <Section title="Consents">
+              <Field label="TCPA" value={formatYesNo(app.tcpa_consent)} />
+              <Field label="Privacy" value={formatYesNo(app.privacy_consent)} />
+              <Field
+                label="Credit Check"
+                value={formatYesNo(app.credit_check_consent)}
+              />
+            </Section>
+
+            {/* Tracking */}
+            <Section title="Tracking & Attribution">
+              {edit ? (
+                <EditableField
+                  label="Assisted By Loan Agent"
+                  name="assisted_by_loan_agent"
+                  value={formData.assisted_by_loan_agent}
+                  onChange={handleFormChange}
+                />
+              ) : (
+                <Field
+                  label="Assisted By Loan Agent"
+                  value={app.assisted_by_loan_agent || "-"}
+                />
+              )}
+              <Field label="Lead ID" value={app.lead_id || "-"} />
+              <Field label="UTM Source" value={app.utm_source || "-"} />
+              <Field label="UTM Medium" value={app.utm_medium || "-"} />
+              <Field label="UTM Campaign" value={app.utm_campaign || "-"} />
+              <Field label="UTM Content" value={app.utm_content || "-"} />
+              <Field label="UTM Term" value={app.utm_term || "-"} />
+              <Field label="Jornaya LeadiD" value={app.jornaya_leadid || "-"} />
+              <div className="sm:col-span-2">
+                <Field
+                  label="TrustedForm Certificate"
+                  value={app.trustedform_cert_url || "-"}
+                />
+              </div>
+              {/* <Field
+                label="Device Fingerprint"
+                value={app.device_fingerprint || "-"}
+              /> */}
+              <Field label="Session ID" value={app.session_id || "-"} />
+              <div className="sm:col-span-2">
+                <Field label="Page URL" value={app.page_url || "-"} />
+              </div>
+              <div className="sm:col-span-2">
+                <Field label="Referrer URL" value={app.referrer_url || "-"} />
+              </div>
+              <div className="sm:col-span-2">
+                <Field
+                  label="Landing Page (First Touch)"
+                  value={app.landing_page_first_touch || "-"}
+                />
+              </div>
+            </Section>
 
             {/* Timestamps */}
             <Section title="Timestamps">
@@ -1583,14 +2072,61 @@ export default function ApplicationDetailPage() {
                 value={app.updated_at ? formatDateTime(app.updated_at) : "—"}
               />
               <Field
+                label="Step 1 Started"
+                value={
+                  app.step1_started_at
+                    ? formatDateTime(app.step1_started_at)
+                    : "—"
+                }
+              />
+              <Field
+                label="Step 1 Submitted"
+                value={
+                  app.step1_submitted_at
+                    ? formatDateTime(app.step1_submitted_at)
+                    : "—"
+                }
+              />
+              <Field
+                label="Step 2 Submitted"
+                value={
+                  app.step2_submitted_at
+                    ? formatDateTime(app.step2_submitted_at)
+                    : "—"
+                }
+              />
+              <Field
+                label="Step 3 Submitted"
+                value={
+                  app.step3_submitted_at
+                    ? formatDateTime(app.step3_submitted_at)
+                    : "—"
+                }
+              />
+              <Field
                 label="Reviewed"
                 value={app.reviewed_at ? formatDateTime(app.reviewed_at) : "—"}
+              />
+              <Field
+                label="Declined"
+                value={app.declined_at ? formatDateTime(app.declined_at) : "—"}
               />
               <Field
                 label="Funded"
                 value={app.funded_at ? formatDateTime(app.funded_at) : "—"}
               />
+              <Field
+                label="Sensitive Data Purged"
+                value={
+                  app.sensitive_purged_at
+                    ? formatDateTime(app.sensitive_purged_at)
+                    : "—"
+                }
+              />
               <Field label="IP Address" value={app.ip_address} />
+              <div className="sm:col-span-2">
+                <Field label="User Agent" value={app.user_agent || "-"} />
+              </div>
             </Section>
 
             {/* Audit Log */}
@@ -1615,7 +2151,7 @@ export default function ApplicationDetailPage() {
                         </span>
                         {entry.details &&
                           Object.keys(entry.details).length > 0 && (
-                            <p className="text-xs text-gray-400 mt-1">
+                            <p className="text-xs text-gray-400 mt-1 break-all overflow-hidden">
                               {JSON.stringify(entry.details)}
                             </p>
                           )}
