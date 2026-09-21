@@ -675,7 +675,7 @@ function OutcomePanel({ outcome }: { outcome: Outcome }) {
         </p>
         <p className="text-xs text-text-secondary mt-4">
           You have the right to a written statement of the specific reasons for
-          this decision. Contact us at (747) 208-3657.
+          this decision. Contact us at (747) 202-2934.
         </p>
       </div>
     );
