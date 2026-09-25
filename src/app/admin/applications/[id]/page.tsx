@@ -2133,7 +2133,7 @@ export default function ApplicationDetailPage() {
                     <React.Fragment key={email.id}>
                       <Field
                         label={`Email #${email.email_number} (${email.track})`}
-                        value={`${email.status.toUpperCase()} — Scheduled: ${new Date(email.scheduled_at).toLocaleString()}`}
+                        value={`${email.status.toUpperCase()} — Drip Scheduled: ${formatDateTime(email?.scheduled_at)}`}
                       />
                       {email.sent_at && (
                         <Field
