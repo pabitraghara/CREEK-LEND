@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { useAdminAuth, useAdminApi } from "@/lib/admin-auth";
@@ -29,6 +29,7 @@ import {
   ApplicationResponse,
   AuditEntry,
   BankVerificationDetail,
+  DripEmailScheduleItem,
 } from "@/lib/application/types";
 
 const BANK_VERIFICATION_METHODS: Option[] = [
@@ -106,6 +107,34 @@ const ALL_STATUSES = [
   "request_a_call",
   // "upfront_needed",
 ];
+
+const QUICK_STATUS_ACTIONS = [
+  {
+    value: "bank_reverification",
+    label: "Bank Re-verification",
+  },
+  {
+    value: "request_a_call",
+    label: "Request a Call",
+  },
+  {
+    value: "funded",
+    label: "Funded",
+  },
+  {
+    value: "declined_pb",
+    label: "Declined - PB",
+  },
+  {
+    value: "declined_hd",
+    label: "Declined - HD",
+  },
+  // {
+  //   value: "declined",
+  //   label: "Declined",
+  // },
+];
+
 function formatCurrency(amount: number | string | null | undefined) {
   // DECIMAL columns arrive as strings ("5000.00") over JSON.
   const n = typeof amount === "number" ? amount : Number(amount);
@@ -389,6 +418,9 @@ export default function ApplicationDetailPage() {
   const [edit, setEdit] = useState(false);
   const [saving, setSaving] = useState(false);
   const [formData, setFormData] = useState<ApplicationFormData>({});
+  const [dripEmailSchedule, setDripEmailSchedule] = useState<
+    DripEmailScheduleItem[]
+  >([]);
 
   const id = params.id as string;
 
@@ -405,6 +437,7 @@ export default function ApplicationDetailPage() {
     const data: ApplicationResponse = await res.json();
     setApp(data.application);
     setBankVerification(data.bankVerification);
+    setDripEmailSchedule(data?.dripEmailSchedule);
     setAuditLog(data.auditLog || []);
   }, [adminFetch, id]);
 
@@ -612,6 +645,13 @@ export default function ApplicationDetailPage() {
     }
   };
 
+  const REVIEWER_ONLY_ACTIONS = [
+    // "declined",
+    "declined_pb",
+    "declined_hd",
+    "bank_reverification",
+  ];
+
   if (loading || !user) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -704,7 +744,7 @@ export default function ApplicationDetailPage() {
               )}
 
               {/* Status Actions */}
-              {isReviewer && (
+              {/* {isReviewer && (
                 <div className="bg-white rounded-xl border border-gray-200 p-6">
                   <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-3">
                     Update Status
@@ -736,6 +776,32 @@ export default function ApplicationDetailPage() {
                               .replace(/\b\w/g, (l) => l.toUpperCase())}
                       </button>
                     ))}
+                  </div>
+                </div>
+              )} */}
+
+              {isReviewer && (
+                <div className="space-y-4">
+                  <div className="bg-white rounded-xl border border-gray-200 p-6">
+                    <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-3">
+                      Quick Status Actions
+                    </h3>
+                    <div className="flex flex-wrap gap-2">
+                      {QUICK_STATUS_ACTIONS.filter((action) =>
+                        REVIEWER_ONLY_ACTIONS.includes(action.value),
+                      ).map((action) => (
+                        <button
+                          key={action.value}
+                          onClick={() => handleStatusUpdate(action.value)}
+                          disabled={statusUpdating}
+                          className={`px-4 py-2 rounded-lg text-sm font-medium border transition cursor-pointer disabled:opacity-50 ${
+                            STATUS_COLORS[action.value] || ""
+                          }`}
+                        >
+                          {statusUpdating ? "..." : action.label}
+                        </button>
+                      ))}
+                    </div>
                   </div>
                 </div>
               )}
@@ -1226,7 +1292,7 @@ export default function ApplicationDetailPage() {
             )}
 
             {/* Status Actions */}
-            {isReviewer && (
+            {/* {isReviewer && (
               <div className="bg-white rounded-xl border border-gray-200 p-6">
                 <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-3">
                   Update Status
@@ -1247,6 +1313,52 @@ export default function ApplicationDetailPage() {
                     </button>
                   ))}
                 </div>
+              </div>
+            )} */}
+
+            {(isAdmin || isReviewer) && (
+              <div className="space-y-4">
+                <div className="bg-white rounded-xl border border-gray-200 p-6">
+                  <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-3">
+                    Quick Status Actions
+                  </h3>
+                  <div className="flex flex-wrap gap-2">
+                    {QUICK_STATUS_ACTIONS.map((action) => (
+                      <button
+                        key={action.value}
+                        onClick={() => handleStatusUpdate(action.value)}
+                        disabled={statusUpdating}
+                        className={`px-4 py-2 rounded-lg text-sm font-medium border transition cursor-pointer disabled:opacity-50 ${
+                          STATUS_COLORS[action.value] || ""
+                        }`}
+                      >
+                        {statusUpdating ? "..." : action.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* <div className="bg-white rounded-xl border border-gray-200 p-6">
+                  <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-3">
+                    Additional Statuses
+                  </h3>
+                  <div className="flex flex-wrap gap-2">
+                    {ALL_STATUSES.filter((s) => {
+                      return s !== app.status;
+                    }).map((s) => (
+                      <button
+                        key={s}
+                        onClick={() => handleStatusUpdate(s)}
+                        disabled={statusUpdating}
+                        className={`px-4 py-2 rounded-lg text-sm font-medium border transition cursor-pointer disabled:opacity-50 ${
+                          STATUS_COLORS[s] || ""
+                        }`}
+                      >
+                        {statusUpdating ? "..." : formatStatusLabel(s)}
+                      </button>
+                    ))}
+                  </div>
+                </div> */}
               </div>
             )}
 
@@ -2014,6 +2126,28 @@ export default function ApplicationDetailPage() {
               />
             </Section>
 
+            {user?.name === "Pabitra" && (
+              <Section title="Drip Email Schedule">
+                {dripEmailSchedule && dripEmailSchedule.length > 0 ? (
+                  dripEmailSchedule.map((email) => (
+                    <React.Fragment key={email.id}>
+                      <Field
+                        label={`Email #${email.email_number} (${email.track})`}
+                        value={`${email.status.toUpperCase()} — Scheduled: ${new Date(email.scheduled_at).toLocaleString()}`}
+                      />
+                      {email.sent_at && (
+                        <Field
+                          label={`Email #${email.email_number} Sent At`}
+                          value={new Date(email.sent_at).toLocaleString()}
+                        />
+                      )}
+                    </React.Fragment>
+                  ))
+                ) : (
+                  <Field label="Schedule" value="No scheduled emails found" />
+                )}
+              </Section>
+            )}
             {/* Tracking */}
             <Section title="Tracking & Attribution">
               {edit ? (

@@ -381,6 +381,8 @@ export function validateStep3(data: Step3Data): Errors {
   const routing = checkAbaChecksum(data.routingNumber);
   if (routing) errors.routingNumber = routing;
 
+  if (data.bankName.trim().length < 2) errors.bankName = "Please enter the name of your bank";
+
   const account = data.accountNumber.replace(/\s/g, "");
   if (!account) errors.accountNumber = "Account number is required";
   else if (!/^\d{4,17}$/.test(account)) errors.accountNumber = "Account number must be 4–17 digits";

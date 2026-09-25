@@ -3,14 +3,15 @@
 /**
  * The three-step application.
  *
- * Each step submits and saves on its own, so a drop-off after Step 1 still
- * leaves a usable lead. Form state is mirrored into localStorage on every
- * change, which is what makes back-navigation lossless and lets a resumed
- * session pick up where it left off.
+ * The steps are browser-only: Next validates the step on screen and moves on,
+ * Back returns without losing anything, and the final Submit posts all three
+ * steps in one request. That request is the only thing that saves — it creates
+ * the application, and the server then sends the confirmation email and
+ * schedules the drip sequence.
  *
- * Sensitive values are the exception: SSN, licence and account numbers are
- * held in React state only and never written to storage. A resumed session
- * re-collects them.
+ * Step 1 is mirrored into localStorage on every change so a reload doesn't
+ * lose it. Sensitive values — SSN, licence and account numbers — are held in
+ * React state only and never written to storage, so a reload re-collects them.
  */
 
 import { useCallback, useEffect, useMemo, useState } from "react";
@@ -25,7 +26,7 @@ import {
   type Step1Data,
   type Step2Data,
   type Step3Data,
-  type StepResponse,
+  type SubmitResponse,
 } from "@/lib/application/types";
 import {
   type Errors,
@@ -38,9 +39,7 @@ import {
 import {
   fetchConfig,
   resumeApplication,
-  submitStep1,
-  submitStep2,
-  submitStep3,
+  submitApplication,
 } from "@/lib/application/api";
 import {
   captureFirstTouch,
@@ -59,8 +58,17 @@ const DRAFT_KEY = "cl_application_draft";
 
 interface Draft {
   step: number;
-  applicationId: string;
   step1: Step1Data;
+}
+
+const STEP2_FIELDS = new Set(Object.keys(emptyStep2));
+const STEP3_FIELDS = new Set(Object.keys(emptyStep3));
+
+/** Which step a field lives on, so a server error can send the applicant back to it. */
+function stepOfField(field: string): number {
+  if (STEP3_FIELDS.has(field)) return 3;
+  if (STEP2_FIELDS.has(field)) return 2;
+  return 1;
 }
 
 function readDraft(): Draft | null {
@@ -91,8 +99,9 @@ function clearDraft(): void {
 /**
  * Maps a resumed application row back onto the form's Step 1 shape.
  *
- * Only Step 1 is restored. The identity and bank fields are never returned by
- * the server, so a resumed applicant re-enters them.
+ * Resume links come from the old flow, which saved Step 1 on its own. Only
+ * Step 1 is restored: the identity and bank fields are never returned by the
+ * server, so a resumed applicant re-enters them.
  */
 function mergeResumed(
   base: Step1Data,
@@ -158,7 +167,6 @@ type Outcome =
 
 export default function ApplicationFlow() {
   const [step, setStep] = useState(1);
-  const [applicationId, setApplicationId] = useState("");
   const [config, setConfig] = useState<ApplyConfig | null>(null);
   const [hydrated, setHydrated] = useState(false);
 
@@ -192,7 +200,6 @@ export default function ApplicationFlow() {
           const app = result.application;
           // The token has done its job; take it out of the address bar.
           scrubResumeTokenFromAddressBar();
-          setApplicationId(app.id);
           setStep1((previous) => mergeResumed(previous, app));
           if (app.current_step >= 4) {
             // Already through Step 3. Confirm rather than ask for bank
@@ -203,9 +210,9 @@ export default function ApplicationFlow() {
               message:
                 "We have everything we need and we'll be in touch shortly.",
             });
-          } else {
-            setStep(Math.min(Math.max(app.current_step, 1), 3));
           }
+          // Otherwise they start at Step 1 with it filled in: its consents
+          // still need ticking, and the whole application submits together.
         } else {
           setFormError(
             result.error ??
@@ -220,8 +227,9 @@ export default function ApplicationFlow() {
     const draft = readDraft();
     if (draft) {
       setStep1(draft.step1);
-      setApplicationId(draft.applicationId);
-      setStep(draft.step);
+      // Step 2 was never stored, so a draft past it lands back on Step 2
+      // rather than on a Step 3 whose submit would be missing the SSN.
+      setStep(Math.min(Math.max(draft.step, 1), 2));
     }
     setHydrated(true);
   }, []);
@@ -259,8 +267,8 @@ export default function ApplicationFlow() {
       return;
     }
 
-    writeDraft({ step, applicationId, step1 });
-  }, [hydrated, outcome, step, applicationId, step1]);
+    writeDraft({ step, step1 });
+  }, [hydrated, outcome, step, step1]);
 
   // -------------------------------------------------------------------------
   // Field handlers
@@ -357,10 +365,14 @@ export default function ApplicationFlow() {
     [config, step],
   );
 
-  /** Consent payload: what was ticked, and the version of the text shown. */
+  /**
+   * Consent payload for every step: what was ticked, and the version of the
+   * text shown. Ticks persist across Back and Next, so this is the whole
+   * application's consent evidence.
+   */
   function consentPayload() {
     const tz = timezoneOffset();
-    return consentsForStep.map((consent) => ({
+    return (config?.consents ?? []).map((consent) => ({
       type: consent.type,
       version: consent.version,
       checked: consentState[consent.type] ?? false,
@@ -368,8 +380,26 @@ export default function ApplicationFlow() {
     }));
   }
 
-  /** Maps a server response onto the form's error state. */
-  function applyServerErrors(response: StepResponse): void {
+  /**
+   * Maps a server response onto the form's error state, and takes the
+   * applicant back to the earliest step that has a problem — the server checks
+   * all three steps at once, so the error may not be on the step showing.
+   */
+  function applyServerErrors(response: SubmitResponse): void {
+    const consentSteps = (response.missingConsents ?? []).map(
+      (type) =>
+        config?.consents.find((consent) => consent.type === type)?.step ?? step,
+    );
+    const errorSteps = (response.errors ?? []).map((item) =>
+      stepOfField(item.field),
+    );
+    const problemSteps = [...errorSteps, ...consentSteps];
+    const target = problemSteps.length > 0 ? Math.min(...problemSteps) : step;
+    if (target !== step) {
+      setStep(target);
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
     if (response.errors?.length) {
       const mapped: Errors = {};
       for (const item of response.errors) mapped[item.field] = item.message;
@@ -377,38 +407,86 @@ export default function ApplicationFlow() {
 
       // Put the first bad field on screen rather than leaving the applicant
       // to hunt for it.
-      const first = response.errors[0].field;
-      requestAnimationFrame(() => {
-        document
-          .getElementById(first)
-          ?.scrollIntoView({ behavior: "smooth", block: "center" });
-        document.getElementById(first)?.focus({ preventScroll: true });
-      });
+      const first = response.errors.find(
+        (item) => stepOfField(item.field) === target,
+      )?.field;
+      if (first) {
+        requestAnimationFrame(() => {
+          document
+            .getElementById(first)
+            ?.scrollIntoView({ behavior: "smooth", block: "center" });
+          document.getElementById(first)?.focus({ preventScroll: true });
+        });
+      }
     }
     setMissingConsents(response.missingConsents);
     setFormError(response.error);
   }
 
   // -------------------------------------------------------------------------
-  // Submission
+  // Navigation and submission
   // -------------------------------------------------------------------------
-  async function handleStep1Submit() {
-    setFormError(undefined);
+  /**
+   * Checks the step on screen in the browser: its fields, and its required
+   * consents. Nothing is sent to the server until the final Submit, so this is
+   * the only thing standing between the applicant and the next step.
+   */
+  function checkCurrentStep(): boolean {
+    const found =
+      step === 1
+        ? validateStep1(step1, showIncomeType)
+        : step === 2
+          ? validateStep2(step2)
+          : validateStep3(step3);
+    const unticked = consentsForStep
+      .filter((consent) => consent.required && !consentState[consent.type])
+      .map((consent) => consent.type);
 
-    const found = validateStep1(step1, showIncomeType);
-    if (Object.keys(found).length > 0) {
-      setErrors(found);
-      const first = Object.keys(found)[0];
+    setErrors(found);
+    setMissingConsents(unticked.length > 0 ? unticked : undefined);
+
+    const first = Object.keys(found)[0];
+    if (first) {
+      setFormError(undefined);
       document
         .getElementById(first)
         ?.scrollIntoView({ behavior: "smooth", block: "center" });
-      return;
+      return false;
     }
+    if (unticked.length > 0) {
+      setFormError("Please agree to all required disclosures to continue.");
+      return false;
+    }
+
+    setFormError(undefined);
+    return true;
+  }
+
+  function goToStep(next: number) {
     setErrors({});
+    setFormError(undefined);
+    setMissingConsents(undefined);
+    setStep(next);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
+  function handleNext() {
+    if (checkCurrentStep()) goToStep(step + 1);
+  }
+
+  function handleBack() {
+    goToStep(Math.max(step - 1, 1));
+  }
+
+  /** Posts all three steps at once — the only request that saves anything. */
+  async function handleSubmit() {
+    if (!checkCurrentStep()) return;
 
     setSubmitting(true);
-    const response = await submitStep1({
+    const response = await submitApplication({
       ...trackingPayload(),
+
+      // Step 1
       loanAmount: step1.loanAmount,
       loanPurpose: step1.loanPurpose,
       loanPurposeOther: step1.loanPurposeOther,
@@ -441,20 +519,30 @@ export default function ApplicationFlow() {
       directDeposit: step1.directDeposit === "yes",
       additionalMonthlyIncome: parseCurrency(step1.additionalMonthlyIncome),
       additionalIncomeSource: step1.additionalIncomeSource,
+
+      // Step 2
+      ssn: step2.ssn,
+      confirmSsn: step2.confirmSsn,
+      driverLicenseNumber: step2.driverLicenseNumber,
+      driverLicenseState: step2.driverLicenseState,
+      dlExpirationDate: step2.dlExpirationDate,
+
+      // Step 3
+      routingNumber: step3.routingNumber,
+      bankName: step3.bankName,
+      accountNumber: step3.accountNumber,
+      confirmAccountNumber: step3.confirmAccountNumber,
+      accountType: step3.accountType,
+      accountStatus: step3.accountStatus,
+      accountAge: step3.accountAge,
+
       consents: consentPayload(),
     });
     setSubmitting(false);
 
-    // A person already mid-application is sent onward rather than duplicated.
-    if (response.code === "application_in_progress" && response.applicationId) {
-      setApplicationId(response.applicationId);
-      setStep(Math.min(response.currentStep ?? 2, 3));
-      setErrors({});
-      setFormError(undefined);
-      return;
-    }
-
     if (response.decision === "decline") {
+      setStep2(emptyStep2);
+      setStep3(emptyStep3);
       setOutcome({ kind: "declined", message: response.message ?? "" });
       return;
     }
@@ -464,86 +552,12 @@ export default function ApplicationFlow() {
       return;
     }
 
-    setApplicationId(response.applicationId);
-    setConsentState({});
-    setErrors({});
-    setFormError(undefined);
-    setStep(2);
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  }
-
-  async function handleStep2Submit() {
-    setFormError(undefined);
-
-    const found = validateStep2(step2);
-    if (Object.keys(found).length > 0) {
-      setErrors(found);
-      return;
-    }
-    setErrors({});
-
-    setSubmitting(true);
-    const response = await submitStep2({
-      ...trackingPayload(),
-      applicationId,
-      ssn: step2.ssn,
-      confirmSsn: step2.confirmSsn,
-      driverLicenseNumber: step2.driverLicenseNumber,
-      driverLicenseState: step2.driverLicenseState,
-      dlExpirationDate: step2.dlExpirationDate,
-      consents: consentPayload(),
-    });
-    setSubmitting(false);
-
-    if (!response.success) {
-      applyServerErrors(response);
-      return;
-    }
-
-    // The identity fields are dropped from memory as soon as the server has
-    // them; only the step marker moves forward into the draft.
+    // The server has the sensitive fields now; drop them from memory.
     setStep2(emptyStep2);
-    setConsentState({});
-    setErrors({});
-    setFormError(undefined);
-    setStep(3);
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  }
-
-  async function handleStep3Submit() {
-    setFormError(undefined);
-
-    const found = validateStep3(step3);
-    if (Object.keys(found).length > 0) {
-      setErrors(found);
-      return;
-    }
-    setErrors({});
-
-    setSubmitting(true);
-    const response = await submitStep3({
-      ...trackingPayload(),
-      applicationId,
-      routingNumber: step3.routingNumber,
-      bankName: step3.bankName,
-      accountNumber: step3.accountNumber,
-      confirmAccountNumber: step3.confirmAccountNumber,
-      accountType: step3.accountType,
-      accountStatus: step3.accountStatus,
-      accountAge: step3.accountAge,
-      consents: consentPayload(),
-    });
-    setSubmitting(false);
-
-    if (!response.success) {
-      applyServerErrors(response);
-      return;
-    }
-
     setStep3(emptyStep3);
     setOutcome({
       kind: "submitted",
-      applicationId,
+      applicationId: response.applicationId,
       message: response.message ?? "",
     });
   }
@@ -590,13 +604,12 @@ export default function ApplicationFlow() {
           regBNotice={config?.regBNotice ?? ""}
           availableTerms={config?.availableTerms ?? [12, 24, 36, 48]}
           amountRange={amountRange}
-          submitting={submitting}
           formError={formError}
           missingConsents={missingConsents}
           onChange={updateStep1}
           onBlurField={blurStep1}
           onConsentChange={changeConsent}
-          onSubmit={handleStep1Submit}
+          onNext={handleNext}
         />
       )}
 
@@ -606,8 +619,6 @@ export default function ApplicationFlow() {
           errors={errors}
           consents={consentsForStep}
           consentState={consentState}
-          applicationId={applicationId}
-          submitting={submitting}
           formError={formError}
           missingConsents={missingConsents}
           onChange={(updates) =>
@@ -626,7 +637,8 @@ export default function ApplicationFlow() {
           }
           onBlurField={blurStep2}
           onConsentChange={changeConsent}
-          onSubmit={handleStep2Submit}
+          onBack={handleBack}
+          onNext={handleNext}
         />
       )}
 
@@ -636,7 +648,6 @@ export default function ApplicationFlow() {
           errors={errors}
           consents={consentsForStep}
           consentState={consentState}
-          applicationId={applicationId}
           submitting={submitting}
           formError={formError}
           missingConsents={missingConsents}
@@ -656,7 +667,8 @@ export default function ApplicationFlow() {
           }
           onBlurField={blurStep3}
           onConsentChange={changeConsent}
-          onSubmit={handleStep3Submit}
+          onBack={handleBack}
+          onSubmit={handleSubmit}
         />
       )}
     </div>

@@ -57,13 +57,13 @@ interface Props {
   regBNotice: string;
   availableTerms: number[];
   amountRange: { min: number; max: number; increment: number };
-  submitting: boolean;
   formError?: string;
   missingConsents?: string[];
   onChange: (updates: Partial<Step1Data>) => void;
   onBlurField: (field: keyof Step1Data) => void;
   onConsentChange: (type: string, checked: boolean) => void;
-  onSubmit: () => void;
+  /** Validates this step and moves on. Nothing is sent to the server yet. */
+  onNext: () => void;
 }
 
 const DIRECT_DEPOSIT_OPTIONS = [
@@ -79,13 +79,12 @@ export default function Step1Request({
   regBNotice,
   availableTerms,
   amountRange,
-  submitting,
   formError,
   missingConsents,
   onChange,
   onBlurField,
   onConsentChange,
-  onSubmit,
+  onNext,
 }: Props) {
   const [installment, setInstallment] = useState<number | null>(null);
   const [emailHint, setEmailHint] = useState<string | null>(null);
@@ -700,11 +699,10 @@ export default function Step1Request({
 
       <button
         type="button"
-        onClick={onSubmit}
-        disabled={submitting}
+        onClick={onNext}
         className="w-full bg-primary hover:bg-primary-dark disabled:opacity-60 disabled:cursor-not-allowed text-white font-semibold py-4 rounded-lg transition-colors"
       >
-        {submitting ? "Checking your rate…" : "Check My Rate"}
+        Next
       </button>
 
       <p className="text-xs text-text-secondary text-center">

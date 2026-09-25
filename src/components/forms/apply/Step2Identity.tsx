@@ -3,8 +3,8 @@
 /**
  * Step 2 — Identity verification (fields 33-37).
  *
- * Only reached after a pre-qualification pass, so an applicant who failed
- * Step 1 never sees these fields and we never store their SSN.
+ * Nothing here is sent until the final Submit. Pre-qualification runs then,
+ * and an applicant who fails it never has their SSN stored.
  *
  * Autofill is switched off on every field here, and paste is blocked on the
  * confirm inputs so a typo is caught rather than duplicated.
@@ -21,30 +21,22 @@ interface Props {
   errors: Errors;
   consents: ConsentDefinition[];
   consentState: ConsentState;
-  applicationId: string;
-  submitting: boolean;
   formError?: string;
   missingConsents?: string[];
   onChange: (updates: Partial<Step2Data>) => void;
   onBlurField: (field: keyof Step2Data) => void;
   onConsentChange: (type: string, checked: boolean) => void;
-  onSubmit: () => void;
+  onBack: () => void;
+  /** Validates this step and moves on. Nothing is sent to the server yet. */
+  onNext: () => void;
 }
 
 export default function Step2Identity({
-  data, errors, consents, consentState, applicationId, submitting,
-  formError, missingConsents, onChange, onBlurField, onConsentChange, onSubmit,
+  data, errors, consents, consentState,
+  formError, missingConsents, onChange, onBlurField, onConsentChange, onBack, onNext,
 }: Props) {
   return (
     <div className="space-y-8">
-      <div className="rounded-lg bg-success/10 border border-success/30 px-4 py-3">
-        <p className="text-sm font-semibold text-text-primary">
-          Good news — you&apos;re pre-qualified.
-        </p>
-        <p className="text-xs text-text-secondary mt-0.5">
-          Application ID <strong>{applicationId}</strong>. Next we need to verify your identity.
-        </p>
-      </div>
 
       <section className="space-y-5">
         <SectionHeading
@@ -122,14 +114,22 @@ export default function Step2Identity({
         </p>
       )}
 
-      <button
-        type="button"
-        onClick={onSubmit}
-        disabled={submitting}
-        className="w-full bg-primary hover:bg-primary-dark disabled:opacity-60 disabled:cursor-not-allowed text-white font-semibold py-4 rounded-lg transition-colors"
-      >
-        {submitting ? "Submitting…" : "Continue"}
-      </button>
+      <div className="flex flex-col-reverse sm:flex-row gap-3">
+        <button
+          type="button"
+          onClick={onBack}
+          className="sm:w-40 border border-surface-dark hover:bg-surface disabled:opacity-60 disabled:cursor-not-allowed text-text-primary font-semibold py-4 rounded-lg transition-colors"
+        >
+          Back
+        </button>
+        <button
+          type="button"
+          onClick={onNext}
+          className="flex-1 bg-primary hover:bg-primary-dark disabled:opacity-60 disabled:cursor-not-allowed text-white font-semibold py-4 rounded-lg transition-colors"
+        >
+          Next
+        </button>
+      </div>
     </div>
   );
 }

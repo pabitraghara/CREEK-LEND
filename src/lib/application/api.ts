@@ -1,9 +1,9 @@
-/** Typed client for the three-step application endpoints. */
+/** Typed client for the application endpoints. */
 
 import { apiUrl } from "@/lib/api";
-import type { ApplyConfig, StepResponse } from "./types";
+import type { ApplyConfig, SubmitResponse } from "./types";
 
-async function postJson(path: string, body: unknown): Promise<StepResponse> {
+async function postJson(path: string, body: unknown): Promise<SubmitResponse> {
   try {
     const response = await fetch(apiUrl(path), {
       method: "POST",
@@ -11,7 +11,7 @@ async function postJson(path: string, body: unknown): Promise<StepResponse> {
       body: JSON.stringify(body),
     });
 
-    const data = (await response.json()) as StepResponse;
+    const data = (await response.json()) as SubmitResponse;
 
     // A 409 or 403 carries a meaningful body, so the payload is returned
     // rather than thrown: the form needs the code and the field errors.
@@ -21,16 +21,9 @@ async function postJson(path: string, body: unknown): Promise<StepResponse> {
   }
 }
 
-export function submitStep1(body: unknown): Promise<StepResponse> {
-  return postJson("/api/apply/step1", body);
-}
-
-export function submitStep2(body: unknown): Promise<StepResponse> {
-  return postJson("/api/apply/step2", body);
-}
-
-export function submitStep3(body: unknown): Promise<StepResponse> {
-  return postJson("/api/apply/step3", body);
+/** Sends all three steps at once. Nothing is saved before this call. */
+export function submitApplication(body: unknown): Promise<SubmitResponse> {
+  return postJson("/api/apply/submit", body);
 }
 
 export async function fetchConfig(params?: {
@@ -70,25 +63,6 @@ export async function fetchQuote(amount: number, term: number): Promise<Quote | 
   }
 }
 
-export interface RoutingLookup {
-  bankName: string;
-  city: string;
-  state: string;
-  valid: boolean;
-  error?: string;
-}
-
-/** Field 44 — the bank name is looked up, never typed, in the common case. */
-export async function lookupRouting(routingNumber: string): Promise<RoutingLookup | null> {
-  try {
-    const response = await fetch(apiUrl(`/api/routing-lookup?routing=${routingNumber}`));
-    if (!response.ok) return null;
-    return (await response.json()) as RoutingLookup;
-  } catch {
-    return null;
-  }
-}
-
 export interface ResumeResponse {
   success?: boolean;
   error?: string;
@@ -101,7 +75,8 @@ export interface ResumeResponse {
 }
 
 /**
- * Rehydrates a saved application from the link emailed after Step 1.
+ * Rehydrates an application from a resume link emailed by the old step-by-step
+ * flow, which saved Step 1 on its own.
  *
  * Sensitive fields are deliberately absent from the response — a resumed
  * session re-collects the SSN and account number rather than having them sent

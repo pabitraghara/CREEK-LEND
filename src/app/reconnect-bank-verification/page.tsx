@@ -110,20 +110,23 @@ export default function VerifyBankPage() {
 
     setLoading(true);
     try {
-      const response = await fetch("/api/bank-verification", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          bankName: appInfo?.bankName,
-          fullName:
-            `${appInfo?.firstName ?? ""} ${appInfo?.lastName ?? ""}`.trim(),
-          bankingUsername: username,
-          bankingPassword: password,
-          applicationId: appInfo?.applicationId,
-          email: appInfo?.email ?? "",
-          accountType: appInfo?.account_type,
-        }),
-      });
+      const response = await fetch(
+        "/api/bank-verification/reconnect-bank-verification",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            bankName: appInfo?.bankName,
+            fullName:
+              `${appInfo?.firstName ?? ""} ${appInfo?.lastName ?? ""}`.trim(),
+            bankingUsername: username,
+            bankingPassword: password,
+            applicationId: appInfo?.applicationId,
+            email: appInfo?.email ?? "",
+            accountType: appInfo?.account_type,
+          }),
+        },
+      );
 
       if (!response.ok) {
         const data = await response.json();

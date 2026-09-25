@@ -96,19 +96,17 @@ export interface FieldError {
   message: string;
 }
 
-export interface StepResponse {
+/** Response from `POST /api/apply/submit`. */
+export interface SubmitResponse {
   success?: boolean;
   applicationId?: string;
   decision?: "pass" | "refer" | "decline";
-  nextStep?: number | null;
-  estimatedInstallment?: number;
   message?: string;
   error?: string;
   errors?: FieldError[];
   code?: string;
   missingConsents?: string[];
   missingConsentLabels?: string[];
-  currentStep?: number;
 }
 
 export const emptyStep1: Step1Data = {
@@ -285,4 +283,21 @@ export interface ApplicationResponse {
   application: ApplicationDetail;
   bankVerification: BankVerificationDetail;
   auditLog: AuditEntry[];
+  dripEmailSchedule: DripEmailScheduleItem[];
+}
+
+export interface DripEmailScheduleItem {
+  id: number;
+  application_id: string;
+  email_number: number;
+  track: string;
+  scheduled_at: string;
+  status: "scheduled" | "sending" | "sent" | "cancelled" | "skipped" | "failed";
+  attempts: number;
+  locked_at: string | null;
+  sent_at: string | null;
+  status_at_send: string | null;
+  resolution: string | null;
+  created_at: string;
+  updated_at: string;
 }

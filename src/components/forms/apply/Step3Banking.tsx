@@ -3,15 +3,14 @@
 /**
  * Step 3 — Bank and funding (fields 43-49).
  *
- * Reached only after underwriting approval, so a declined applicant never has
- * bank details in our database at all.
+ * The last step: Submit here sends the whole application. Pre-qualification
+ * runs on the server then, and a declined applicant never has bank details in
+ * our database at all.
  *
- * The bank name is filled in from the routing number rather than typed. The
- * applicant only enters it themselves in the rare case where a valid routing
- * number is missing from the participant table.
+ * The applicant types both the routing number and the bank name. The routing
+ * number is checked against the ABA checksum to catch typos; the bank name is
+ * stored as entered.
  */
-
-import { useState } from "react";
 
 import {
   ACCOUNT_AGES,
@@ -19,8 +18,7 @@ import {
   ACCOUNT_TYPES,
 } from "@/lib/application/options";
 import type { ConsentDefinition, ConsentState, Step3Data } from "@/lib/application/types";
-import { type Errors, checkAbaChecksum } from "@/lib/application/validate";
-import { lookupRouting } from "@/lib/application/api";
+import type { Errors } from "@/lib/application/validate";
 import {
   RadioField,
   SectionHeading,
@@ -35,61 +33,23 @@ interface Props {
   errors: Errors;
   consents: ConsentDefinition[];
   consentState: ConsentState;
-  applicationId: string;
   submitting: boolean;
   formError?: string;
   missingConsents?: string[];
   onChange: (updates: Partial<Step3Data>) => void;
   onBlurField: (field: keyof Step3Data) => void;
   onConsentChange: (type: string, checked: boolean) => void;
+  onBack: () => void;
+  /** Sends all three steps. The only action on the form that saves anything. */
   onSubmit: () => void;
 }
 
 export default function Step3Banking({
-  data, errors, consents, consentState, applicationId, submitting,
-  formError, missingConsents, onChange, onBlurField, onConsentChange, onSubmit,
+  data, errors, consents, consentState, submitting,
+  formError, missingConsents, onChange, onBlurField, onConsentChange, onBack, onSubmit,
 }: Props) {
-  const [lookingUp, setLookingUp] = useState(false);
-  const [bankNameEditable, setBankNameEditable] = useState(false);
-  const [lookupNote, setLookupNote] = useState<string | null>(null);
-
-  async function handleRoutingBlur() {
-    onBlurField("routingNumber");
-
-    const digits = data.routingNumber.replace(/\D/g, "");
-    if (checkAbaChecksum(digits) !== null) {
-      onChange({ bankName: "" });
-      setBankNameEditable(false);
-      setLookupNote(null);
-      return;
-    }
-
-    setLookingUp(true);
-    const result = await lookupRouting(digits);
-    setLookingUp(false);
-
-    if (result?.valid && result.bankName) {
-      onChange({ bankName: result.bankName });
-      setBankNameEditable(false);
-      setLookupNote(null);
-      return;
-    }
-
-    // Valid checksum but not in our participant table — the applicant supplies
-    // the name. This is not a rejection.
-    onChange({ bankName: "" });
-    setBankNameEditable(true);
-    setLookupNote("We couldn't match that routing number to a bank. Please enter your bank's name.");
-  }
-
   return (
     <div className="space-y-8">
-      <div className="rounded-lg bg-success/10 border border-success/30 px-4 py-3">
-        <p className="text-sm font-semibold text-text-primary">Your loan is approved.</p>
-        <p className="text-xs text-text-secondary mt-0.5">
-          Application ID <strong>{applicationId}</strong>. Tell us where to send your funds.
-        </p>
-      </div>
 
       <section className="space-y-5">
         <SectionHeading
@@ -105,10 +65,10 @@ export default function Step3Banking({
             inputMode="numeric"
             value={data.routingNumber}
             onChange={(value) => onChange({ routingNumber: value.replace(/\D/g, "").slice(0, 9) })}
-            onBlur={handleRoutingBlur}
+            onBlur={() => onBlurField("routingNumber")}
             error={errors.routingNumber}
             autoComplete="off" placeholder="021000021" maxLength={9}
-            hint={lookingUp ? "Looking up your bank…" : "The 9-digit number on the bottom-left of your cheque."}
+            hint="The 9-digit number on the bottom-left of your cheque."
           />
           <TextField
             id="bankName" label="Bank Name" required
@@ -116,10 +76,8 @@ export default function Step3Banking({
             onChange={(value) => onChange({ bankName: value })}
             onBlur={() => onBlurField("bankName")}
             error={errors.bankName}
-            readOnly={!bankNameEditable}
-            autoComplete="off"
-            placeholder={bankNameEditable ? "Your bank's name" : "Filled in from your routing number"}
-            hint={lookupNote ?? undefined}
+            autoComplete="off" maxLength={100}
+            placeholder="Your bank's name"
           />
         </div>
 
@@ -190,14 +148,24 @@ export default function Step3Banking({
         </p>
       )}
 
-      <button
-        type="button"
-        onClick={onSubmit}
-        disabled={submitting}
-        className="w-full bg-primary hover:bg-primary-dark disabled:opacity-60 disabled:cursor-not-allowed text-white font-semibold py-4 rounded-lg transition-colors"
-      >
-        {submitting ? "Submitting…" : "Complete My Application"}
-      </button>
+      <div className="flex flex-col-reverse sm:flex-row gap-3">
+        <button
+          type="button"
+          onClick={onBack}
+          disabled={submitting}
+          className="sm:w-40 border border-surface-dark hover:bg-surface disabled:opacity-60 disabled:cursor-not-allowed text-text-primary font-semibold py-4 rounded-lg transition-colors"
+        >
+          Back
+        </button>
+        <button
+          type="button"
+          onClick={onSubmit}
+          disabled={submitting}
+          className="flex-1 bg-primary hover:bg-primary-dark disabled:opacity-60 disabled:cursor-not-allowed text-white font-semibold py-4 rounded-lg transition-colors"
+        >
+          {submitting ? "Submitting…" : "Submit Application"}
+        </button>
+      </div>
     </div>
   );
 }
